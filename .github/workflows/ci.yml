@@ -35,7 +35,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  check:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
     name: Check and build
     runs-on: ubuntu-latest
@@ -50,22 +50,6 @@ jobs:
         run: |
           ./mvnw license:check
           ./mvnw clean install -DskipTests
-
-  build-native:
-    if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
-    name: Build native image
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup Java
-        uses: graalvm/setup-graalvm@v1
-        with:
-          version: '22.3.0'
-          java-version: '17'
-          components: 'native-image'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build with native-image profile
-        run: ./mvnw clean install -DskipTests -Pnative
 
   unittest:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
@@ -87,14 +71,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: docker/build-push-action@v3
+      - name: Build hawkeye
+        uses: docker/build-push-action@v3
         with:
           context: .
+          file: ./Dockerfile
           load: true
-          push: false
+          tags: hawkeye:latest
+      - name: Build hawkeye-native
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Dockerfile.native
+          load: true
           tags: hawkeye-native:latest
       - name: Run sanity checks
-        run: docker run --rm hawkeye-native:latest
+        run: |
+          docker run --rm hawkeye:latest
+          docker run --rm hawkeye-native:latest
 
   required:
     name: Required
@@ -102,16 +96,14 @@ jobs:
     timeout-minutes: 10
     if: ${{ always() && ((github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')) }}
     needs:
-      - build
-      - build-native
+      - check
       - docker
       - unittest
     steps:
       - name: Guardian
         run: |
           if [[ ! ( \
-                 "${{ needs.build.result }}" == "success" \
-              && "${{ needs.build-native.result }}" == "success" \
+                 "${{ needs.check.result }}" == "success" \
               && "${{ needs.docker.result }}" == "success" \
               && "${{ needs.unittest.result }}" == "success" \
               ) ]]; then

@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM eclipse-temurin:17 as build
+FROM ghcr.io/graalvm/native-image:ol9-java17-22.3.0 as build
 WORKDIR /build
 COPY . .
-RUN ./mvnw -B -ntp clean package -DskipTests
+RUN ./mvnw -B -ntp clean package -DskipTests -Pnative -DonlyNativeDistro
 
-FROM eclipse-temurin:17-jre
-COPY --from=build /build/distribution/commandline/target/commandline-1.0.0-SNAPSHOT.jar /bin/hawkeye
-ENTRYPOINT ["/bin/hawkeye"]
+FROM ubuntu:jammy
+COPY --from=build /build/distribution/native/target/hawkeye-native /bin/
+ENTRYPOINT ["/bin/hawkeye-native"]
