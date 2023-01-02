@@ -39,7 +39,6 @@ jobs:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
     name: Check and build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
       - name: Setup Java
@@ -49,14 +48,13 @@ jobs:
           java-version: '17'
       - name: Check and build
         run: |
-          mvn license:check
-          mvn clean install -DskipTests
+          ./mvnw license:check
+          ./mvnw clean install -DskipTests
 
   build-native:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
     name: Build native image
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
       - name: Setup Java
@@ -67,13 +65,12 @@ jobs:
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build with native-image profile
-        run: mvn clean install -DskipTests -Pnative-image
+        run: ./mvnw clean install -DskipTests -Pnative
 
   unittest:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
     name: Run unit tests
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
       - name: Setup Java
@@ -82,7 +79,22 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - name: Maven verify
-        run: mvn clean verify
+        run: ./mvnw clean verify
+
+  docker:
+    if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
+    name: Check Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/build-push-action@v3
+        with:
+          context: .
+          load: true
+          push: false
+          tags: hawkeye-native:latest
+      - name: Run sanity checks
+        run: docker run --rm hawkeye-native:latest
 
   required:
     name: Required
@@ -92,6 +104,7 @@ jobs:
     needs:
       - build
       - build-native
+      - docker
       - unittest
     steps:
       - name: Guardian
@@ -99,6 +112,7 @@ jobs:
           if [[ ! ( \
                  "${{ needs.build.result }}" == "success" \
               && "${{ needs.build-native.result }}" == "success" \
+              && "${{ needs.docker.result }}" == "success" \
               && "${{ needs.unittest.result }}" == "success" \
               ) ]]; then
             echo "Required jobs haven't been completed successfully."

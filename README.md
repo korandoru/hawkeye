@@ -8,7 +8,7 @@ Simple license header checker and formatter, in multiple distribution forms.
 
 ```shell
 # Build
-mvn clean install -DskipTests
+./mvnw clean install -DskipTests
 
 # Run
 ./distribution/commandline/target/hawkeye-<version>-bin/hawkeye-<version>/hawkeye
@@ -18,7 +18,7 @@ mvn clean install -DskipTests
 
 ```shell
 # Build with GraalVM
-mvn clean insatll -DskipTests
+./mvnw clean package -DskipTests -DskipCommandLineDistro -Pnative
 
 # Run
 ./distribution/native/target/hawkeye-native
