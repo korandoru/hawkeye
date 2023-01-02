@@ -15,7 +15,7 @@
 FROM ghcr.io/graalvm/native-image:ol9-java17-22.3.0 as build
 WORKDIR /build
 COPY . .
-RUN ./mvnw clean package -DskipTests -DskipCommandLineDistro -Pnative
+RUN ./mvnw -B -ntp clean package -DskipTests -DskipCommandLineDistro -Pnative
 
 FROM ubuntu:jammy
 COPY --from=build /build/distribution/native/target/hawkeye-native /bin/
