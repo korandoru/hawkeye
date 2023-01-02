@@ -9,7 +9,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <name>HawkEye Distribution :: Command Line Interface</name>
+    <name>HawkEye :: Distribution :: Command Line Interface</name>
     <artifactId>commandline</artifactId>
 
     <properties>

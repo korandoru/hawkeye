@@ -9,12 +9,25 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <name>HawkEye Distribution</name>
+    <name>HawkEye :: Distribution</name>
     <artifactId>distribution</artifactId>
 
     <packaging>pom</packaging>
     <modules>
         <module>commandline</module>
     </modules>
+
+    <profiles>
+        <profile>
+            <id>native-image</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+
+            <modules>
+                <module>native</module>
+            </modules>
+        </profile>
+    </profiles>
 
 </project>
