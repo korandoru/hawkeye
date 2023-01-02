@@ -36,7 +36,7 @@ concurrency:
 jobs:
   build:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
-    name: Build
+    name: Check and build
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -46,8 +46,10 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Maven build
-        run: mvn clean install -DskipTests
+      - name: Check and build
+        run: |
+          mvn license:check
+          mvn clean install -DskipTests
 
   build-native:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
