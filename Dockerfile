@@ -17,6 +17,6 @@ WORKDIR /build
 COPY . .
 RUN ./mvnw clean package -DskipTests -DskipCommandLineDistro -Pnative
 
-FROM debian:11-slim
+FROM ubuntu:jammy
 COPY --from=build /build/distribution/native/target/hawkeye-native /bin/
 ENTRYPOINT ["/bin/hawkeye-native"]
