@@ -169,9 +169,7 @@
                                 <include>**/.github/**</include>
                             </includes>
                             <excludes>
-                                <exclude>**/component_temp_dir/**</exclude>
-                                <exclude>interop.bc</exclude>
-                                <exclude>examples/helloworld.bf</exclude>
+                                <exclude>**/*.txt</exclude>
                             </excludes>
                         </licenseSet>
                     </licenseSets>
