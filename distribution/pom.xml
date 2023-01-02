@@ -9,19 +9,12 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>hawkeye-command</artifactId>
+    <name>HawkEye Distribution</name>
+    <artifactId>distribution</artifactId>
 
-    <dependencies>
-        <dependency>
-            <groupId>io.korandoru.hawkeye</groupId>
-            <artifactId>hawkeye-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>info.picocli</groupId>
-            <artifactId>picocli</artifactId>
-        </dependency>
-    </dependencies>
+    <packaging>pom</packaging>
+    <modules>
+        <module>commandline</module>
+    </modules>
 
 </project>
