@@ -170,6 +170,7 @@
                             </includes>
                             <excludes>
                                 <exclude>**/*.txt</exclude>
+                                <exclude>.dockerignore</exclude>
                             </excludes>
                         </licenseSet>
                     </licenseSets>
