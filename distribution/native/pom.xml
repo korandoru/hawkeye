@@ -12,35 +12,40 @@
     <name>HawkEye :: Distribution :: Native Image</name>
     <artifactId>native</artifactId>
 
+    <properties>
+        <native-maven-plugin.version>0.9.19</native-maven-plugin.version>
+    </properties>
+
     <packaging>pom</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.korandoru.hawkeye</groupId>
+            <artifactId>hawkeye-command</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <artifactId>exec-maven-plugin</artifactId>
-                <groupId>org.codehaus.mojo</groupId>
+                <groupId>org.graalvm.buildtools</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <version>${native-maven-plugin.version}</version>
+                <extensions>true</extensions>
                 <executions>
                     <execution>
-                        <id>make_native</id>
+                        <id>build-native</id>
+                        <goals>
+                            <goal>compile-no-fork</goal>
+                        </goals>
                         <phase>package</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>${basedir}/make_native.sh</executable>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>clean_native</id>
-                        <phase>clean</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>${basedir}/clean_native.sh</executable>
-                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <mainClass>io.korandoru.hawkeye.command.HawkEyeCommandMain</mainClass>
+                    <imageName>hawkeye-native</imageName>
+                </configuration>
             </plugin>
         </plugins>
     </build>
