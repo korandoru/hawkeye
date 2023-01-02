@@ -39,7 +39,6 @@ jobs:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
     name: Check and build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
       - name: Setup Java
@@ -56,7 +55,6 @@ jobs:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
     name: Build native image
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
       - name: Setup Java
@@ -73,7 +71,6 @@ jobs:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
     name: Run unit tests
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
       - name: Setup Java
@@ -84,6 +81,22 @@ jobs:
       - name: Maven verify
         run: ./mvnw clean verify
 
+  docker:
+    if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
+    name: Build Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/build-push-action@v3
+        with:
+          context: .
+          platforms: linux/amd64
+          load: true
+          push: false
+          tags: hawkeye-native:latest
+      - name: Run sanity checks
+        run: docker run --rm hawkeye-native:latest
+
   required:
     name: Required
     runs-on: ubuntu-latest
@@ -92,6 +105,7 @@ jobs:
     needs:
       - build
       - build-native
+      - docker
       - unittest
     steps:
       - name: Guardian
@@ -99,6 +113,7 @@ jobs:
           if [[ ! ( \
                  "${{ needs.build.result }}" == "success" \
               && "${{ needs.build-native.result }}" == "success" \
+              && "${{ needs.docker.result }}" == "success" \
               && "${{ needs.unittest.result }}" == "success" \
               ) ]]; then
             echo "Required jobs haven't been completed successfully."
