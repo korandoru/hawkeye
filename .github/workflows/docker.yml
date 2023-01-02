@@ -76,7 +76,7 @@ jobs:
       - uses: docker/build-push-action@v3
         with:
           context: .
-          platforms: linux/amd64
+          platforms: linux/amd64, linux/arm64
           push: false
           load: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -84,3 +84,12 @@ jobs:
 
       - name: Run sanity checks
         run: docker run --rm ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+
+      - uses: docker/build-push-action@v3
+        with:
+          context: .
+          platforms: linux/amd64, linux/arm64
+          # After the basic functionality done, change it to: ${{ github.event_name != 'pull_request' }}
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
