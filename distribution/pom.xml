@@ -31,7 +31,23 @@
 
     <packaging>pom</packaging>
 
+    <properties>
+        <onlyNativeDistro>false</onlyNativeDistro>
+    </properties>
+
     <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>!onlyNativeDistro</name>
+                </property>
+            </activation>
+            <modules>
+                <module>commandline</module>
+            </modules>
+        </profile>
         <profile>
             <id>native</id>
             <activation>
@@ -41,20 +57,6 @@
                 <module>native</module>
             </modules>
         </profile>
-
-        <profile>
-            <id>commandline</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <property>
-                    <name>!skipCommandLineDistro</name>
-                </property>
-            </activation>
-            <modules>
-                <module>commandline</module>
-            </modules>
-        </profile>
-
     </profiles>
 
 </project>

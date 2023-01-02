@@ -26,6 +26,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
+    <name>HawkEye :: Core</name>
     <artifactId>hawkeye-core</artifactId>
 
     <dependencies>

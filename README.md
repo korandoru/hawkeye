@@ -18,7 +18,7 @@ Simple license header checker and formatter, in multiple distribution forms.
 
 ```shell
 # Build with GraalVM
-./mvnw clean package -DskipTests -DskipCommandLineDistro -Pnative
+./mvnw clean package -DskipTests -Pnative -DonlyNativeDistro
 
 # Run
 ./distribution/native/target/hawkeye-native
