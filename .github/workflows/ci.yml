@@ -64,6 +64,8 @@ jobs:
         with:
           version: '22.3.0'
           java-version: '17'
+          components: 'native-image'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build with native-image profile
         run: mvn clean install -DskipTests -Pnative-image
 
