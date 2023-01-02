@@ -23,3 +23,7 @@ mvn clean insatll -DskipTests
 # Run
 ./distribution/native/target/hawkeye-native
 ```
+
+## Acknowledgment
+
+This software is strongly inspired by [license-maven-plugin](https://github.com/mathieucarbou/license-maven-plugin), with an initial motivation to bring it beyond a Maven plugin.
