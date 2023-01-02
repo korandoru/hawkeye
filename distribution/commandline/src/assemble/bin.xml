@@ -23,12 +23,6 @@
         <format>dir</format>
         <format>tar.gz</format>
     </formats>
-    <includeBaseDirectory>true</includeBaseDirectory>
-    <moduleSets>
-        <moduleSet>
-            <useAllReactorProjects>true</useAllReactorProjects>
-        </moduleSet>
-    </moduleSets>
     <files>
         <file>
             <source>${project.build.directory}/commandline-${project.version}.jar</source>
