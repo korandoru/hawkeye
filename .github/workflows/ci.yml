@@ -86,6 +86,7 @@ jobs:
     name: Required
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    if: ${{ always() && ((github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')) }}
     needs:
       - build
       - build-native
