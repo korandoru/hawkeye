@@ -93,7 +93,7 @@ jobs:
           context: .
           file: ./Dockerfile
           load: true
-          tags: hawkeye-native:latest
+          tags: hawkeye:latest
       - name: Build hawkeye-native
         uses: docker/build-push-action@v3
         with:
