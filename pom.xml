@@ -42,6 +42,7 @@
 
         <!-- lib dependencies -->
         <assertj.version>3.23.1</assertj.version>
+        <commons-io.version>2.11.0</commons-io.version>
         <commons-text.version>1.10.0</commons-text.version>
         <jackson-dataformat-toml.version>2.14.1</jackson-dataformat-toml.version>
         <jetbrains-annotations.version>23.1.0</jetbrains-annotations.version>
@@ -87,6 +88,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-text</artifactId>
                 <version>${commons-text.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
