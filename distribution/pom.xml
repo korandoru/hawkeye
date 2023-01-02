@@ -30,21 +30,31 @@
     <artifactId>distribution</artifactId>
 
     <packaging>pom</packaging>
-    <modules>
-        <module>commandline</module>
-    </modules>
 
     <profiles>
         <profile>
-            <id>native-image</id>
+            <id>native</id>
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
-
             <modules>
                 <module>native</module>
             </modules>
         </profile>
+
+        <profile>
+            <id>commandline</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>!skipCommandLineDistro</name>
+                </property>
+            </activation>
+            <modules>
+                <module>commandline</module>
+            </modules>
+        </profile>
+
     </profiles>
 
 </project>

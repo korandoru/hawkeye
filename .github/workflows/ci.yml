@@ -49,8 +49,8 @@ jobs:
           java-version: '17'
       - name: Check and build
         run: |
-          mvn license:check
-          mvn clean install -DskipTests
+          ./mvnw license:check
+          ./mvnw clean install -DskipTests
 
   build-native:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
@@ -67,7 +67,7 @@ jobs:
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build with native-image profile
-        run: mvn clean install -DskipTests -Pnative-image
+        run: ./mvnw clean install -DskipTests -Pnative
 
   unittest:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
@@ -82,7 +82,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - name: Maven verify
-        run: mvn clean verify
+        run: ./mvnw clean verify
 
   required:
     name: Required
