@@ -87,14 +87,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: docker/build-push-action@v3
+      - name: Build hawkeye
+        uses: docker/build-push-action@v3
         with:
           context: .
+          file: ./Dockerfile
           load: true
-          push: false
+          tags: hawkeye-native:latest
+      - name: Build hawkeye-native
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Dockerfile.native
+          load: true
           tags: hawkeye-native:latest
       - name: Run sanity checks
-        run: docker run --rm hawkeye-native:latest
+        run: |
+          docker run --rm hawkeye:latest
+          docker run --rm hawkeye-native:latest
 
   required:
     name: Required
