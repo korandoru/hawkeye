@@ -42,10 +42,13 @@
 
         <!-- lib dependencies -->
         <assertj.version>3.23.1</assertj.version>
+        <commons-text.version>1.10.0</commons-text.version>
+        <jackson-dataformat-toml.version>2.14.1</jackson-dataformat-toml.version>
+        <jetbrains-annotations.version>23.1.0</jetbrains-annotations.version>
         <junit.version>5.9.1</junit.version>
         <lombok.version>1.18.24</lombok.version>
         <picocli.version>4.6.3</picocli.version>
-        <jetbrains-annotations.version>23.1.0</jetbrains-annotations.version>
+        <slf4j.version>1.7.36</slf4j.version>
 
         <!-- bundled maven plugins -->
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
@@ -69,6 +72,21 @@
                 <artifactId>picocli-codegen</artifactId>
                 <version>${picocli.version}</version>
                 <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-toml</artifactId>
+                <version>${jackson-dataformat-toml.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>${commons-text.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
