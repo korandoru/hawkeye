@@ -53,6 +53,9 @@
                         <goals>
                             <goal>repackage</goal>
                         </goals>
+                        <configuration>
+                            <finalName>hawkeye</finalName>
+                        </configuration>
                     </execution>
                 </executions>
                 <configuration>

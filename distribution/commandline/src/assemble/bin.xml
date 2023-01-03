@@ -25,7 +25,7 @@
     </formats>
     <files>
         <file>
-            <source>${project.build.directory}/commandline-${project.version}.jar</source>
+            <source>${project.build.directory}/hawkeye.jar</source>
             <destName>hawkeye</destName>
             <outputDirectory>.</outputDirectory>
             <fileMode>755</fileMode>
