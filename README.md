@@ -11,7 +11,7 @@ Simple license header checker and formatter, in multiple distribution forms.
 ./mvnw clean install -DskipTests
 
 # Run
-./distribution/commandline/target/hawkeye-<version>-bin/hawkeye-<version>/hawkeye
+./distribution/commandline/target/hawkeye.jar
 ```
 
 ### Native Image
