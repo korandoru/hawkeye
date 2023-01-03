@@ -18,7 +18,9 @@ package io.korandoru.hawkeye.core;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import org.apache.commons.io.IOUtils;
 
 /**
  * A wrapper class of {@link File} and its content.
@@ -30,9 +32,13 @@ public class FileContent {
     private int position;
 
     public FileContent(File file) {
+        this(file, StandardCharsets.UTF_8);
+    }
+
+    public FileContent(File file, Charset charset) {
         this.file = file;
         try {
-            this.fileContent = new StringBuilder(Files.readString(file.toPath()));
+            this.fileContent = new StringBuilder(IOUtils.toString(file.toURI(), charset));
         } catch (IOException e) {
             throw new IllegalArgumentException("Unable to read file " + file, e);
         }
