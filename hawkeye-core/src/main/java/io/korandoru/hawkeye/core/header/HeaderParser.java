@@ -108,7 +108,7 @@ public final class HeaderParser {
                 inPlaceHeader.append(line.toLowerCase());
             }
 
-            String before = StringUtils.stripEnd(headerDefinition.getBeforeEachLine(), null);
+            String before = headerDefinition.getBeforeEachLine().stripTrailing();
             if ("".equals(before) && !headerDefinition.isMultipleLines()) {
                 before = headerDefinition.getBeforeEachLine();
             }

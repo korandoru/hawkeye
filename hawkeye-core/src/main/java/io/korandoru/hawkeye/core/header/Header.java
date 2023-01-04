@@ -16,8 +16,13 @@
 
 package io.korandoru.hawkeye.core.header;
 
+import io.korandoru.hawkeye.core.document.Document;
 import io.korandoru.hawkeye.core.resource.HeaderSource;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.stream.Collectors;
 import lombok.Getter;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -70,7 +75,7 @@ public final class Header {
                 str = before + line + after;
             }
 
-            newHeader.append(StringUtils.stripEnd(str, null));
+            newHeader.append(str.stripTrailing());
             newHeader.append(endOfLine);
         }
 
@@ -83,5 +88,14 @@ public final class Header {
         }
 
         return newHeader.toString();
+    }
+
+    public boolean isMatchForText(Document d, HeaderDefinition headerDefinition, Charset encoding) throws IOException {
+        final String firstLines = FileUtils.readLines(d.getFile(), encoding)
+                .stream()
+                .limit(headerContentLines.length + 10)
+                .collect(Collectors.joining("\n", "", "\n"));
+        final String fileHeader = firstLines.replaceAll(" *\r?\n", "\n");
+        return fileHeader.contains(d.mergeProperties(buildForDefinition(headerDefinition)));
     }
 }

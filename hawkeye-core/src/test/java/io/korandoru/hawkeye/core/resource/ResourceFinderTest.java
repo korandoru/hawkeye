@@ -30,7 +30,7 @@ class ResourceFinderTest {
     private static ResourceFinder finder;
 
     @BeforeAll
-    static void setup() {
+    public static void setup() {
         finder = new ResourceFinder(Paths.get("."));
         finder.setCompileClassPath(List.of("src/test/data/compileCP"));
         finder.setPluginClassPath(ResourceFinderTest.class.getClassLoader());

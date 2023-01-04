@@ -1,0 +1,61 @@
+/*
+ * Copyright 2023 Korandoru Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package io.korandoru.hawkeye.core.document;
+
+import io.korandoru.hawkeye.core.header.HeaderType;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public enum DocumentType {
+    TXT("txt", HeaderType.TEXT),
+    UNKNOWN("", HeaderType.UNKNOWN),
+    XML("xml", HeaderType.XML_STYLE),
+    YAML("yaml", HeaderType.SCRIPT_STYLE),
+    YML("yml", HeaderType.SCRIPT_STYLE);
+    private static final Map<String, String> MAPPING = new LinkedHashMap<>();
+
+    static {
+        for (DocumentType type : values()) {
+            MAPPING.put(type.getExtension(), type.getDefaultHeaderTypeName());
+        }
+    }
+
+    private final String extension;
+    private final HeaderType defaultHeaderType;
+
+    private DocumentType(String extension, HeaderType defaultHeaderType) {
+        this.extension = extension;
+        this.defaultHeaderType = defaultHeaderType;
+    }
+
+    public String getExtension() {
+        return extension;
+    }
+
+    public HeaderType getDefaultHeaderType() {
+        return defaultHeaderType;
+    }
+
+    public String getDefaultHeaderTypeName() {
+        return defaultHeaderType.name().toLowerCase();
+    }
+
+    public static Map<String, String> defaultMapping() {
+        return Collections.unmodifiableMap(MAPPING);
+    }
+}
