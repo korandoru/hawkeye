@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.korandoru.hawkeye.core;
+package io.korandoru.hawkeye.core.resource;
 
 import java.net.URL;
 import java.nio.charset.Charset;

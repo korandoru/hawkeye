@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.korandoru.hawkeye.core;
+package io.korandoru.hawkeye.core.header;
 
 import java.util.Collections;
 import java.util.HashMap;

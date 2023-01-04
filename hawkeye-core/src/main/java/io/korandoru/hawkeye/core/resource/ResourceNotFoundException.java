@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.korandoru.hawkeye.core;
+package io.korandoru.hawkeye.core.resource;
 
 public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(String message, Throwable cause) {

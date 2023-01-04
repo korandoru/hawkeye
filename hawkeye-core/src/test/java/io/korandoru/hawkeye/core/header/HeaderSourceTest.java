@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package io.korandoru.hawkeye.core;
+package io.korandoru.hawkeye.core.header;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import io.korandoru.hawkeye.core.resource.HeaderSource;
+import io.korandoru.hawkeye.core.resource.ResourceFinder;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 

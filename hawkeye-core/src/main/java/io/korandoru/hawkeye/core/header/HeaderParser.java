@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package io.korandoru.hawkeye.core;
+package io.korandoru.hawkeye.core.header;
 
+import io.korandoru.hawkeye.core.FileContent;
 import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
