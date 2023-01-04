@@ -18,10 +18,8 @@ package io.korandoru.hawkeye.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 class HeaderTest {

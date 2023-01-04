@@ -43,6 +43,37 @@ public class HeaderDefinition {
     private final Pattern firstLineDetectionPattern;
     private final Pattern lastLineDetectionPattern;
 
+    /**
+     * Tells if the given content line must be skipped according to this header definition. The header is outputted
+     * after any skipped line if any pattern defined on this point or on the first line if not pattern defined.
+     *
+     * @param line The line to test.
+     * @return true if this line must be skipped or false.
+     */
+    public boolean isSkipLine(String line) {
+        return skipLinePattern != null && line != null && skipLinePattern.matcher(line).matches();
+    }
+
+    /**
+     * Tells if the given content line is the first line of a possible header of this definition kind.
+     *
+     * @param line The line to test.
+     * @return true if the first line of a header have been recognized or false.
+     */
+    public boolean isFirstHeaderLine(String line) {
+        return firstLineDetectionPattern != null && line != null && firstLineDetectionPattern.matcher(line).matches();
+    }
+
+    /**
+     * Tells if the given content line is the last line of a possible header of this definition kind.
+     *
+     * @param line The line to test.
+     * @return true if the last line of a header have been recognized or false.
+     */
+    public boolean isLastHeaderLine(String line) {
+        return lastLineDetectionPattern != null && line != null && lastLineDetectionPattern.matcher(line).matches();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

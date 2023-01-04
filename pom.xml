@@ -176,7 +176,8 @@
                                 <include>**/.github/**</include>
                             </includes>
                             <excludes>
-                                <exclude>**/*.txt</exclude>
+                                <exclude>**/src/test/**/*.txt</exclude>
+                                <exclude>**/src/test/**/*.xml</exclude>
                                 <exclude>.dockerignore</exclude>
                             </excludes>
                         </licenseSet>
