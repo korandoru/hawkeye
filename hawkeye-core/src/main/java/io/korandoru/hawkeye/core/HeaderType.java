@@ -26,9 +26,11 @@ import java.util.regex.Pattern;
  * Defines the default header definitions available out of the box.
  */
 public enum HeaderType {
-    SCRIPT_STYLE("#", "# ", "#EOL", "", "^#!.*$", "#.*$", "#.*$", false, false),
-    SLASHSTAR_STYLE("/*", " * ", " */", "", null, "(\\s|\\t)*/\\*.*$", ".*\\*/(\\s|\\t)*$", false, true),
-    UNKNOWN("", "", "", "", null, null, null, false, false);
+    ASP("<%", "' ", "%>", "", null, "(\\s|\\t)*<%( .*)?$", ".*%>(\\s|\\t)*$", true, true, false),
+    JAVADOC_STYLE("/**", " * ", " */", "", null, "(\\s|\\t)*/\\*.*$", ".*\\*/(\\s|\\t)*$", false, true, false),
+    SCRIPT_STYLE("#", "# ", "#EOL", "", "^#!.*$", "#.*$", "#.*$", false, false, false),
+    SLASHSTAR_STYLE("/*", " * ", " */", "", null, "(\\s|\\t)*/\\*.*$", ".*\\*/(\\s|\\t)*$", false, true, false),
+    UNKNOWN("", "", "", "", null, null, null, false, false, false);
 
     private final HeaderDefinition definition;
 
@@ -41,7 +43,8 @@ public enum HeaderType {
             String firstLineDetectionPattern,
             String lastLineDetectionPattern,
             boolean allowBlankLines,
-            boolean multiLine
+            boolean multiLine,
+            boolean padLines
     ) {
         this.definition = HeaderDefinition.builder()
                 .type(name())
@@ -54,6 +57,7 @@ public enum HeaderType {
                 .lastLineDetectionPattern(Optional.ofNullable(lastLineDetectionPattern).map(Pattern::compile).orElse(null))
                 .allowBlankLines(allowBlankLines)
                 .multipleLines(multiLine)
+                .padLines(padLines)
                 .build();
     }
 

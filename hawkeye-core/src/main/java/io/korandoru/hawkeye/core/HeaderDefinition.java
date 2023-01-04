@@ -37,6 +37,8 @@ public class HeaderDefinition {
     private final boolean allowBlankLines;
     private final boolean multipleLines;
 
+    private final boolean padLines;
+
     private final Pattern skipLinePattern;
     private final Pattern firstLineDetectionPattern;
     private final Pattern lastLineDetectionPattern;
@@ -93,6 +95,7 @@ public class HeaderDefinition {
                     Optional.ofNullable(afterEachLine).orElse(""),
                     allowBlankLines,
                     multipleLines,
+                    padLines,
                     skipLinePattern,
                     firstLineDetectionPattern,
                     lastLineDetectionPattern);

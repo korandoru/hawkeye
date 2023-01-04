@@ -19,11 +19,17 @@ package io.korandoru.hawkeye.core;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import org.apache.commons.io.IOUtils;
 
 public final class UrlHeaderSource extends HeaderSource {
     private final URL url;
+
+    public UrlHeaderSource(URL url) throws IOException {
+        super(IOUtils.toString(url, StandardCharsets.UTF_8), false);
+        this.url = url;
+    }
 
     public UrlHeaderSource(URL url, Charset charset) throws IOException {
         super(IOUtils.toString(url, charset), false);
