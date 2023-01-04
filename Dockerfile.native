@@ -17,6 +17,6 @@ WORKDIR /build
 COPY . .
 RUN ./mvnw -B -ntp clean package -DskipTests -Pnative -DonlyNativeDistro
 
-FROM ghcr.io/dlorenc/images/java-static
+FROM ubuntu:jammy
 COPY --from=build /build/distribution/native/target/hawkeye-native /bin/
 ENTRYPOINT ["/bin/hawkeye-native"]
