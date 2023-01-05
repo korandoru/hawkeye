@@ -60,6 +60,7 @@
                 </executions>
                 <configuration>
                     <mainClass>io.korandoru.hawkeye.command.HawkEyeCommandMain</mainClass>
+                    <embeddedLaunchScript>src/embeddedLaunchScript.sh</embeddedLaunchScript>
                     <executable>true</executable>
                 </configuration>
             </plugin>

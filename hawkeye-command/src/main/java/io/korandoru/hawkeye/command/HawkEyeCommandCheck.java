@@ -36,6 +36,7 @@ public class HawkEyeCommandCheck implements Callable<Integer> {
     @Override
     public Integer call() {
         final HawkEyeConfig config = HawkEyeConfig.of(options.config);
+        System.out.println("basedir=" + config.getBaseDir().toAbsolutePath());
         final LicenseChecker checker = new LicenseChecker(config);
         final Report report = checker.call();
         final boolean hasHeaderNotFoundFiles = report.getResults()
