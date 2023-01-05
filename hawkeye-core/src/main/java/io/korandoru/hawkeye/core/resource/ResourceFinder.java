@@ -104,15 +104,19 @@ public class ResourceFinder {
         final String cpResource = resource.startsWith("/") ? resource.substring(1) : resource;
 
         // tries compile-classpath of project
-        res = compileClassPath.getResource(cpResource);
-        if (res != null) {
-            return res;
+        if (compileClassPath != null) {
+            res = compileClassPath.getResource(cpResource);
+            if (res != null) {
+                return res;
+            }
         }
 
         // tries this plugin classpath
-        res = pluginClassPath.getResource(cpResource);
-        if (res != null) {
-            return res;
+        if (pluginClassPath != null) {
+            res = pluginClassPath.getResource(cpResource);
+            if (res != null) {
+                return res;
+            }
         }
 
         // otherwise, tries to return a valid URL
