@@ -28,16 +28,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-includes = [
-    "**",
-    "**/.github",
-    "**/.github/**",
-]
-
 excludes = [
     "**/src/test/**/*.txt",
     "**/src/test/**/*.xml",
 ]
+
+[mapping]
+'Dockerfile.native' = 'SCRIPT_STYLE'
 
 [properties]
 inceptionYear = 2023

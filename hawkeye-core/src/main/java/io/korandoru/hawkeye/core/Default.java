@@ -86,10 +86,6 @@ public class Default {
       "**/.gitkeep",
       "**/.gitmodules",
 
-      // GitHub
-      "**/.github",
-      "**/.github/**",
-
       // BitKeeper
       "**/BitKeeper",
       "**/BitKeeper/**",
