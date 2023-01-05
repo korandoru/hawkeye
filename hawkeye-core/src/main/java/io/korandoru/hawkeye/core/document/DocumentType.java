@@ -84,6 +84,7 @@ public enum DocumentType {
     TEX_STYLE("sty", HeaderType.PERCENT_STYLE),
     TEX("tex", HeaderType.PERCENT_STYLE),
     TLD("tld", HeaderType.XML_STYLE),
+    TOML("toml", HeaderType.SCRIPT_STYLE),
     TS("ts", HeaderType.TRIPLESLASH_STYLE),
     TXT("txt", HeaderType.TEXT),
     UNKNOWN("", HeaderType.UNKNOWN),
