@@ -8,26 +8,27 @@ import java.util.Map;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
+import org.apache.commons.io.file.PathUtils;
 
 @Data
 @Builder
 @Jacksonized
 public class HawkEyeConfig {
 
-    private final Path baseDir;
+    @Builder.Default
+    private final Path baseDir = PathUtils.current();
     private final String inlineHeader;
     private final String headerPath;
-    private final Map<String, String> properties;
-
+    @Builder.Default
+    private final boolean strictCheck = true;
     @Builder.Default
     private final boolean useDefaultExcludes = true;
     @Builder.Default
     private final List<String> includes = Collections.emptyList();
     @Builder.Default
     private final List<String> excludes = Collections.emptyList();
-
-    @Builder.Default
-    private final boolean strictCheck = true;
+    private final List<String> keywords = Collections.singletonList("copyright");
+    private final Map<String, String> properties;
 
 
     public static void main(String[] args) throws Exception {

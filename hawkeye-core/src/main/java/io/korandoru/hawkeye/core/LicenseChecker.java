@@ -46,7 +46,7 @@ public class LicenseChecker implements Callable<Report> {
                 DocumentType.defaultMapping(),
                 HeaderType.defaultDefinitions(),
                 StandardCharsets.UTF_8,
-                new String[]{"copyright"},
+                config.getKeywords().toArray(new String[0]),
                 d -> {
                     final Map<String, String> perDoc = new LinkedHashMap<>(config.getProperties());
                     perDoc.put("file.name", d.getFile().getName());
