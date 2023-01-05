@@ -41,8 +41,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Check license headers
-        uses: ./distribution/action
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -79,14 +77,16 @@ jobs:
           context: .
           file: ./Dockerfile
           load: true
-          tags: hawkeye:latest
+          tags: hawkeye:latest,ghcr.io/korandoru/hawkeye:latest
       - name: Build hawkeye-native
         uses: docker/build-push-action@v3
         with:
           context: .
           file: ./Dockerfile.native
           load: true
-          tags: hawkeye-native:latest
+          tags: hawkeye-native:latest,ghcr.io/korandoru/hawkeye-native:latest
+      - name: Check license headers
+        uses: ./distribution/action
       - name: Run sanity checks
         run: |
           docker run --rm -v $(pwd):/github/workspace hawkeye:latest check --config licenserc.toml
