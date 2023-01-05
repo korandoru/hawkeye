@@ -37,6 +37,9 @@ To check license headers in GitHub Actions, add a step in your GitHub workflow:
 ```yaml
 - name: Check License Header
   uses: korandoru/hawkeye/distribution/action@v1
+  # with:
+  #   config: path to the config file, default to licenserc.toml
+  #   version: version of hawkeye, default to the tag or latest on main
 ```
 
 ### Docker
