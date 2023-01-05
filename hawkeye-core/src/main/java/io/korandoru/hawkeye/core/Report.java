@@ -27,9 +27,9 @@ import lombok.SneakyThrows;
 @Data
 @RequiredArgsConstructor
 public class Report {
-    enum Action {CHECK, FORMAT, REMOVE}
+    public enum Action {CHECK, FORMAT, REMOVE}
 
-    enum Result {
+    public enum Result {
         /**
          * For check: header is OK
          */

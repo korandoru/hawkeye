@@ -16,21 +16,13 @@
 
 package io.korandoru.hawkeye.command;
 
+import java.io.File;
 import picocli.CommandLine;
 
-@CommandLine.Command(
-        name = "hawkeye",
-        version = CommandConstants.VERSION,
-        mixinStandardHelpOptions = true,
-        subcommands = {
-                HawkEyeCommandCheck.class
-        }
-)
-public class HawkEyeCommandMain {
+@CommandLine.Command
+public class CommandOptions {
 
-    @SuppressWarnings("InstantiationOfUtilityClass")
-    public static void main(String[] args) {
-        System.exit(new CommandLine(new HawkEyeCommandMain()).execute(args));
-    }
+    @CommandLine.Option(names = "--config", description = "Path to the config file.", required = true)
+    public File config;
 
 }
