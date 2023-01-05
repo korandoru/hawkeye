@@ -46,7 +46,8 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: ./distribution/action
+      - name: Check license headers
+        uses: ./distribution/action
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
