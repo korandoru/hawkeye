@@ -62,7 +62,7 @@ docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye-native
 
 ```shell
 # Build with GraalVM
-./mvnw clean package -DskipTests -Pnative -DonlyNativeDistro
+./mvnw clean package -DskipTests -Pnative
 
 # Run
 ./distribution/native/target/hawkeye-native

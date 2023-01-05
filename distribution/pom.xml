@@ -31,9 +31,10 @@
 
     <packaging>pom</packaging>
 
-    <properties>
-        <onlyNativeDistro>false</onlyNativeDistro>
-    </properties>
+    <modules>
+        <module>commandline</module>
+        <module>native</module>
+    </modules>
 
     <build>
         <plugins>
@@ -46,29 +47,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>default</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <property>
-                    <name>!onlyNativeDistro</name>
-                </property>
-            </activation>
-            <modules>
-                <module>commandline</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>native</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <modules>
-                <module>native</module>
-            </modules>
-        </profile>
-    </profiles>
-
 </project>
