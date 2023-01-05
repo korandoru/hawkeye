@@ -1,0 +1,17 @@
+baseDir = "."
+
+headerPath="tools/ci/license-header-template.txt"
+
+includes = [
+    "**",
+    "**/.github",
+    "**/.github/**",
+]
+
+excludes = [
+    "**/src/test/**/*.txt",
+    "**/src/test/**/*.xml",
+]
+
+[properties]
+'license.git.copyrightExistenceYears' = 2023
