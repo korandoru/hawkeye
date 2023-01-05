@@ -19,4 +19,5 @@ RUN ./mvnw -B -ntp clean package -DskipTests
 
 FROM eclipse-temurin:17-jre
 COPY --from=build /build/distribution/commandline/target/hawkeye.jar /bin/hawkeye
+WORKDIR /github/workspace/
 ENTRYPOINT ["/bin/hawkeye"]

@@ -19,4 +19,5 @@ RUN ./mvnw -B -ntp clean package -DskipTests -Pnative -DonlyNativeDistro
 
 FROM ubuntu:jammy
 COPY --from=build /build/distribution/native/target/hawkeye-native /bin/
+WORKDIR /github/workspace/
 ENTRYPOINT ["/bin/hawkeye-native"]

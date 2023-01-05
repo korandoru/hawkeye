@@ -87,8 +87,8 @@ jobs:
           tags: hawkeye-native:latest
       - name: Run sanity checks
         run: |
-          docker run --rm hawkeye:latest check --config tools/ci/licenserc.toml
-          docker run --rm hawkeye-native:latest check --config tools/ci/licenserc.toml
+          docker run --rm -v $(pwd):/github/workspace hawkeye:latest check --config tools/ci/licenserc.toml
+          docker run --rm -v $(pwd):/github/workspace hawkeye-native:latest check --config tools/ci/licenserc.toml
 
   required:
     name: Required
