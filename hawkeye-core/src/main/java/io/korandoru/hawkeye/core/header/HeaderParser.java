@@ -20,7 +20,6 @@ import io.korandoru.hawkeye.core.FileContent;
 import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
 
 @Getter
 public final class HeaderParser {
