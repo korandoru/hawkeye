@@ -77,7 +77,9 @@ public class LicenseChecker implements Callable<Report> {
         final var checker = new LicenseChecker(config);
         final var report = checker.call();
         report.getResults().forEach((path, result) -> {
-            System.out.println(path + "=" + result);
+            if (result != Report.Result.PRESENT) {
+                System.out.println(path + "=" + result);
+            }
         });
     }
 }
