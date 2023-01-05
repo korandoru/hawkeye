@@ -39,6 +39,7 @@ public abstract class LicenseProcessor implements Callable<Report> {
     @Override
     public Report call() {
         final Report report = new Report(action);
+
         final Path baseDir = Path.of(config.getBaseDir());
         final ResourceFinder resourceFinder = new ResourceFinder(baseDir);
         resourceFinder.setPluginClassPath(getClass().getClassLoader());
@@ -55,9 +56,15 @@ public abstract class LicenseProcessor implements Callable<Report> {
                 config.isUseDefaultExcludes());
         final String[] selectedFiles = selection.getSelectedFiles();
 
+        final Map<String, String> mapping = new LinkedHashMap<>();
+        if (config.isUseDefaultMapping()) {
+            mapping.putAll(DocumentType.defaultMapping());
+        }
+        mapping.putAll(config.getMapping());
+
         final DocumentFactory documentFactory = new DocumentFactory(
                 baseDir.toFile(),
-                DocumentType.defaultMapping(),
+                mapping,
                 HeaderType.defaultDefinitions(),
                 StandardCharsets.UTF_8,
                 config.getKeywords().toArray(new String[0]),

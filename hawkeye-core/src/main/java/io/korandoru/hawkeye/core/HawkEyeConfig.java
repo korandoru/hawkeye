@@ -41,11 +41,16 @@ public class HawkEyeConfig {
     @Builder.Default
     private final boolean useDefaultExcludes = true;
     @Builder.Default
+    private final boolean useDefaultMapping = true;
+    @Builder.Default
     private final List<String> includes = Collections.emptyList();
     @Builder.Default
     private final List<String> excludes = Collections.emptyList();
     private final List<String> keywords = Collections.singletonList("copyright");
-    private final Map<String, String> properties;
+    @Builder.Default
+    private final Map<String, String> properties = Collections.emptyMap();
+    @Builder.Default
+    private final Map<String, String> mapping = Collections.emptyMap();
 
     @SneakyThrows
     public static HawkEyeConfig of(URL source) {
