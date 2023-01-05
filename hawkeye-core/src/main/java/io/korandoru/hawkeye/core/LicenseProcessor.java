@@ -21,10 +21,10 @@ import io.korandoru.hawkeye.core.document.DocumentFactory;
 import io.korandoru.hawkeye.core.document.DocumentType;
 import io.korandoru.hawkeye.core.header.Header;
 import io.korandoru.hawkeye.core.header.HeaderType;
-import io.korandoru.hawkeye.core.model.HawkEyeConfig;
 import io.korandoru.hawkeye.core.resource.HeaderSource;
 import io.korandoru.hawkeye.core.resource.ResourceFinder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -39,7 +39,8 @@ public abstract class LicenseProcessor implements Callable<Report> {
     @Override
     public Report call() {
         final Report report = new Report(action);
-        final ResourceFinder resourceFinder = new ResourceFinder(config.getBaseDir());
+        final Path baseDir = Path.of(config.getBaseDir());
+        final ResourceFinder resourceFinder = new ResourceFinder(baseDir);
         resourceFinder.setPluginClassPath(getClass().getClassLoader());
 
         final HeaderSource headerSource = HeaderSource.of(
@@ -48,14 +49,14 @@ public abstract class LicenseProcessor implements Callable<Report> {
                 resourceFinder);
         final Header header = new Header(headerSource);
         final Selection selection = new Selection(
-                config.getBaseDir().toFile(),
+                baseDir.toFile(),
                 config.getIncludes().toArray(new String[0]),
                 config.getExcludes().toArray(new String[0]),
                 config.isUseDefaultExcludes());
         final String[] selectedFiles = selection.getSelectedFiles();
 
         final DocumentFactory documentFactory = new DocumentFactory(
-                config.getBaseDir().toFile(),
+                baseDir.toFile(),
                 DocumentType.defaultMapping(),
                 HeaderType.defaultDefinitions(),
                 StandardCharsets.UTF_8,

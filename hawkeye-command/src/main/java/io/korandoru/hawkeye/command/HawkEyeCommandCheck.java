@@ -18,7 +18,7 @@ package io.korandoru.hawkeye.command;
 
 import io.korandoru.hawkeye.core.LicenseChecker;
 import io.korandoru.hawkeye.core.Report;
-import io.korandoru.hawkeye.core.model.HawkEyeConfig;
+import io.korandoru.hawkeye.core.HawkEyeConfig;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
 

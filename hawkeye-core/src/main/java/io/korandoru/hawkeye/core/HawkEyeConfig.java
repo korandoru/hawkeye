@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package io.korandoru.hawkeye.core.model;
+package io.korandoru.hawkeye.core;
 
 import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import java.io.File;
 import java.net.URL;
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.jackson.Jacksonized;
-import org.apache.commons.io.file.PathUtils;
 
 @Data
 @Builder
@@ -35,7 +33,7 @@ import org.apache.commons.io.file.PathUtils;
 public class HawkEyeConfig {
 
     @Builder.Default
-    private final Path baseDir = PathUtils.current();
+    private final String baseDir = ".";
     private final String inlineHeader;
     private final String headerPath;
     @Builder.Default

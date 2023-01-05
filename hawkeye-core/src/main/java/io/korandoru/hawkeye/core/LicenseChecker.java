@@ -18,7 +18,6 @@ package io.korandoru.hawkeye.core;
 
 import io.korandoru.hawkeye.core.document.Document;
 import io.korandoru.hawkeye.core.header.Header;
-import io.korandoru.hawkeye.core.model.HawkEyeConfig;
 
 public class LicenseChecker extends LicenseProcessor {
 
