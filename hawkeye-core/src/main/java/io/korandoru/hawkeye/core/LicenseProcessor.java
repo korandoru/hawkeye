@@ -18,6 +18,7 @@ package io.korandoru.hawkeye.core;
 
 import io.korandoru.hawkeye.core.document.Document;
 import io.korandoru.hawkeye.core.document.DocumentFactory;
+import io.korandoru.hawkeye.core.document.DocumentPropertiesLoader;
 import io.korandoru.hawkeye.core.document.DocumentType;
 import io.korandoru.hawkeye.core.header.Header;
 import io.korandoru.hawkeye.core.header.HeaderType;
@@ -25,6 +26,7 @@ import io.korandoru.hawkeye.core.resource.HeaderSource;
 import io.korandoru.hawkeye.core.resource.ResourceFinder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.Year;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -62,17 +64,23 @@ public abstract class LicenseProcessor implements Callable<Report> {
         }
         mapping.putAll(config.getMapping());
 
+        final Map<String, String> globalProperties = new LinkedHashMap<>();
+        globalProperties.put("builtin.thisYear", Year.now().toString());
+        final DocumentPropertiesLoader propertiesLoader = document -> {
+            final Map<String, String> properties = new LinkedHashMap<>();
+            properties.put("builtin.filename", document.getFile().getName());
+            properties.putAll(globalProperties);
+            properties.putAll(config.getProperties());
+            return properties;
+        };
+
         final DocumentFactory documentFactory = new DocumentFactory(
                 baseDir.toFile(),
                 mapping,
                 HeaderType.defaultDefinitions(),
                 StandardCharsets.UTF_8,
                 config.getKeywords().toArray(new String[0]),
-                d -> {
-                    final Map<String, String> perDoc = new LinkedHashMap<>(config.getProperties());
-                    perDoc.put("file.name", d.getFile().getName());
-                    return perDoc;
-                });
+                propertiesLoader);
 
         for (final String file : selectedFiles) {
             final Document document = documentFactory.createDocuments(file);

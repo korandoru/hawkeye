@@ -50,8 +50,7 @@ public abstract sealed class HeaderSource permits LiteralHeaderSource, UrlHeader
                 final URL headerUrl = finder.findResource(headerPath);
                 return new UrlHeaderSource(headerUrl, charset);
             } catch (Exception e) {
-                throw new IllegalArgumentException(
-                        "Cannot read header document " + headerPath + ". Cause: " + e.getMessage(), e);
+                throw new IllegalArgumentException("Cannot read header document " + headerPath, e);
             }
         }
 

@@ -39,4 +39,4 @@ types:
   - chore
   - revert
 
-targetUrl: https://github.com/korandoru/hawkeye/blob/master/.github/semantic.yml
+targetUrl: https://github.com/korandoru/hawkeye/blob/main/.github/semantic.yml
