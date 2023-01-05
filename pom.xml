@@ -59,7 +59,6 @@
 
         <!-- community maven plugins -->
         <exec-maven-plugin.version>3.1.0</exec-maven-plugin.version>
-        <license-maven-plugin.version>4.2.rc3</license-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -171,39 +170,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
-            </plugin>
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>${license-maven-plugin.version}</version>
-                <configuration>
-                    <licenseSets>
-                        <licenseSet>
-                            <header>tools/ci/license-header-template.txt</header>
-                            <includes>
-                                <!-- Force override the default exclusions -->
-                                <include>**</include>
-                                <include>**/.github</include>
-                                <include>**/.github/**</include>
-                            </includes>
-                            <excludes>
-                                <exclude>**/src/test/**/*.txt</exclude>
-                                <exclude>**/src/test/**/*.xml</exclude>
-                                <exclude>.dockerignore</exclude>
-                            </excludes>
-                        </licenseSet>
-                    </licenseSets>
-                    <headerDefinitions>
-                        <headerDefinition>tools/ci/license-header-override-styles.xml</headerDefinition>
-                    </headerDefinitions>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.mycila</groupId>
-                        <artifactId>license-maven-plugin-git</artifactId>
-                        <version>${license-maven-plugin.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>
