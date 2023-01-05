@@ -48,7 +48,7 @@ jobs:
           java-version: '17'
       - name: Check and build
         run: |
-          ./mvnw license:check
+          ./mvnw spotless:check
           ./mvnw clean install -DskipTests
 
   unittest:
