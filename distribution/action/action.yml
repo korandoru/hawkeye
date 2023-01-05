@@ -41,4 +41,6 @@ runs:
     - shell: bash
       run: |
         docker pull ghcr.io/korandoru/hawkeye-native:${{ inputs.version }}
-        docker run ghcr.io/korandoru/hawkeye-native:${{ inputs.version }} ${{ inputs.mode }} --config ${{ inputs.config }}
+        docker run --rm -v $(pwd):/github/workspace \
+          ghcr.io/korandoru/hawkeye-native:${{ inputs.version }} \
+          ${{ inputs.mode }} --config ${{ inputs.config }}
