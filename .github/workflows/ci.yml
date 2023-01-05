@@ -41,6 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: ./distribution/action
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -87,8 +88,8 @@ jobs:
           tags: hawkeye-native:latest
       - name: Run sanity checks
         run: |
-          docker run --rm -v $(pwd):/github/workspace hawkeye:latest check --config tools/ci/licenserc.toml
-          docker run --rm -v $(pwd):/github/workspace hawkeye-native:latest check --config tools/ci/licenserc.toml
+          docker run --rm -v $(pwd):/github/workspace hawkeye:latest check --config licenserc.toml
+          docker run --rm -v $(pwd):/github/workspace hawkeye-native:latest check --config licenserc.toml
 
   required:
     name: Required
