@@ -30,6 +30,31 @@
 
     <inceptionYear>2023</inceptionYear>
 
+    <url>https://github.com/korandoru/hawkeye</url>
+
+    <licenses>
+        <license>
+            <name>Apache 2.0 License</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>tison</id>
+            <name>Zili Chen</name>
+            <email>wander4096@gmail.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/korandoru/trufflebf.git</connection>
+        <developerConnection>scm:git:https://github.com/korandoru/trufflebf.git</developerConnection>
+        <url>https://github.com/korandoru/trufflebf</url>
+        <tag>HEAD</tag>
+    </scm>
+
     <modules>
         <module>hawkeye-command</module>
         <module>hawkeye-core</module>
