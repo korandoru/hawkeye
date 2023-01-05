@@ -22,7 +22,6 @@ import java.nio.charset.Charset;
 import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 
-@SuppressWarnings("unused")
 public final class DocumentFactory {
 
     private final Map<String, String> mapping;

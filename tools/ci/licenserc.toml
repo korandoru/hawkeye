@@ -12,12 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM ghcr.io/graalvm/native-image:ol9-java17-22.3.0 as build
-WORKDIR /build
-COPY . .
-RUN ./mvnw -B -ntp clean package -DskipTests -Pnative -DonlyNativeDistro
+baseDir = "."
 
-FROM ubuntu:jammy
-COPY --from=build /build/distribution/native/target/hawkeye-native /bin/
-WORKDIR /github/workspace/
-ENTRYPOINT ["/bin/hawkeye-native"]
+headerPath="tools/ci/license-header-template.txt"
+
+includes = [
+    "**",
+    "**/.github",
+    "**/.github/**",
+]
+
+excludes = [
+    "**/src/test/**/*.txt",
+    "**/src/test/**/*.xml",
+]
+
+[properties]
+'license.git.copyrightExistenceYears' = 2023
