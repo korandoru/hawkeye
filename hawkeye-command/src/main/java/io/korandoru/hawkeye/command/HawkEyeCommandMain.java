@@ -23,7 +23,9 @@ import picocli.CommandLine;
         version = CommandConstants.VERSION,
         mixinStandardHelpOptions = true,
         subcommands = {
-                HawkEyeCommandCheck.class
+                HawkEyeCommandCheck.class,
+                HawkEyeCommandFormat.class,
+                HawkEyeCommandRemove.class
         }
 )
 public class HawkEyeCommandMain {

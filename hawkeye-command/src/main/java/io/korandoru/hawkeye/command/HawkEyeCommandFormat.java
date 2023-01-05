@@ -16,19 +16,19 @@
 
 package io.korandoru.hawkeye.command;
 
-import io.korandoru.hawkeye.core.LicenseChecker;
+import io.korandoru.hawkeye.core.LicenseFormatter;
 import io.korandoru.hawkeye.core.Report;
 import io.korandoru.hawkeye.core.model.HawkEyeConfig;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
 
 @CommandLine.Command(
-        name = "check",
+        name = "format",
         version = CommandConstants.VERSION,
         mixinStandardHelpOptions = true,
-        description = "Check license headers."
+        description = "Format license headers."
 )
-public class HawkEyeCommandCheck implements Callable<Integer> {
+public class HawkEyeCommandFormat implements Callable<Integer> {
 
     @CommandLine.Mixin
     private CommandOptions options;
@@ -36,12 +36,12 @@ public class HawkEyeCommandCheck implements Callable<Integer> {
     @Override
     public Integer call() {
         final HawkEyeConfig config = HawkEyeConfig.of(options.config);
-        final LicenseChecker checker = new LicenseChecker(config);
-        final Report report = checker.call();
-        final boolean hasHeaderNotFoundFiles = report.getResults()
+        final LicenseFormatter formatter = new LicenseFormatter(config);
+        final Report report = formatter.call();
+        final boolean hasHeaderUpdatedFiles = report.getResults()
                 .values()
                 .stream()
-                .anyMatch(Report.Result.MISSING::equals);
-        return hasHeaderNotFoundFiles ? 1 : 0;
+                .anyMatch(result -> result != Report.Result.NOOP);
+        return hasHeaderUpdatedFiles ? 1 : 0;
     }
 }

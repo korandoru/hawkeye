@@ -16,19 +16,19 @@
 
 package io.korandoru.hawkeye.command;
 
-import io.korandoru.hawkeye.core.LicenseChecker;
+import io.korandoru.hawkeye.core.LicenseRemover;
 import io.korandoru.hawkeye.core.Report;
 import io.korandoru.hawkeye.core.model.HawkEyeConfig;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
 
 @CommandLine.Command(
-        name = "check",
+        name = "remove",
         version = CommandConstants.VERSION,
         mixinStandardHelpOptions = true,
-        description = "Check license headers."
+        description = "Remove license headers."
 )
-public class HawkEyeCommandCheck implements Callable<Integer> {
+public class HawkEyeCommandRemove implements Callable<Integer> {
 
     @CommandLine.Mixin
     private CommandOptions options;
@@ -36,12 +36,12 @@ public class HawkEyeCommandCheck implements Callable<Integer> {
     @Override
     public Integer call() {
         final HawkEyeConfig config = HawkEyeConfig.of(options.config);
-        final LicenseChecker checker = new LicenseChecker(config);
-        final Report report = checker.call();
-        final boolean hasHeaderNotFoundFiles = report.getResults()
+        final LicenseRemover remover = new LicenseRemover(config);
+        final Report report = remover.call();
+        final boolean hasHeaderRemovedFiles = report.getResults()
                 .values()
                 .stream()
-                .anyMatch(Report.Result.MISSING::equals);
-        return hasHeaderNotFoundFiles ? 1 : 0;
+                .anyMatch(Report.Result.REMOVED::equals);
+        return hasHeaderRemovedFiles ? 1 : 0;
     }
 }
