@@ -32,8 +32,8 @@ inputs:
     default: check
 
 runs:
-  using: docker
-  image: ghcr.io/korandoru/hawkeye-native
+  using: 'docker'
+  image: 'Dockerfile'
   args:
     - ${{ inputs.mode }}
     - --config
