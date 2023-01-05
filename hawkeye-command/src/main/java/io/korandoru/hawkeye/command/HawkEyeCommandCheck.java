@@ -19,7 +19,10 @@ package io.korandoru.hawkeye.command;
 import io.korandoru.hawkeye.core.LicenseChecker;
 import io.korandoru.hawkeye.core.Report;
 import io.korandoru.hawkeye.core.HawkEyeConfig;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
 
 @CommandLine.Command(
@@ -28,6 +31,7 @@ import picocli.CommandLine;
         mixinStandardHelpOptions = true,
         description = "Check license headers."
 )
+@Slf4j
 public class HawkEyeCommandCheck implements Callable<Integer> {
 
     @CommandLine.Mixin
@@ -38,10 +42,20 @@ public class HawkEyeCommandCheck implements Callable<Integer> {
         final HawkEyeConfig config = HawkEyeConfig.of(options.config);
         final LicenseChecker checker = new LicenseChecker(config);
         final Report report = checker.call();
-        final boolean hasHeaderNotFoundFiles = report.getResults()
-                .values()
-                .stream()
-                .anyMatch(Report.Result.MISSING::equals);
-        return hasHeaderNotFoundFiles ? 1 : 0;
+
+        final List<String> unknownHeaderFiles = report.getResults().entrySet().stream()
+                .filter(e -> Report.Result.UNKNOWN.equals(e.getValue()))
+                .map(Map.Entry::getKey)
+                .toList();
+
+        final List<String> missingHeaderFiles = report.getResults().entrySet().stream()
+                .filter(e -> Report.Result.MISSING.equals(e.getValue()))
+                .map(Map.Entry::getKey)
+                .toList();
+
+        log.warn("Processing unknown files: {}", unknownHeaderFiles);
+        log.info("Found missing header files: {}", missingHeaderFiles);
+
+        return missingHeaderFiles.isEmpty() ? 0 : 1;
     }
 }

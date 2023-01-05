@@ -16,10 +16,13 @@
 
 package io.korandoru.hawkeye.command;
 
+import io.korandoru.hawkeye.core.HawkEyeConfig;
 import io.korandoru.hawkeye.core.LicenseRemover;
 import io.korandoru.hawkeye.core.Report;
-import io.korandoru.hawkeye.core.HawkEyeConfig;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
 
 @CommandLine.Command(
@@ -28,6 +31,7 @@ import picocli.CommandLine;
         mixinStandardHelpOptions = true,
         description = "Remove license headers."
 )
+@Slf4j
 public class HawkEyeCommandRemove implements Callable<Integer> {
 
     @CommandLine.Mixin
@@ -38,10 +42,20 @@ public class HawkEyeCommandRemove implements Callable<Integer> {
         final HawkEyeConfig config = HawkEyeConfig.of(options.config);
         final LicenseRemover remover = new LicenseRemover(config);
         final Report report = remover.call();
-        final boolean hasHeaderRemovedFiles = report.getResults()
-                .values()
-                .stream()
-                .anyMatch(Report.Result.REMOVED::equals);
-        return hasHeaderRemovedFiles ? 1 : 0;
+
+        final List<String> unknownHeaderFiles = report.getResults().entrySet().stream()
+                .filter(e -> Report.Result.UNKNOWN.equals(e.getValue()))
+                .map(Map.Entry::getKey)
+                .toList();
+
+        final List<String> removedHeaderFiles = report.getResults().entrySet().stream()
+                .filter(e -> Report.Result.REMOVED.equals(e.getValue()))
+                .map(Map.Entry::getKey)
+                .toList();
+
+        log.warn("Processing unknown files: {}", unknownHeaderFiles);
+        log.info("Removed header for files: {}", removedHeaderFiles);
+
+        return removedHeaderFiles.isEmpty() ? 0 : 1;
     }
 }

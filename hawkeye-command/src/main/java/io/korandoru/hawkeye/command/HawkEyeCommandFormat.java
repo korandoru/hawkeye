@@ -19,7 +19,10 @@ package io.korandoru.hawkeye.command;
 import io.korandoru.hawkeye.core.LicenseFormatter;
 import io.korandoru.hawkeye.core.Report;
 import io.korandoru.hawkeye.core.HawkEyeConfig;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
 
 @CommandLine.Command(
@@ -28,6 +31,7 @@ import picocli.CommandLine;
         mixinStandardHelpOptions = true,
         description = "Format license headers."
 )
+@Slf4j
 public class HawkEyeCommandFormat implements Callable<Integer> {
 
     @CommandLine.Mixin
@@ -38,10 +42,20 @@ public class HawkEyeCommandFormat implements Callable<Integer> {
         final HawkEyeConfig config = HawkEyeConfig.of(options.config);
         final LicenseFormatter formatter = new LicenseFormatter(config);
         final Report report = formatter.call();
-        final boolean hasHeaderUpdatedFiles = report.getResults()
-                .values()
-                .stream()
-                .anyMatch(result -> result != Report.Result.NOOP);
-        return hasHeaderUpdatedFiles ? 1 : 0;
+
+        final List<String> unknownHeaderFiles = report.getResults().entrySet().stream()
+                .filter(e -> Report.Result.UNKNOWN.equals(e.getValue()))
+                .map(Map.Entry::getKey)
+                .toList();
+
+        final List<Map.Entry<String, Report.Result>> updatedHeaderFiles = report.getResults().entrySet().stream()
+                .filter(e -> e.getValue() != Report.Result.UNKNOWN)
+                .filter(e -> e.getValue() != Report.Result.NOOP)
+                .toList();
+
+        log.warn("Processing unknown files: {}", unknownHeaderFiles);
+        log.info("Updated header for files: {}", updatedHeaderFiles);
+
+        return updatedHeaderFiles.isEmpty() ? 0 : 1;
     }
 }
