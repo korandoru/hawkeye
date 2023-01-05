@@ -18,7 +18,7 @@
 #
 # ... where valid types and scopes can be found below; for example:
 #
-#     fix(test): flaky test V1_ProxyAuthenticationTest.anonymousSocketTest
+#     build(maven): One level down for native profile
 #
 # More about configurations on https://github.com/Ezard/semantic-prs#configuration
 
