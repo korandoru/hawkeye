@@ -27,6 +27,7 @@
     </parent>
 
     <name>HawkEye :: Command</name>
+    <description>HawkEye command-line interface</description>
     <artifactId>hawkeye-command</artifactId>
 
     <dependencies>

@@ -27,6 +27,7 @@
     </parent>
 
     <name>HawkEye :: Core</name>
+    <description>HawkEye core library</description>
     <artifactId>hawkeye-core</artifactId>
 
     <dependencies>
