@@ -2,6 +2,8 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 dependency-reduced-pom.xml
+release.properties
+pom.xml.releaseBackup
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
