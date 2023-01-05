@@ -36,9 +36,9 @@ inputs:
     default: check
 
 runs:
-  using: docker
-  image: docker://ghcr.io/korandoru/hawkeye-native:${{ inputs.version }}
-  args:
-    - ${{ inputs.mode }}
-    - --config
-    - ${{ inputs.config }}
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        docker pull ghcr.io/korandoru/hawkeye-native:${{ inputs.version }}
+        docker run ghcr.io/korandoru/hawkeye-native:${{ inputs.version }} ${{ inputs.mode }} --config ${{ inputs.config }}
