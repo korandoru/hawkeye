@@ -24,53 +24,45 @@
         <version>1.0.3-SNAPSHOT</version>
     </parent>
 
-    <name>HawkEye :: Distribution :: Native Image</name>
-    <artifactId>native</artifactId>
-
-    <properties>
-        <native-maven-plugin.version>0.9.19</native-maven-plugin.version>
-    </properties>
+    <name>HawkEye :: Distribution :: Release Helper</name>
+    <artifactId>releasehelper</artifactId>
 
     <packaging>pom</packaging>
 
-    <dependencies>
-        <dependency>
-            <groupId>io.korandoru.hawkeye</groupId>
-            <artifactId>hawkeye-command</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <configuration>
+                    <skip>false</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>before-prepare-release</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>v${project.version}</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>after-prepare-release</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>latest</arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
     <profiles>
-        <profile>
-            <id>native</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.graalvm.buildtools</groupId>
-                        <artifactId>native-maven-plugin</artifactId>
-                        <version>${native-maven-plugin.version}</version>
-                        <extensions>true</extensions>
-                        <executions>
-                            <execution>
-                                <id>build-native</id>
-                                <goals>
-                                    <goal>compile-no-fork</goal>
-                                </goals>
-                                <phase>package</phase>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <mainClass>io.korandoru.hawkeye.command.HawkEyeCommandMain</mainClass>
-                            <imageName>hawkeye-native</imageName>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
         <profile>
             <id>release</id>
             <build>

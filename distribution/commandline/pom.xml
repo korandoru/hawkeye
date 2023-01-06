@@ -25,6 +25,7 @@
     </parent>
 
     <name>HawkEye :: Distribution :: Command Line Interface</name>
+    <description>HawkEye command-line executables</description>
     <artifactId>commandline</artifactId>
 
     <properties>
