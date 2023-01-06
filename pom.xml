@@ -244,6 +244,7 @@
                     <releaseProfiles>release</releaseProfiles>
                     <goals>deploy</goals>
                     <signTag>true</signTag>
+                    <tagNameFormat>v${project.version}</tagNameFormat>
                     <pushChanges>false</pushChanges>
                     <localCheckout>true</localCheckout>
                     <arguments>-DskipTests</arguments>
