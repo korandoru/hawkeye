@@ -87,6 +87,7 @@ jobs:
             type=semver,pattern={{raw}}
             type=semver,pattern=v{{major}}
             type=sha,format=long
+            type=edge
 
       - uses: docker/build-push-action@v3
         with:
