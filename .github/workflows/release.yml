@@ -16,7 +16,7 @@ name: Release
 
 on:
   push:
-    tags: ['v*']
+    tags: ['v1.*']
   workflow_dispatch:
 
 jobs:
@@ -83,11 +83,10 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ghcr.io/${{ github.repository_owner }}/hawkeye-native
-          flavor: latest=false
           tags: |
-            type=ref,event=tag
+            type=semver,pattern={{raw}}
+            type=semver,pattern=v{{major}}
             type=sha,format=long
-            type=raw,value=latest
 
       - uses: docker/build-push-action@v3
         with:
