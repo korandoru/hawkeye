@@ -53,7 +53,9 @@ public class HawkEyeCommandFormat implements Callable<Integer> {
                 .filter(e -> e.getValue() != Report.Result.NOOP)
                 .toList();
 
-        log.warn("Processing unknown files: {}", unknownHeaderFiles);
+        if (!unknownHeaderFiles.isEmpty()) {
+            log.warn("Processing unknown files: {}", unknownHeaderFiles);
+        }
         log.info("Updated header for files: {}", updatedHeaderFiles);
 
         return updatedHeaderFiles.isEmpty() ? 0 : 1;

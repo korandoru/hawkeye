@@ -53,7 +53,9 @@ public class HawkEyeCommandCheck implements Callable<Integer> {
                 .map(Map.Entry::getKey)
                 .toList();
 
-        log.warn("Processing unknown files: {}", unknownHeaderFiles);
+        if (!unknownHeaderFiles.isEmpty()) {
+            log.warn("Processing unknown files: {}", unknownHeaderFiles);
+        }
         log.info("Found missing header files: {}", missingHeaderFiles);
 
         return missingHeaderFiles.isEmpty() ? 0 : 1;
