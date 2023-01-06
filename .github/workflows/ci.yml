@@ -20,8 +20,6 @@ on:
     tags-ignore: ['v1.*']
   pull_request:
     branches: [main]
-  registry_package:
-    type: [published]
   schedule:
     - cron: '4 2 * * *'
 
