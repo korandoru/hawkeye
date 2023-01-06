@@ -16,7 +16,7 @@ name: CI
 
 on:
   push:
-    branches:
+    tags-ignore: ['v1.*']
   pull_request:
     branches: [main]
   registry_package:
