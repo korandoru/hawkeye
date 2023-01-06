@@ -27,6 +27,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     print("update-action-image-url.py executing...")
+    print(f"with version={args.version}")
 
     pattern = re.compile(r'docker://ghcr.io/korandoru/hawkeye-native.*')
     basedir = Path(__file__).parent.parent.absolute()
