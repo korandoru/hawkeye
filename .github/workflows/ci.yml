@@ -16,6 +16,7 @@ name: CI
 
 on:
   push:
+    branches: [main]
     tags-ignore: ['v1.*']
   pull_request:
     branches: [main]
