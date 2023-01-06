@@ -288,8 +288,18 @@
                     <useReleaseProfile>false</useReleaseProfile>
                     <releaseProfiles>release</releaseProfiles>
                     <goals>deploy</goals>
-                    <preparationGoals>clean verify exec:exec@before-prepare-release</preparationGoals>
-                    <completionGoals>clean package exec:exec@after-prepare-release</completionGoals>
+                    <preparationGoals>
+                        clean
+                        verify
+                        exec:exec@before-prepare-release
+                        scm:add@add-action-yml
+                    </preparationGoals>
+                    <completionGoals>
+                        clean
+                        package
+                        exec:exec@after-prepare-release
+                        scm:add@add-action-yml
+                    </completionGoals>
                     <signTag>true</signTag>
                     <tagNameFormat>v@{project.version}</tagNameFormat>
                     <scmCommentPrefix>ci(release):</scmCommentPrefix>

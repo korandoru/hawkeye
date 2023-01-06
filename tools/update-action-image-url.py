@@ -26,9 +26,6 @@ if __name__ == '__main__':
     parser.add_argument('version', default='latest', nargs='?', help='version of hawkeye-native image')
     args = parser.parse_args()
 
-    print("update-action-image-url.py executing...")
-    print(f"with version={args.version}")
-
     pattern = re.compile(r'docker://ghcr.io/korandoru/hawkeye-native.*')
     basedir = Path(__file__).parent.parent.absolute()
     with fileinput.FileInput(basedir / 'action.yml', inplace=True, backup='.bak') as content:
