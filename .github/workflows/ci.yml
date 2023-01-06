@@ -21,7 +21,7 @@ on:
   pull_request:
     branches: [main]
   registry_package:
-    type: [publish]
+    type: [published]
   schedule:
     - cron: '4 2 * * *'
 
