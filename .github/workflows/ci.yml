@@ -16,9 +16,11 @@ name: CI
 
 on:
   push:
-    branches: ['**']
+    branches: ['*']
   pull_request:
     branches: [main]
+  registry_package:
+    type: [publish]
   schedule:
     - cron: '4 2 * * *'
 
