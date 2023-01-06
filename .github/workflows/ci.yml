@@ -89,7 +89,7 @@ jobs:
           load: true
           tags: hawkeye-native:latest,ghcr.io/korandoru/hawkeye-native:latest
       - name: Check license headers
-        uses: ./distribution/action
+        uses: .
       - name: Run sanity checks
         run: |
           docker run --rm -v $(pwd):/github/workspace hawkeye:latest check --config licenserc.toml
