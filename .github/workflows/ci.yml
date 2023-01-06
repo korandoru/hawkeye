@@ -80,20 +80,20 @@ jobs:
           context: .
           file: ./Dockerfile
           load: true
-          tags: hawkeye:latest,ghcr.io/korandoru/hawkeye:latest
+          tags: ghcr.io/korandoru/hawkeye:latest
       - name: Build hawkeye-native
         uses: docker/build-push-action@v3
         with:
           context: .
           file: ./Dockerfile.native
           load: true
-          tags: hawkeye-native:latest,ghcr.io/korandoru/hawkeye-native:latest
+          tags: ghcr.io/korandoru/hawkeye-native:latest
       - name: Check license headers
-        uses: .
+        uses: ./
       - name: Run sanity checks
         run: |
-          docker run --rm -v $(pwd):/github/workspace hawkeye:latest check --config licenserc.toml
-          docker run --rm -v $(pwd):/github/workspace hawkeye-native:latest check --config licenserc.toml
+          docker run --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye:latest check --config licenserc.toml
+          docker run --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye-native:latest check --config licenserc.toml
 
   required:
     name: Required
