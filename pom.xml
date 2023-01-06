@@ -243,6 +243,7 @@
                     <useReleaseProfile>false</useReleaseProfile>
                     <releaseProfiles>release</releaseProfiles>
                     <goals>deploy</goals>
+                    <signTag>true</signTag>
                     <pushChanges>false</pushChanges>
                     <localCheckout>true</localCheckout>
                     <arguments>-DskipTests</arguments>
