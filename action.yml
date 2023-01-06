@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: HawkEye
+name: HawkEye Action
 description: 'Check, format, or remove license headers.'
 author: 'Korandoru Contributors'
 branding:
