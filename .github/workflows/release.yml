@@ -83,11 +83,12 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ghcr.io/${{ github.repository_owner }}/hawkeye-native
+          flavor: latest=false
           tags: |
             type=semver,pattern={{raw}}
             type=semver,pattern=v{{major}}
             type=sha,format=long
-            type=edge
+            type=raw,value=latest
 
       - uses: docker/build-push-action@v3
         with:
