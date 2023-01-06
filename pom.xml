@@ -244,7 +244,8 @@
                     <releaseProfiles>release</releaseProfiles>
                     <goals>deploy</goals>
                     <signTag>true</signTag>
-                    <tagNameFormat>v${project.version}</tagNameFormat>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
+                    <scmCommentPrefix>ci(release):</scmCommentPrefix>
                     <pushChanges>false</pushChanges>
                     <localCheckout>true</localCheckout>
                     <arguments>-DskipTests</arguments>
