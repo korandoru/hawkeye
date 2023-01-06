@@ -190,6 +190,24 @@
                     <version>${maven-shade-plugin.version}</version>
                 </plugin>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>${maven-release-plugin.version}</version>
+                    <configuration>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <useReleaseProfile>false</useReleaseProfile>
+                        <releaseProfiles>release</releaseProfiles>
+                        <goals>deploy</goals>
+                        <signTag>true</signTag>
+                        <tagNameFormat>v@{project.version}</tagNameFormat>
+                        <scmCommentPrefix>ci(release):</scmCommentPrefix>
+                        <pushChanges>false</pushChanges>
+                        <localCheckout>true</localCheckout>
+                        <arguments>-DskipTests</arguments>
+                        <mavenExecutorId>forked-path</mavenExecutorId>
+                    </configuration>
+                </plugin>
+                <plugin>
                     <groupId>org.sonatype.plugins</groupId>
                     <artifactId>nexus-staging-maven-plugin</artifactId>
                     <version>${nexus-staging-maven-plugin.version}</version>
@@ -235,21 +253,42 @@
             </plugin>
 
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>before-prepare-release</id>
+                        <inherited>false</inherited>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${basedir}/tools/update-action-image-url.py</executable>
+                            <arguments>v${project.version}</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>after-prepare-release</id>
+                        <inherited>false</inherited>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${basedir}/tools/update-action-image-url.py</executable>
+                            <arguments>v${project.version}</arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>${maven-release-plugin.version}</version>
+                <!-- update-action-image-url.py should run only in parent -->
+                <inherited>false</inherited>
                 <configuration>
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
-                    <useReleaseProfile>false</useReleaseProfile>
-                    <releaseProfiles>release</releaseProfiles>
-                    <goals>deploy</goals>
-                    <signTag>true</signTag>
-                    <tagNameFormat>v@{project.version}</tagNameFormat>
-                    <scmCommentPrefix>ci(release):</scmCommentPrefix>
-                    <pushChanges>false</pushChanges>
-                    <localCheckout>true</localCheckout>
-                    <arguments>-DskipTests</arguments>
-                    <mavenExecutorId>forked-path</mavenExecutorId>
+                    <preparationGoals>clean verify exec:exec@before-prepare-release</preparationGoals>
+                    <completionGoals>exec:exec@after-prepare-release</completionGoals>
                 </configuration>
             </plugin>
         </plugins>
