@@ -57,6 +57,8 @@ docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye check 
 
 ### Executable JAR
 
+The executable JAR requires a preinstalled JRE environment (version >= 17).
+
 ```shell
 export HAWKEYE_VERSION=1.0.0 # replace with expected version
 wget https://repo1.maven.org/maven2/io/korandoru/hawkeye/commandline/$HAWKEYE_VERSION/commandline-$HAWKEYE_VERSION-bin.tar.gz
@@ -67,6 +69,8 @@ hawkeye-$HAWKEYE_VERSION/hawkeye check -h
 ## Build
 
 ### Executable JAR
+
+This steps requires JDK 17. Higher versions *may* work.
 
 ```shell
 # Build
@@ -83,6 +87,8 @@ docker build . -t hawkeye
 ```
 
 ### Native Image
+
+This steps requires GraalVM 22.3.0. Higher versions *may* work.
 
 ```shell
 # Build with GraalVM
