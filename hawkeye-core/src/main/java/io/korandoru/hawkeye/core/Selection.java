@@ -30,6 +30,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import lombok.SneakyThrows;
 
@@ -55,7 +56,7 @@ public final class Selection {
     @SneakyThrows
     public String[] getSelectedFiles() {
         if (selectedFiles.isDone()) {
-            return selectedFiles.getNow(new String[0]);
+            return selectedFiles.get(0, TimeUnit.SECONDS);
         }
 
         final Path basePath = basedir.toPath();
@@ -93,7 +94,9 @@ public final class Selection {
                 return FileVisitResult.CONTINUE;
             }
         });
-        return results.toArray(String[]::new);
+
+        this.selectedFiles.complete(results.toArray(String[]::new));
+        return selectedFiles.get(0, TimeUnit.SECONDS);
     }
 
     private static String[] buildExclusions(boolean useDefaultExcludes, String[] excludes, String[] overrides) {
