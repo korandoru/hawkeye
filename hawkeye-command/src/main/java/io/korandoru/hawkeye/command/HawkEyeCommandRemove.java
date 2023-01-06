@@ -53,7 +53,9 @@ public class HawkEyeCommandRemove implements Callable<Integer> {
                 .map(Map.Entry::getKey)
                 .toList();
 
-        log.warn("Processing unknown files: {}", unknownHeaderFiles);
+        if (!unknownHeaderFiles.isEmpty()) {
+            log.warn("Processing unknown files: {}", unknownHeaderFiles);
+        }
         log.info("Removed header for files: {}", removedHeaderFiles);
 
         return removedHeaderFiles.isEmpty() ? 0 : 1;
