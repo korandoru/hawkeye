@@ -25,6 +25,7 @@
     </parent>
 
     <name>HawkEye :: Distribution</name>
+    <description>HawkEye distributions</description>
     <artifactId>distribution</artifactId>
 
     <packaging>pom</packaging>
@@ -32,5 +33,6 @@
     <modules>
         <module>commandline</module>
         <module>native</module>
+        <module>releasehelper</module>
     </modules>
 </project>
