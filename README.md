@@ -8,6 +8,8 @@ You can use HawkEye in GitHub Actions or in your local machine.
 
 ### GitHub Actions
 
+The HawkEye GitHub Action enables users to run license header check by HawkEye with a config file.
+
 First of all, add a `licenserc.toml` file in the root of your project. The simplest config for projects licensed under Apache License 2.0 is as below:
 
 > **Note** The full configurations can be found in [the configuration section](#configurations).
@@ -36,14 +38,30 @@ To check license headers in GitHub Actions, add a step in your GitHub workflow:
 
 ```yaml
 - name: Check License Header
-  uses: korandoru/hawkeye/distribution/action@v1
+  uses: korandoru/hawkeye@v1
 ```
 
 ### Docker
 
+[Native Image](https://www.graalvm.org/22.3/reference-manual/native-image/) powered image (90MB):
+
 ```shell
 docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye-native check --config licenserc.toml
-docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye-native check --config licenserc.toml
+```
+
+[Eclipse Temurin](https://projects.eclipse.org/projects/adoptium.temurin) JRE based image (266MB):
+
+```shell
+docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye check --config licenserc.toml
+```
+
+### Executable JAR
+
+```shell
+export HAWKEYE_VERSION=1.0.0 # replace with expected version
+wget https://repo1.maven.org/maven2/io/korandoru/hawkeye/commandline/$HAWKEYE_VERSION/commandline-$HAWKEYE_VERSION-bin.tar.gz
+tar -xvzf commandline-$HAWKEYE_VERSION-bin.tar.gz
+hawkeye-$HAWKEYE_VERSION/hawkeye check -h
 ```
 
 ## Build
@@ -58,6 +76,12 @@ docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye-native
 ./distribution/commandline/target/hawkeye.jar
 ```
 
+Build Docker image:
+
+```shell
+docker build . -t hawkeye
+```
+
 ### Native Image
 
 ```shell
@@ -68,7 +92,15 @@ docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye-native
 ./distribution/native/target/hawkeye-native
 ```
 
+Build Docker image:
+
+```shell
+docker build . -t hawkeye -f Dockerfile.native
+```
+
 ## Configurations
+
+### Config file
 
 ```toml
 # Base directory for the whole execution.
