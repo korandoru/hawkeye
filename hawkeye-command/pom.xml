@@ -21,7 +21,7 @@
     <parent>
         <groupId>io.korandoru.hawkeye</groupId>
         <artifactId>hawkeye</artifactId>
-        <version>1.0.2-SNAPSHOT</version>
+        <version>1.0.2</version>
     </parent>
 
     <name>HawkEye :: Command</name>
