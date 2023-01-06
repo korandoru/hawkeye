@@ -49,7 +49,7 @@ public enum HeaderType {
     PERCENT3_STYLE("%%%", "%%% ", "%%%EOL", "", null, "%%%.*$", "%%%.*$", false, false, false),
     EXCLAMATION3_STYLE("!!!", "!!! ", "!!!EOL", "", null, "!!!.*$", "!!!.*$", false, false, false),
 
-    DOUBLESLASH_STYLE("//", "// ", "//EOL", "", null, "//.*$", "//.*$", false, false, false),
+    DOUBLESLASH_STYLE("", "// ", "EOL", "", null, "//.*$", "//.*$", false, false, false),
     SINGLE_LINE_DOUBLESLASH_STYLE("", "// ", "", "", null, "//.*$", "//.*$", false, false, false),
     TRIPLESLASH_STYLE("///", "/// ", "///EOL", "", null, "///.*$", "///.*$", false, false, false),
     // non generic

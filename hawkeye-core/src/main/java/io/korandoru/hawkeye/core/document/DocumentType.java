@@ -73,6 +73,7 @@ public enum DocumentType {
     PROPERTIES("properties", HeaderType.SCRIPT_STYLE),
     PYTHON("py", HeaderType.SCRIPT_STYLE),
     RUBY("rb", HeaderType.SCRIPT_STYLE),
+    RUST("rs", HeaderType.DOUBLESLASH_STYLE),
     SCALA("scala", HeaderType.SLASHSTAR_STYLE),
     SCAML("scaml", HeaderType.HAML_STYLE),
     SCSS("scss", HeaderType.JAVADOC_STYLE),
@@ -85,7 +86,7 @@ public enum DocumentType {
     TEX("tex", HeaderType.PERCENT_STYLE),
     TLD("tld", HeaderType.XML_STYLE),
     TOML("toml", HeaderType.SCRIPT_STYLE),
-    TS("ts", HeaderType.TRIPLESLASH_STYLE),
+    TS("ts", HeaderType.SLASHSTAR_STYLE),
     TXT("txt", HeaderType.TEXT),
     UNKNOWN("", HeaderType.UNKNOWN),
     VB("bas", HeaderType.HAML_STYLE),
@@ -112,7 +113,7 @@ public enum DocumentType {
     private final String extension;
     private final HeaderType defaultHeaderType;
 
-    private DocumentType(String extension, HeaderType defaultHeaderType) {
+    DocumentType(String extension, HeaderType defaultHeaderType) {
         this.extension = extension;
         this.defaultHeaderType = defaultHeaderType;
     }
