@@ -17,7 +17,7 @@ WORKDIR /build
 COPY . .
 RUN ./mvnw -B -ntp clean package -DskipTests -Pnative
 
-FROM ubuntu:jammy
+FROM cgr.dev/chainguard/graalvm-native-image-base
 COPY --from=build /build/distribution/native/target/hawkeye-native /bin/
 WORKDIR /github/workspace/
 ENTRYPOINT ["/bin/hawkeye-native"]
