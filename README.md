@@ -142,7 +142,7 @@ useDefaultExcludes = true
 # default: all the files under `baseDir`.
 includes = ["..."]
 
-# Patterns of path to be excluded on execution.
+# Patterns of path to be excluded on execution. A leading bang (!) indicates a invert exclude rule.
 # default: empty; if useDefaultExcludes is true, append default excludes.
 excludes = ["..."]
 

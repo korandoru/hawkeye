@@ -16,7 +16,6 @@
 
 package io.korandoru.hawkeye.core;
 
-import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.SneakyThrows;
 
@@ -50,8 +50,9 @@ public final class Selection {
     public Selection(File basedir, String[] included, String[] excluded, boolean useDefaultExcludes) {
         this.basedir = basedir;
         this.fs = basedir.toPath().getFileSystem();
+        final String[] usedDefaultExcludes = useDefaultExcludes ? Default.EXCLUDES : new String[0];
         this.included = included.length > 0 ? included : Default.INCLUDE;
-        this.excluded = buildExclusions(useDefaultExcludes, excluded, included);
+        this.excluded = Stream.concat(stream(usedDefaultExcludes), stream(excluded)).toArray(String[]::new);
         this.selectedFiles = new CompletableFuture<>();
     }
 
@@ -62,9 +63,24 @@ public final class Selection {
         }
 
         final Path basePath = basedir.toPath();
-        final List<PathMatcher> folderExcludes = findFolderExcludes();
+
+        final List<String> excludesList = new ArrayList<>();
+        final List<String> invertExcludesList = new ArrayList<>();
+        for (String exclude : excluded) {
+            if (exclude.startsWith("!")) {
+                invertExcludesList.add(exclude.substring(1));
+            } else {
+                excludesList.add(exclude);
+            }
+        }
+        final String[] excludes = excludesList.toArray(new String[0]);
+        final String[] invertExcludes = invertExcludesList.toArray(new String[0]);
+
+        final List<PathMatcher> folderExcludes = buildFolderPathMaters(excludes);
+        final List<PathMatcher> folderInvertExcludes = buildFolderPathMaters(invertExcludes);
         final List<PathMatcher> includedPatterns = buildPathMatchers(included);
-        final List<PathMatcher> excludedPatterns = buildPathMatchers(excluded);
+        final List<PathMatcher> excludedPatterns = buildPathMatchers(excludes);
+        final List<PathMatcher> invertExcludedPatterns = buildPathMatchers(invertExcludes);
 
         final List<String> results = new ArrayList<>();
         final Set<FileVisitOption> followLinksOption = EnumSet.of(FileVisitOption.FOLLOW_LINKS);
@@ -73,7 +89,8 @@ public final class Selection {
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)  {
                 final Path path = basePath.relativize(dir);
                 final boolean isExcluded = folderExcludes.stream().anyMatch(m -> m.matches(path));
-                return isExcluded ? FileVisitResult.SKIP_SUBTREE : FileVisitResult.CONTINUE;
+                final boolean isInvertExcluded = folderInvertExcludes.stream().anyMatch(m -> m.matches(path));
+                return (isExcluded && !isInvertExcluded) ? FileVisitResult.SKIP_SUBTREE : FileVisitResult.CONTINUE;
             }
 
             @Override
@@ -81,7 +98,8 @@ public final class Selection {
                 final Path path = basePath.relativize(file);
                 final boolean isIncluded = includedPatterns.stream().anyMatch(m -> m.matches(path));
                 final boolean isExcluded = excludedPatterns.stream().anyMatch(m -> m.matches(path));
-                if (isIncluded && !isExcluded) {
+                final boolean isInvertExcluded = invertExcludedPatterns.stream().anyMatch(m -> m.matches(path));
+                if (isIncluded && !(isExcluded && !isInvertExcluded)) {
                     results.add(path.toString());
                 }
                 return FileVisitResult.CONTINUE;
@@ -102,26 +120,19 @@ public final class Selection {
         return selectedFiles.get(0, TimeUnit.SECONDS);
     }
 
-    private static String[] buildExclusions(boolean useDefaultExcludes, String[] excludes, String[] includes) {
-        final List<String> exclusions = new ArrayList<>();
-        if (useDefaultExcludes) {
-            exclusions.addAll(asList(Default.EXCLUDES));
-        }
-        // remove from the default exclusion list the patterns that have been explicitly included
-        exclusions.removeAll(asList(includes));
-        exclusions.addAll(asList(excludes));
-        return exclusions.toArray(new String[0]);
-    }
-
-    private List<PathMatcher> findFolderExcludes() {
-        final List<String> excludes = new ArrayList<>();
-        for (final String exclude : excluded) {
-            if (exclude.endsWith(File.separator) || exclude.endsWith(File.separator + "**")) {
-                excludes.add(exclude.substring(0, exclude.lastIndexOf(File.separator)));
+    private List<PathMatcher> buildFolderPathMaters(String[] patterns) {
+        final List<String> result = new ArrayList<>();
+        for (final String pattern : patterns) {
+            if (pattern.endsWith("/")) {
+                result.add(pattern.substring(0, pattern.length() - 1));
+                continue;
             }
-            excludes.add(exclude);
+            if (pattern.endsWith("/**")) {
+                result.add(pattern.substring(0, pattern.length() - 3));
+            }
+            result.add(pattern);
         }
-        return buildPathMatchers(excludes.toArray(new String[0]));
+        return buildPathMatchers(result.toArray(new String[0]));
     }
 
     private List<PathMatcher> buildPathMatchers(String[] patterns) {

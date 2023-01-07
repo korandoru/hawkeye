@@ -59,14 +59,14 @@ class SelectionTest {
         final File root = createFakeProject(tempDir);
         final Selection selection = new Selection(
                 root,
-                new String[]{"**" + File.separator + "*.txt"},
-                new String[]{"target" + File.separator + "**", "module" + File.separator + "**" + File.separator + "target" + File.separator + "**"},
+                new String[]{"**/*.txt"},
+                new String[]{"target/**", "module/**/target/**"},
                 false);
         final String[] selectedFiles = selection.getSelectedFiles();
         final List<String> expectedSelectedFiles = List.of(
                 "included.txt",
-                String.join(File.separator, "module", "src", "main", "java", "not-ignored.txt"),
-                String.join(File.separator, "module", "sub", "subsub", "src", "main", "java", "not-ignored.txt"));
+                String.join("/", "module", "src", "main", "java", "not-ignored.txt"),
+                String.join("/", "module", "sub", "subsub", "src", "main", "java", "not-ignored.txt"));
         assertThat(selectedFiles).containsExactlyInAnyOrderElementsOf(expectedSelectedFiles);
     }
 
