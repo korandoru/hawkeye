@@ -19,6 +19,7 @@ package io.korandoru.hawkeye.core;
 import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import java.io.File;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ import lombok.extern.jackson.Jacksonized;
 public class HawkEyeConfig {
 
     @Builder.Default
-    private final String baseDir = ".";
+    private final Path baseDir = Path.of(".");
     private final String inlineHeader;
     private final String headerPath;
     @Builder.Default

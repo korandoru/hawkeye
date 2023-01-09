@@ -42,7 +42,7 @@ public abstract class LicenseProcessor implements Callable<Report> {
     public Report call() {
         final Report report = new Report(action);
 
-        final Path baseDir = Path.of(config.getBaseDir());
+        final Path baseDir = config.getBaseDir();
         final ResourceFinder resourceFinder = new ResourceFinder(baseDir);
         resourceFinder.setPluginClassPath(getClass().getClassLoader());
 
