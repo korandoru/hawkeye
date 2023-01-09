@@ -21,8 +21,7 @@ import picocli.CommandLine;
 
 @CommandLine.Command
 public class CommandOptions {
-
-    @CommandLine.Option(names = "--config", description = "Path to the config file.", required = true)
+    @CommandLine.Option(names = "--config", description = "Path to the config file.", defaultValue = "licenserc.toml")
     public File config;
 
 }
