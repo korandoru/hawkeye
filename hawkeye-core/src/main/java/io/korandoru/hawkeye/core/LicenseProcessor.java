@@ -24,13 +24,16 @@ import io.korandoru.hawkeye.core.header.Header;
 import io.korandoru.hawkeye.core.header.HeaderType;
 import io.korandoru.hawkeye.core.resource.HeaderSource;
 import io.korandoru.hawkeye.core.resource.ResourceFinder;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Year;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 
 @RequiredArgsConstructor
 public abstract class LicenseProcessor implements Callable<Report> {
@@ -38,11 +41,16 @@ public abstract class LicenseProcessor implements Callable<Report> {
     private final HawkEyeConfig config;
     private final Report.Action action;
 
+    @SneakyThrows
     @Override
     public Report call() {
         final Report report = new Report(action);
 
-        final Path baseDir = Path.of(config.getBaseDir());
+        final Path baseDir = config.getBaseDir();
+        if (!Files.isDirectory(baseDir)) {
+            throw new IOException(baseDir + " does not exist or is not a directory.");
+        }
+
         final ResourceFinder resourceFinder = new ResourceFinder(baseDir);
         resourceFinder.setPluginClassPath(getClass().getClassLoader());
 
