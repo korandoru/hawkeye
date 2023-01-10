@@ -1,6 +1,6 @@
 [
   {
-    "name": "io.korandoru.hawkeye.core.HawkEyeConfig",
+    "name": "io.korandoru.hawkeye.core.HawkEyeConfig$HawkEyeConfigBuilder",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
     "allDeclaredMethods": true,
@@ -8,7 +8,7 @@
     "allDeclaredFields": true
   },
   {
-    "name": "io.korandoru.hawkeye.core.HawkEyeConfig$HawkEyeConfigBuilder",
+    "name": "com.fasterxml.jackson.databind.ext.Java7HandlersImpl",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
     "allDeclaredMethods": true,
