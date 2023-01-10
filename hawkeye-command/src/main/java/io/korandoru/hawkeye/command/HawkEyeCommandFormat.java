@@ -16,9 +16,9 @@
 
 package io.korandoru.hawkeye.command;
 
+import io.korandoru.hawkeye.core.HawkEyeConfig;
 import io.korandoru.hawkeye.core.LicenseFormatter;
 import io.korandoru.hawkeye.core.Report;
-import io.korandoru.hawkeye.core.HawkEyeConfig;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
