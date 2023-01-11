@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -36,8 +37,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 @Getter
+@Slf4j
 public final class Selection {
 
     private final File basedir;
@@ -59,8 +62,16 @@ public final class Selection {
     @SneakyThrows
     public String[] getSelectedFiles() {
         if (selectedFiles.isDone()) {
-            return selectedFiles.get(0, TimeUnit.SECONDS);
+            final String[] files = selectedFiles.get(0, TimeUnit.SECONDS);
+            log.debug("Got previous selected files: {} (count: {})", Arrays.toString(files), files.length);
+            return files;
         }
+
+        log.debug(
+                "Selecting files with baseDir: {}, included: {}, excluded: {}",
+                basedir,
+                Arrays.toString(included),
+                Arrays.toString(excluded));
 
         final Path basePath = basedir.toPath();
 
@@ -86,7 +97,7 @@ public final class Selection {
         final Set<FileVisitOption> followLinksOption = EnumSet.of(FileVisitOption.FOLLOW_LINKS);
         Files.walkFileTree(basePath, followLinksOption, Integer.MAX_VALUE, new FileVisitor<>() {
             @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)  {
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
                 final Path path = basePath.relativize(dir);
                 final boolean isExcluded = folderExcludes.stream().anyMatch(m -> m.matches(path));
                 final boolean isInvertExcluded = folderInvertExcludes.stream().anyMatch(m -> m.matches(path));
@@ -117,7 +128,10 @@ public final class Selection {
         });
 
         this.selectedFiles.complete(results.toArray(String[]::new));
-        return selectedFiles.get(0, TimeUnit.SECONDS);
+        final String[] files = selectedFiles.get(0, TimeUnit.SECONDS);
+        log.debug("Selected files: {} (count: {})", Arrays.toString(files), files.length);
+
+        return files;
     }
 
     private List<PathMatcher> buildFolderPathMaters(String[] patterns) {
