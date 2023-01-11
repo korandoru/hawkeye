@@ -94,7 +94,7 @@ public final class Header {
         final String firstLines = FileUtils.readLines(d.getFile(), encoding)
                 .stream()
                 .limit(headerContentLines.length + 10)
-                .collect(Collectors.joining("\n", "", "\n"));
+                .collect(Collectors.joining("\n", "", "\n\n"));
         final String fileHeader = firstLines.replaceAll(" *\r?\n", "\n");
         final String expectedHeader = d.mergeProperties(buildForDefinition(headerDefinition));
         return fileHeader.contains(expectedHeader);
