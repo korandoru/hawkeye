@@ -16,6 +16,7 @@
 
 package io.korandoru.hawkeye.core;
 
+import io.korandoru.hawkeye.core.config.HawkEyeConfig;
 import io.korandoru.hawkeye.core.document.Document;
 import io.korandoru.hawkeye.core.document.DocumentFactory;
 import io.korandoru.hawkeye.core.document.DocumentPropertiesLoader;

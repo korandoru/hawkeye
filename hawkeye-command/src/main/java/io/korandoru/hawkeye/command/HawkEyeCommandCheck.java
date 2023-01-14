@@ -16,9 +16,9 @@
 
 package io.korandoru.hawkeye.command;
 
-import io.korandoru.hawkeye.core.HawkEyeConfig;
 import io.korandoru.hawkeye.core.LicenseChecker;
 import io.korandoru.hawkeye.core.Report;
+import io.korandoru.hawkeye.core.config.HawkEyeConfig;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -39,7 +39,7 @@ public class HawkEyeCommandCheck implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        final HawkEyeConfig config = HawkEyeConfig.of(options.config);
+        final HawkEyeConfig config = HawkEyeConfig.of(options.config).build();
         final LicenseChecker checker = new LicenseChecker(config);
         final Report report = checker.call();
 

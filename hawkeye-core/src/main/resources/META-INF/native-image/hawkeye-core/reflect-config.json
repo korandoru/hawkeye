@@ -1,6 +1,6 @@
 [
   {
-    "name": "io.korandoru.hawkeye.core.HawkEyeConfig$HawkEyeConfigBuilder",
+    "name": "io.korandoru.hawkeye.core.config.ConfigModel$ConfigModelBuilder",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
     "allDeclaredMethods": true,

@@ -16,9 +16,9 @@
 
 package io.korandoru.hawkeye.command;
 
-import io.korandoru.hawkeye.core.HawkEyeConfig;
 import io.korandoru.hawkeye.core.LicenseFormatter;
 import io.korandoru.hawkeye.core.Report;
+import io.korandoru.hawkeye.core.config.HawkEyeConfig;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -39,7 +39,7 @@ public class HawkEyeCommandFormat implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        final HawkEyeConfig config = HawkEyeConfig.of(options.config);
+        final HawkEyeConfig config = HawkEyeConfig.of(options.config).build();
         final LicenseFormatter formatter = new LicenseFormatter(config);
         final Report report = formatter.call();
 
