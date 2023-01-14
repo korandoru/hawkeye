@@ -16,9 +16,10 @@
 
 package io.korandoru.hawkeye.command;
 
-import io.korandoru.hawkeye.core.HawkEyeConfig;
 import io.korandoru.hawkeye.core.LicenseFormatter;
-import io.korandoru.hawkeye.core.Report;
+import io.korandoru.hawkeye.core.config.HawkEyeConfig;
+import io.korandoru.hawkeye.core.report.Report;
+import io.korandoru.hawkeye.core.report.ReportConstants;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -37,26 +38,34 @@ public class HawkEyeCommandFormat implements Callable<Integer> {
     @CommandLine.Mixin
     private CommandOptions options;
 
+    @CommandLine.Option(names = "--dry-run", description = "whether update file in place")
+    public boolean dryRun;
+
     @Override
     public Integer call() {
-        final HawkEyeConfig config = HawkEyeConfig.of(options.config);
+        final HawkEyeConfig config = HawkEyeConfig.of(options.config).dryRun(dryRun).build();
         final LicenseFormatter formatter = new LicenseFormatter(config);
         final Report report = formatter.call();
 
         final List<String> unknownHeaderFiles = report.getResults().entrySet().stream()
-                .filter(e -> Report.Result.UNKNOWN.equals(e.getValue()))
+                .filter(e -> ReportConstants.RESULT_UNKNOWN.equals(e.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
 
-        final List<Map.Entry<String, Report.Result>> updatedHeaderFiles = report.getResults().entrySet().stream()
-                .filter(e -> e.getValue() != Report.Result.UNKNOWN)
-                .filter(e -> e.getValue() != Report.Result.NOOP)
+        final List<Map.Entry<String, String>> updatedHeaderFiles = report.getResults().entrySet().stream()
+                .filter(e -> !ReportConstants.RESULT_UNKNOWN.equals(e.getValue()))
+                .filter(e -> !ReportConstants.RESULT_NOOP.equals(e.getValue()))
                 .toList();
 
         if (!unknownHeaderFiles.isEmpty()) {
             log.warn("Processing unknown files: {}", unknownHeaderFiles);
         }
-        log.info("Updated header for files: {}", updatedHeaderFiles);
+
+        if (updatedHeaderFiles.isEmpty()) {
+            log.info("All files have proper header.");
+        } else if (!dryRun) {
+            log.info("Updated header for files: {}", updatedHeaderFiles);
+        }
 
         return updatedHeaderFiles.isEmpty() ? 0 : 1;
     }

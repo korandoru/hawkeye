@@ -16,29 +16,34 @@
 
 package io.korandoru.hawkeye.core;
 
+import io.korandoru.hawkeye.core.config.HawkEyeConfig;
 import io.korandoru.hawkeye.core.document.Document;
 import io.korandoru.hawkeye.core.header.Header;
+import io.korandoru.hawkeye.core.report.Report;
+import io.korandoru.hawkeye.core.report.ReportConstants;
 
 public class LicenseFormatter extends LicenseProcessor {
 
     public LicenseFormatter(HawkEyeConfig config) {
-        super(config, Report.Action.FORMAT);
+        super(config, ReportConstants.ACTION_FORMAT);
     }
 
     @Override
     protected void onHeaderNotFound(Document document, Header header, Report report) {
         if (document.headerDetected()) {
             document.removeHeader();
-            report.add(document.getFile(), Report.Result.REPLACED);
+            document.updateHeader(header);
+            report.add(document.getFile(), ReportConstants.RESULT_REPLACED);
         } else {
-            report.add(document.getFile(), Report.Result.ADDED);
+            document.updateHeader(header);
+            report.add(document.getFile(), ReportConstants.RESULT_ADDED);
         }
-        document.updateHeader(header);
-        document.save();
+
+        LicenseProcessUtils.save(document, config.isDryRun(), ".formatted");
     }
 
     @Override
     protected void onExistingHeader(Document document, Header header, Report report) {
-        report.add(document.getFile(), Report.Result.NOOP);
+        report.add(document.getFile(), ReportConstants.RESULT_NOOP);
     }
 }

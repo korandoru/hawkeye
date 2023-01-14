@@ -14,14 +14,28 @@
  * limitations under the License.
  */
 
-package io.korandoru.hawkeye.command;
+package io.korandoru.hawkeye.core;
 
+import io.korandoru.hawkeye.core.document.Document;
 import java.io.File;
-import picocli.CommandLine;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
-@CommandLine.Command
-public class CommandOptions {
-    @CommandLine.Option(names = "--config", description = "path to the config file", defaultValue = "licenserc.toml")
-    public File config;
+@Slf4j
+@UtilityClass
+public class LicenseProcessUtils {
+
+    public static void save(Document document, boolean dryRun, String suffix) {
+        if (!dryRun) {
+            document.save();
+            return;
+        }
+
+        final String filename = document.getFile().getName() + suffix;
+        final File copy = new File(document.getFile().getParentFile(), filename);
+        document.saveTo(copy);
+
+        log.info("Result saved to: {}", copy);
+    }
 
 }

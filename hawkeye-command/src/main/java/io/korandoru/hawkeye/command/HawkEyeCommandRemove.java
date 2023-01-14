@@ -16,9 +16,10 @@
 
 package io.korandoru.hawkeye.command;
 
-import io.korandoru.hawkeye.core.HawkEyeConfig;
 import io.korandoru.hawkeye.core.LicenseRemover;
-import io.korandoru.hawkeye.core.Report;
+import io.korandoru.hawkeye.core.config.HawkEyeConfig;
+import io.korandoru.hawkeye.core.report.Report;
+import io.korandoru.hawkeye.core.report.ReportConstants;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -37,26 +38,34 @@ public class HawkEyeCommandRemove implements Callable<Integer> {
     @CommandLine.Mixin
     private CommandOptions options;
 
+    @CommandLine.Option(names = "--dry-run", description = "whether update file in place")
+    public boolean dryRun;
+
     @Override
     public Integer call() {
-        final HawkEyeConfig config = HawkEyeConfig.of(options.config);
+        final HawkEyeConfig config = HawkEyeConfig.of(options.config).dryRun(dryRun).build();
         final LicenseRemover remover = new LicenseRemover(config);
         final Report report = remover.call();
 
         final List<String> unknownHeaderFiles = report.getResults().entrySet().stream()
-                .filter(e -> Report.Result.UNKNOWN.equals(e.getValue()))
+                .filter(e -> ReportConstants.RESULT_UNKNOWN.equals(e.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
 
         final List<String> removedHeaderFiles = report.getResults().entrySet().stream()
-                .filter(e -> Report.Result.REMOVED.equals(e.getValue()))
+                .filter(e -> ReportConstants.RESULT_REMOVED.equals(e.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
 
         if (!unknownHeaderFiles.isEmpty()) {
             log.warn("Processing unknown files: {}", unknownHeaderFiles);
         }
-        log.info("Removed header for files: {}", removedHeaderFiles);
+
+        if (removedHeaderFiles.isEmpty()) {
+            log.info("No file has been removed header.");
+        } else if (!dryRun) {
+            log.info("Removed header for files: {}", removedHeaderFiles);
+        }
 
         return removedHeaderFiles.isEmpty() ? 0 : 1;
     }

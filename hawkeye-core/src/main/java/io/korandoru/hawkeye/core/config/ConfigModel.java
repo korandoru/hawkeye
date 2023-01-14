@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-package io.korandoru.hawkeye.core;
+package io.korandoru.hawkeye.core.config;
 
-import com.fasterxml.jackson.dataformat.toml.TomlMapper;
-import java.io.File;
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import lombok.Builder;
 import lombok.Data;
-import lombok.SneakyThrows;
 import lombok.extern.jackson.Jacksonized;
 
 @Data
 @Builder
 @Jacksonized
-public class HawkEyeConfig {
+class ConfigModel {
 
     @Builder.Default
     private final Path baseDir = Path.of(".");
@@ -52,16 +48,4 @@ public class HawkEyeConfig {
     private final Map<String, String> properties = Collections.emptyMap();
     @Builder.Default
     private final Map<String, String> mapping = Collections.emptyMap();
-
-    @SneakyThrows
-    public static HawkEyeConfig of(URL source) {
-        final TomlMapper mapper = new TomlMapper();
-        return mapper.readValue(source, HawkEyeConfig.class);
-    }
-
-    @SneakyThrows
-    public static HawkEyeConfig of(File source) {
-        final TomlMapper mapper = new TomlMapper();
-        return mapper.readValue(source, HawkEyeConfig.class);
-    }
 }

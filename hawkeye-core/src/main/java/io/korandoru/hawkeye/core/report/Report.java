@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-package io.korandoru.hawkeye.command;
+package io.korandoru.hawkeye.core.report;
 
 import java.io.File;
-import picocli.CommandLine;
+import java.time.Instant;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import lombok.Data;
+import lombok.SneakyThrows;
 
-@CommandLine.Command
-public class CommandOptions {
-    @CommandLine.Option(names = "--config", description = "path to the config file", defaultValue = "licenserc.toml")
-    public File config;
+@Data
+public class Report {
+    private final Instant timestamp = Instant.now();
+    private final String action;
+    private final Map<String, String> results = new ConcurrentHashMap<>();
 
+    @SneakyThrows
+    public void add(File file, String result) {
+        results.put(file.getCanonicalPath(), result);
+    }
 }

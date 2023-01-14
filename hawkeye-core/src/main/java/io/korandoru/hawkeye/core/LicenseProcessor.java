@@ -16,12 +16,15 @@
 
 package io.korandoru.hawkeye.core;
 
+import io.korandoru.hawkeye.core.config.HawkEyeConfig;
 import io.korandoru.hawkeye.core.document.Document;
 import io.korandoru.hawkeye.core.document.DocumentFactory;
 import io.korandoru.hawkeye.core.document.DocumentPropertiesLoader;
 import io.korandoru.hawkeye.core.document.DocumentType;
 import io.korandoru.hawkeye.core.header.Header;
 import io.korandoru.hawkeye.core.header.HeaderType;
+import io.korandoru.hawkeye.core.report.Report;
+import io.korandoru.hawkeye.core.report.ReportConstants;
 import io.korandoru.hawkeye.core.resource.HeaderSource;
 import io.korandoru.hawkeye.core.resource.ResourceFinder;
 import java.io.IOException;
@@ -38,8 +41,8 @@ import lombok.SneakyThrows;
 @RequiredArgsConstructor
 public abstract class LicenseProcessor implements Callable<Report> {
 
-    private final HawkEyeConfig config;
-    private final Report.Action action;
+    protected final HawkEyeConfig config;
+    private final String action;
 
     @SneakyThrows
     @Override
@@ -97,7 +100,7 @@ public abstract class LicenseProcessor implements Callable<Report> {
             }
 
             if (document.isNotSupported()) {
-                report.add(document.getFile(), Report.Result.UNKNOWN);
+                report.add(document.getFile(), ReportConstants.RESULT_UNKNOWN);
             } else if (document.hasHeader(header, config.isStrictCheck())) {
                 onExistingHeader(document, header, report);
             } else {

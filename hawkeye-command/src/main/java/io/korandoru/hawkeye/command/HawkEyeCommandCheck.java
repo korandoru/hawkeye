@@ -16,9 +16,10 @@
 
 package io.korandoru.hawkeye.command;
 
-import io.korandoru.hawkeye.core.HawkEyeConfig;
 import io.korandoru.hawkeye.core.LicenseChecker;
-import io.korandoru.hawkeye.core.Report;
+import io.korandoru.hawkeye.core.config.HawkEyeConfig;
+import io.korandoru.hawkeye.core.report.Report;
+import io.korandoru.hawkeye.core.report.ReportConstants;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -39,24 +40,29 @@ public class HawkEyeCommandCheck implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        final HawkEyeConfig config = HawkEyeConfig.of(options.config);
+        final HawkEyeConfig config = HawkEyeConfig.of(options.config).build();
         final LicenseChecker checker = new LicenseChecker(config);
         final Report report = checker.call();
 
         final List<String> unknownHeaderFiles = report.getResults().entrySet().stream()
-                .filter(e -> Report.Result.UNKNOWN.equals(e.getValue()))
+                .filter(e -> ReportConstants.RESULT_UNKNOWN.equals(e.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
 
         final List<String> missingHeaderFiles = report.getResults().entrySet().stream()
-                .filter(e -> Report.Result.MISSING.equals(e.getValue()))
+                .filter(e -> ReportConstants.RESULT_MISSING.equals(e.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
 
         if (!unknownHeaderFiles.isEmpty()) {
             log.warn("Processing unknown files: {}", unknownHeaderFiles);
         }
-        log.info("Found missing header files: {}", missingHeaderFiles);
+
+        if (missingHeaderFiles.isEmpty()) {
+            log.info("No missing header file has been found.");
+        } else {
+            log.info("Found missing header files: {}", missingHeaderFiles);
+        }
 
         return missingHeaderFiles.isEmpty() ? 0 : 1;
     }
