@@ -19,7 +19,10 @@ package io.korandoru.hawkeye.core;
 import io.korandoru.hawkeye.core.config.HawkEyeConfig;
 import io.korandoru.hawkeye.core.document.Document;
 import io.korandoru.hawkeye.core.header.Header;
+import java.io.File;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class LicenseFormatter extends LicenseProcessor {
 
     public LicenseFormatter(HawkEyeConfig config) {
@@ -28,14 +31,21 @@ public class LicenseFormatter extends LicenseProcessor {
 
     @Override
     protected void onHeaderNotFound(Document document, Header header, Report report) {
+        report.add(document.getFile(), document.headerDetected() ? Report.Result.REPLACED : Report.Result.ADDED);
+
         if (document.headerDetected()) {
             document.removeHeader();
-            report.add(document.getFile(), Report.Result.REPLACED);
-        } else {
-            report.add(document.getFile(), Report.Result.ADDED);
         }
         document.updateHeader(header);
-        document.save();
+
+        if (config.isDryRun()) {
+            String name = document.getFile().getName() + ".formatted";
+            File copy = new File(document.getFile().getParentFile(), name);
+            log.info("Result saved to: {}", copy);
+            document.saveTo(copy);
+        } else {
+            document.save();
+        }
     }
 
     @Override

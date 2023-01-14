@@ -19,7 +19,10 @@ package io.korandoru.hawkeye.core;
 import io.korandoru.hawkeye.core.config.HawkEyeConfig;
 import io.korandoru.hawkeye.core.document.Document;
 import io.korandoru.hawkeye.core.header.Header;
+import java.io.File;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class LicenseRemover extends LicenseProcessor {
 
     public LicenseRemover(HawkEyeConfig config) {
@@ -39,7 +42,14 @@ public class LicenseRemover extends LicenseProcessor {
     private void remove(Document document, Report report) {
         if (document.headerDetected()) {
             document.removeHeader();
-            document.save();
+            if (config.isDryRun()) {
+                String name = document.getFile().getName() + ".removed";
+                File copy = new File(document.getFile().getParentFile(), name);
+                log.info("Result saved to: {}", copy);
+                document.saveTo(copy);
+            } else {
+                document.save();
+            }
             report.add(document.getFile(), Report.Result.REMOVED);
         } else {
             report.add(document.getFile(), Report.Result.NOOP);

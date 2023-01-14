@@ -37,9 +37,12 @@ public class HawkEyeCommandRemove implements Callable<Integer> {
     @CommandLine.Mixin
     private CommandOptions options;
 
+    @CommandLine.Option(names = "--dry-run", description = "whether update file in place")
+    public boolean dryRun;
+
     @Override
     public Integer call() {
-        final HawkEyeConfig config = HawkEyeConfig.of(options.config).build();
+        final HawkEyeConfig config = HawkEyeConfig.of(options.config).dryRun(dryRun).build();
         final LicenseRemover remover = new LicenseRemover(config);
         final Report report = remover.call();
 

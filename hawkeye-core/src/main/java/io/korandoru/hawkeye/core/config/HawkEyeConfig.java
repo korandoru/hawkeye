@@ -33,6 +33,7 @@ import lombok.SneakyThrows;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class HawkEyeConfig {
 
+    /// region options in config models
     private final Path baseDir;
     private final String inlineHeader;
     private final String headerPath;
@@ -44,6 +45,9 @@ public class HawkEyeConfig {
     private final List<String> keywords;
     private final Map<String, String> properties;
     private final Map<String, String> mapping;
+    /// endregion
+
+    private final boolean dryRun;
 
     @SneakyThrows
     public static Builder of(File source) {
@@ -80,7 +84,8 @@ public class HawkEyeConfig {
                     excludes,
                     keywords,
                     properties,
-                    mapping);
+                    mapping,
+                    dryRun);
         }
     }
 

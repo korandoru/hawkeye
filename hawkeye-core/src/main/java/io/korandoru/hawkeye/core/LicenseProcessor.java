@@ -39,7 +39,7 @@ import lombok.SneakyThrows;
 @RequiredArgsConstructor
 public abstract class LicenseProcessor implements Callable<Report> {
 
-    private final HawkEyeConfig config;
+    protected final HawkEyeConfig config;
     private final Report.Action action;
 
     @SneakyThrows
