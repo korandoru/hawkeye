@@ -59,7 +59,12 @@ public class HawkEyeCommandRemove implements Callable<Integer> {
         if (!unknownHeaderFiles.isEmpty()) {
             log.warn("Processing unknown files: {}", unknownHeaderFiles);
         }
-        log.info("Removed header for files: {}", removedHeaderFiles);
+
+        if (removedHeaderFiles.isEmpty()) {
+            log.info("No file has been removed header.");
+        } else if (!dryRun) {
+            log.info("Removed header for files: {}", removedHeaderFiles);
+        }
 
         return removedHeaderFiles.isEmpty() ? 0 : 1;
     }

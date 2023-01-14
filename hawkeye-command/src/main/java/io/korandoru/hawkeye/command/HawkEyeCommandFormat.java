@@ -60,7 +60,12 @@ public class HawkEyeCommandFormat implements Callable<Integer> {
         if (!unknownHeaderFiles.isEmpty()) {
             log.warn("Processing unknown files: {}", unknownHeaderFiles);
         }
-        log.info("Updated header for files: {}", updatedHeaderFiles);
+
+        if (updatedHeaderFiles.isEmpty()) {
+            log.info("All files have proper header.");
+        } else if (!dryRun) {
+            log.info("Updated header for files: {}", updatedHeaderFiles);
+        }
 
         return updatedHeaderFiles.isEmpty() ? 0 : 1;
     }

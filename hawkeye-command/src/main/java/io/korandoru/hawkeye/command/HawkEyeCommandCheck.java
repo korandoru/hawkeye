@@ -56,7 +56,12 @@ public class HawkEyeCommandCheck implements Callable<Integer> {
         if (!unknownHeaderFiles.isEmpty()) {
             log.warn("Processing unknown files: {}", unknownHeaderFiles);
         }
-        log.info("Found missing header files: {}", missingHeaderFiles);
+
+        if (missingHeaderFiles.isEmpty()) {
+            log.info("No missing header file has been found.");
+        } else {
+            log.info("Found missing header files: {}", missingHeaderFiles);
+        }
 
         return missingHeaderFiles.isEmpty() ? 0 : 1;
     }
