@@ -18,7 +18,6 @@ package io.korandoru.hawkeye.core.config;
 
 import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import java.io.File;
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;

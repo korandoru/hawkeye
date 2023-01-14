@@ -17,8 +17,9 @@
 package io.korandoru.hawkeye.command;
 
 import io.korandoru.hawkeye.core.LicenseRemover;
-import io.korandoru.hawkeye.core.Report;
 import io.korandoru.hawkeye.core.config.HawkEyeConfig;
+import io.korandoru.hawkeye.core.report.Report;
+import io.korandoru.hawkeye.core.report.ReportConstants;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -47,12 +48,12 @@ public class HawkEyeCommandRemove implements Callable<Integer> {
         final Report report = remover.call();
 
         final List<String> unknownHeaderFiles = report.getResults().entrySet().stream()
-                .filter(e -> Report.Result.UNKNOWN.equals(e.getValue()))
+                .filter(e -> ReportConstants.RESULT_UNKNOWN.equals(e.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
 
         final List<String> removedHeaderFiles = report.getResults().entrySet().stream()
-                .filter(e -> Report.Result.REMOVED.equals(e.getValue()))
+                .filter(e -> ReportConstants.RESULT_REMOVED.equals(e.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
 

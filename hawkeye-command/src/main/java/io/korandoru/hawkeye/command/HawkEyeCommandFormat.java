@@ -17,9 +17,9 @@
 package io.korandoru.hawkeye.command;
 
 import io.korandoru.hawkeye.core.LicenseFormatter;
-import io.korandoru.hawkeye.core.Report;
 import io.korandoru.hawkeye.core.config.HawkEyeConfig;
-import java.io.File;
+import io.korandoru.hawkeye.core.report.Report;
+import io.korandoru.hawkeye.core.report.ReportConstants;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -48,13 +48,13 @@ public class HawkEyeCommandFormat implements Callable<Integer> {
         final Report report = formatter.call();
 
         final List<String> unknownHeaderFiles = report.getResults().entrySet().stream()
-                .filter(e -> Report.Result.UNKNOWN.equals(e.getValue()))
+                .filter(e -> ReportConstants.RESULT_UNKNOWN.equals(e.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
 
-        final List<Map.Entry<String, Report.Result>> updatedHeaderFiles = report.getResults().entrySet().stream()
-                .filter(e -> e.getValue() != Report.Result.UNKNOWN)
-                .filter(e -> e.getValue() != Report.Result.NOOP)
+        final List<Map.Entry<String, String>> updatedHeaderFiles = report.getResults().entrySet().stream()
+                .filter(e -> !ReportConstants.RESULT_UNKNOWN.equals(e.getValue()))
+                .filter(e -> !ReportConstants.RESULT_NOOP.equals(e.getValue()))
                 .toList();
 
         if (!unknownHeaderFiles.isEmpty()) {

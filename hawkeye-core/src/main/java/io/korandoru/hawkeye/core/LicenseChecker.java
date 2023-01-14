@@ -19,20 +19,22 @@ package io.korandoru.hawkeye.core;
 import io.korandoru.hawkeye.core.config.HawkEyeConfig;
 import io.korandoru.hawkeye.core.document.Document;
 import io.korandoru.hawkeye.core.header.Header;
+import io.korandoru.hawkeye.core.report.Report;
+import io.korandoru.hawkeye.core.report.ReportConstants;
 
 public class LicenseChecker extends LicenseProcessor {
 
     public LicenseChecker(HawkEyeConfig config) {
-        super(config, Report.Action.CHECK);
+        super(config, ReportConstants.ACTION_CHECK);
     }
 
     @Override
     protected void onHeaderNotFound(Document document, Header header, Report report) {
-        report.add(document.getFile(), Report.Result.MISSING);
+        report.add(document.getFile(), ReportConstants.RESULT_MISSING);
     }
 
     @Override
     protected void onExistingHeader(Document document, Header header, Report report) {
-        report.add(document.getFile(), Report.Result.PRESENT);
+        report.add(document.getFile(), ReportConstants.RESULT_PRESENT);
     }
 }

@@ -19,14 +19,15 @@ package io.korandoru.hawkeye.core;
 import io.korandoru.hawkeye.core.config.HawkEyeConfig;
 import io.korandoru.hawkeye.core.document.Document;
 import io.korandoru.hawkeye.core.header.Header;
-import java.io.File;
+import io.korandoru.hawkeye.core.report.Report;
+import io.korandoru.hawkeye.core.report.ReportConstants;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class LicenseRemover extends LicenseProcessor {
 
     public LicenseRemover(HawkEyeConfig config) {
-        super(config, Report.Action.REMOVE);
+        super(config, ReportConstants.ACTION_REMOVE);
     }
 
     @Override
@@ -40,19 +41,14 @@ public class LicenseRemover extends LicenseProcessor {
     }
 
     private void remove(Document document, Report report) {
-        if (document.headerDetected()) {
-            document.removeHeader();
-            if (config.isDryRun()) {
-                String name = document.getFile().getName() + ".removed";
-                File copy = new File(document.getFile().getParentFile(), name);
-                log.info("Result saved to: {}", copy);
-                document.saveTo(copy);
-            } else {
-                document.save();
-            }
-            report.add(document.getFile(), Report.Result.REMOVED);
-        } else {
-            report.add(document.getFile(), Report.Result.NOOP);
+        if (!document.headerDetected()) {
+            report.add(document.getFile(), ReportConstants.RESULT_NOOP);
+            return;
         }
+
+        document.removeHeader();
+        report.add(document.getFile(), ReportConstants.RESULT_REMOVED);
+
+        LicenseProcessUtils.save(document, config.isDryRun(), ".removed");
     }
 }
