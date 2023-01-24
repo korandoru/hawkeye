@@ -43,7 +43,7 @@ public final class Header {
     @VisibleForTesting
     static StringSubstitutor buildEndOfLineSubstitutor(String endOfLine) {
         final Map<String, String> properties = Map.of("eol", endOfLine);
-        return new StringSubstitutor(properties);
+        return new StringSubstitutor(properties, "@<", ">", '@');
     }
 
     public Header(HeaderSource location) {
