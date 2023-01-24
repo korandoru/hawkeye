@@ -20,14 +20,19 @@ import io.korandoru.hawkeye.core.document.Document;
 import io.korandoru.hawkeye.core.resource.HeaderSource;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringSubstitutor;
 import org.jetbrains.annotations.VisibleForTesting;
 
 @Getter
 public final class Header {
+
+    private final StringSubstitutor substitutor;
+    private final String endOfLine;
 
     private final HeaderSource location;
     private final String headerContent;
@@ -35,12 +40,25 @@ public final class Header {
     private final String[] headerContentLines;
     private final int maxLength;
 
+    @VisibleForTesting
+    static StringSubstitutor buildEndOfLineSubstitutor(String endOfLine) {
+        final Map<String, String> properties = Map.of("eol", endOfLine);
+        return new StringSubstitutor(properties);
+    }
+
     public Header(HeaderSource location) {
+        this(location, System.lineSeparator());
+    }
+
+    @VisibleForTesting
+    Header(HeaderSource location, String endOfLine) {
         this.location = location;
         this.headerContent = location.getContent();
         this.headerContentLines = location.getContent().lines().toArray(String[]::new);
         this.headerContentOneLine = StringUtils.deleteWhitespace(this.headerContent);
         this.maxLength = location.getContent().lines().map(String::length).max(Integer::compareTo).orElse(0);
+        this.endOfLine = endOfLine;
+        this.substitutor = buildEndOfLineSubstitutor(endOfLine);
     }
 
     @Override
@@ -49,15 +67,10 @@ public final class Header {
     }
 
     public String buildForDefinition(HeaderDefinition type) {
-        return buildForDefinition(type, System.lineSeparator());
-    }
-
-    @VisibleForTesting
-    String buildForDefinition(HeaderDefinition type, String endOfLine) {
         final StringBuilder newHeader = new StringBuilder();
 
         if (StringUtils.isNotEmpty(type.getFirstLine())) {
-            final String firstLine = type.getFirstLine().replace("EOL", endOfLine);
+            final String firstLine = substitutor.replace(type.getFirstLine());
             newHeader.append(firstLine);
             if (!firstLine.equals(endOfLine)) {
                 newHeader.append(endOfLine);
@@ -65,8 +78,8 @@ public final class Header {
         }
 
         for (String line : this.headerContentLines) {
-            final String before = type.getBeforeEachLine().replace("EOL", endOfLine);
-            final String after = type.getAfterEachLine().replace("EOL", endOfLine);
+            final String before = substitutor.replace(type.getBeforeEachLine());
+            final String after = substitutor.replace(type.getAfterEachLine());
             final String str;
 
             if (type.isPadLines()) {
@@ -80,7 +93,7 @@ public final class Header {
         }
 
         if (StringUtils.isNotEmpty(type.getEndLine())) {
-            String endLine = type.getEndLine().replace("EOL", endOfLine);
+            final String endLine = substitutor.replace(type.getEndLine());
             newHeader.append(endLine);
             if (!endLine.equals(endOfLine)) {
                 newHeader.append(endOfLine);

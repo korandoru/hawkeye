@@ -17,6 +17,7 @@
 package io.korandoru.hawkeye.core.header;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import io.korandoru.hawkeye.core.resource.HeaderSource;
 import io.korandoru.hawkeye.core.resource.UrlHeaderSource;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -27,13 +28,14 @@ class HeaderTest {
 
     @Test
     void testWindowsLineSeparator() throws Exception {
-        final Header header = new Header(new UrlHeaderSource(getClass().getResource("/test-header1.txt")));
+        final HeaderSource source = new UrlHeaderSource(getClass().getResource("/test-header1.txt"));
+        final Header header = new Header(source, "\r\n");
         assertThat(header.getHeaderContentLines()).hasSize(13);
         assertThat(header.getHeaderContentOneLine()).contains("${year}");
         assertThat(header.getLocation().isFromUrl(getClass().getResource("/test-header1.txt"))).isTrue();
 
         final File file = new File("src/test/resources/test-header2.txt");
         final String content = IOUtils.toString(file.toURI(), StandardCharsets.UTF_8);
-        assertThat(header.buildForDefinition(HeaderType.ASP.getDefinition(), "\r\n")).isEqualTo(content);
+        assertThat(header.buildForDefinition(HeaderType.ASP.getDefinition())).isEqualTo(content);
     }
 }
