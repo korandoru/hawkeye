@@ -27,7 +27,7 @@ import lombok.extern.jackson.Jacksonized;
 @Data
 @Builder
 @Jacksonized
-class ConfigModel {
+class LicenseRCModel {
 
     @Builder.Default
     private final Path baseDir = Path.of(".");
