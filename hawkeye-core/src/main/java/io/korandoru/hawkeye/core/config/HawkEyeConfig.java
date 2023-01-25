@@ -50,7 +50,7 @@ public class HawkEyeConfig {
     @SneakyThrows
     public static Builder of(File source) {
         final TomlMapper mapper = new TomlMapper();
-        final LicenseRCModel model = mapper.readValue(source, LicenseRCModel.class);
+        final ConfigFileModel model = mapper.readValue(source, ConfigFileModel.class);
         final Builder builder = new Builder();
         return builder.baseDir(model.getBaseDir())
                 .inlineHeader(model.getInlineHeader())
