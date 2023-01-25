@@ -10,7 +10,7 @@ import lombok.extern.jackson.Jacksonized;
 @Data
 @Builder
 @Jacksonized
-class HeaderStyleModel {
+public class HeaderStyleModel {
     /**
      * The name of this header style.
      */
@@ -84,7 +84,7 @@ class HeaderStyleModel {
      */
     private final String lastLineDetectionPattern;
 
-    HeaderDefinition toHeaderDefinition() {
+    public HeaderDefinition toHeaderDefinition() {
         return HeaderDefinition.builder()
                 .type(name)
                 .firstLine(firstLine)

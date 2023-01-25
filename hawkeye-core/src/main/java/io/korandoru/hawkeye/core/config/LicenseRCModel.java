@@ -34,6 +34,8 @@ class LicenseRCModel {
     private final String inlineHeader;
     private final String headerPath;
     @Builder.Default
+    private final List<String> additionalHeaders = Collections.emptyList();
+    @Builder.Default
     private final boolean strictCheck = true;
     @Builder.Default
     private final boolean useDefaultExcludes = true;
