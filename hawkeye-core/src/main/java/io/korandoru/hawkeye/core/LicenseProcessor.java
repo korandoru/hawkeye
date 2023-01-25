@@ -16,22 +16,27 @@
 
 package io.korandoru.hawkeye.core;
 
+import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import io.korandoru.hawkeye.core.config.HawkEyeConfig;
+import io.korandoru.hawkeye.core.config.HeaderStylesModel;
 import io.korandoru.hawkeye.core.document.Document;
 import io.korandoru.hawkeye.core.document.DocumentFactory;
 import io.korandoru.hawkeye.core.document.DocumentPropertiesLoader;
 import io.korandoru.hawkeye.core.document.DocumentType;
 import io.korandoru.hawkeye.core.header.Header;
+import io.korandoru.hawkeye.core.header.HeaderDefinition;
 import io.korandoru.hawkeye.core.header.HeaderType;
 import io.korandoru.hawkeye.core.report.Report;
 import io.korandoru.hawkeye.core.report.ReportConstants;
 import io.korandoru.hawkeye.core.resource.HeaderSource;
 import io.korandoru.hawkeye.core.resource.ResourceFinder;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Year;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -85,10 +90,20 @@ public abstract class LicenseProcessor implements Callable<Report> {
             return properties;
         };
 
+        final Map<String, HeaderDefinition> definitionMap = new HashMap<>(HeaderType.defaultDefinitions());
+        final TomlMapper mapper = new TomlMapper();
+        for (String additionalHeader: config.getAdditionalHeaders()) {
+            final URL source = resourceFinder.findResource(additionalHeader);
+            final HeaderStylesModel stylesModel = mapper.readValue(source, HeaderStylesModel.class);
+            definitionMap.putAll(stylesModel.toHeaderDefinitions());
+        }
+        // force inclusion of unknown item to manage unknown files
+        definitionMap.put(HeaderType.UNKNOWN.getDefinition().getType(), HeaderType.UNKNOWN.getDefinition());
+
         final DocumentFactory documentFactory = new DocumentFactory(
                 baseDir.toFile(),
                 mapping,
-                HeaderType.defaultDefinitions(),
+                definitionMap,
                 StandardCharsets.UTF_8,
                 config.getKeywords().toArray(new String[0]),
                 propertiesLoader);

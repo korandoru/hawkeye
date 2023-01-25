@@ -32,10 +32,10 @@ import lombok.SneakyThrows;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class HawkEyeConfig {
 
-    /// region options in config models
     private final Path baseDir;
     private final String inlineHeader;
     private final String headerPath;
+    private final List<String> additionalHeaders;
     private final boolean strictCheck;
     private final boolean useDefaultExcludes;
     private final boolean useDefaultMapping;
@@ -44,18 +44,18 @@ public class HawkEyeConfig {
     private final List<String> keywords;
     private final Map<String, String> properties;
     private final Map<String, String> mapping;
-    /// endregion
 
     private final boolean dryRun;
 
     @SneakyThrows
     public static Builder of(File source) {
         final TomlMapper mapper = new TomlMapper();
-        final ConfigModel model = mapper.readValue(source, ConfigModel.class);
+        final ConfigFileModel model = mapper.readValue(source, ConfigFileModel.class);
         final Builder builder = new Builder();
         return builder.baseDir(model.getBaseDir())
                 .inlineHeader(model.getInlineHeader())
                 .headerPath(model.getHeaderPath())
+                .additionalHeaders(model.getAdditionalHeaders())
                 .strictCheck(model.isStrictCheck())
                 .useDefaultExcludes(model.isUseDefaultExcludes())
                 .useDefaultMapping(model.isUseDefaultMapping())
@@ -76,6 +76,7 @@ public class HawkEyeConfig {
                     baseDir,
                     inlineHeader,
                     headerPath,
+                    additionalHeaders,
                     strictCheck,
                     useDefaultExcludes,
                     useDefaultMapping,

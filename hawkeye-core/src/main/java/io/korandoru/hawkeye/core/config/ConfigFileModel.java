@@ -27,12 +27,14 @@ import lombok.extern.jackson.Jacksonized;
 @Data
 @Builder
 @Jacksonized
-class ConfigModel {
+class ConfigFileModel {
 
     @Builder.Default
     private final Path baseDir = Path.of(".");
     private final String inlineHeader;
     private final String headerPath;
+    @Builder.Default
+    private final List<String> additionalHeaders = Collections.emptyList();
     @Builder.Default
     private final boolean strictCheck = true;
     @Builder.Default

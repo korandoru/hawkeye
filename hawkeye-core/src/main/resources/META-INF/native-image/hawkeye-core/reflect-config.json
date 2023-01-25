@@ -1,6 +1,22 @@
 [
   {
-    "name": "io.korandoru.hawkeye.core.config.ConfigModel$ConfigModelBuilder",
+    "name": "io.korandoru.hawkeye.core.config.ConfigFileModel$ConfigFileModelBuilder",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allDeclaredMethods": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "io.korandoru.hawkeye.core.config.HeaderStyleModel$HeaderStyleModelBuilder",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allDeclaredMethods": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "io.korandoru.hawkeye.core.config.HeaderStylesModel",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
     "allDeclaredMethods": true,

@@ -154,17 +154,23 @@ keywords = ["copyright", "..."]
 # default: true
 useDefaultMapping = true
 
+# Paths to additional header style files. The model of user-defined header style can be found below.
+# default: empty
+additionalHeaders = ["..."]
+
 # Mapping rules.
 #
 # The key of a mapping rule is:
 # 1. file extension, like 'ts' or 'java';
 # 2. filename, like 'Dockerfile.native' or 'my_executable_file'.
 #
-# Available header type can be found at `HeaderType`, whose name is case insensitive.
+# Available header style types consist of those defined at `HeaderType` and user-defined ones in `additionalHeaders`.
+# The name of header style type is case insensitive.
+#
 # If useDefaultMapping is true, the mapping rules defined here can override the default one.
 [mapping]
-'extension' = 'HeaderType'
-'filename' = 'AnotherHeaderType'
+'extension' = 'header_style_type'
+'filename' = 'another_header_style_type'
 
 # Properties to fulfill the template.
 # For a defined key-value pair, you can use ${key} in the header template, which will be substituted
@@ -175,6 +181,58 @@ useDefaultMapping = true
 # 2. builtin.thisYear is the current year, like: 2023.
 [properties]
 inceptionYear = 2023
+```
+
+### Header style file
+
+```toml
+# [REQUIRED] The name of this header.
+[my_header_style]
+
+# The first fixed line of this header. Default to none.
+firstLine = "..."
+
+# The last fixed line of this header. Default to none.
+endLine = "..."
+
+# The characters to prepend before each license header lines. Default to empty.
+beforeEachLine = "..."
+
+# The characters to append after each license header lines. Default to empty.
+afterEachLine = "..."
+
+# Only for multi-line comments: specify if blank lines are allowed.
+# Default to false because most of the time, a header has some characters on each line.
+allowBlankLines = false
+
+# Specify whether this is a multi-line comment style or not.
+#
+# A multi-line comment style is equivalent to what we have in Java, where a first line and line will delimit
+# a whole multi-line comment section.
+#
+# A style that is not multi-line is usually repeating in each line the characters before and after each line
+# to delimit a one-line comment.
+#
+# Defaulut to true.
+multipleLines = true
+
+# Only for non multi-line comments: specify if some spaces should be added after the header line and before
+# the `afterEachLine` characters so that all the lines are aligned.
+#
+# Default to false.
+padLines = false
+
+# A regex to define a first line in a file that should be skipped and kept untouched, like the XML declaration
+# at the top of XML documents.
+#
+# Default to none.
+skipLinePattern = "..."
+
+# [REQUIRED] The regex used to detect the start of a header section or line.
+firstLineDetectionPattern = "..."
+
+# [REQUIRED] The regex used to detect the end of a header section or line.
+lastLineDetectionPattern = "..."
 ```
 
 ## License
