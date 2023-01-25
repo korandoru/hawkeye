@@ -91,7 +91,7 @@ class HeaderStyleModel {
     private final String firstLineDetectionPattern;
 
     /**
-     * The regex used to detect the end of a header section or line
+     * The regex used to detect the end of a header section or line.
      */
     private final String lastLineDetectionPattern;
 
