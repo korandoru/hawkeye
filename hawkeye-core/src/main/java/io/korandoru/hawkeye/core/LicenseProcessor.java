@@ -18,7 +18,7 @@ package io.korandoru.hawkeye.core;
 
 import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import io.korandoru.hawkeye.core.config.HawkEyeConfig;
-import io.korandoru.hawkeye.core.config.HeaderStyleModel;
+import io.korandoru.hawkeye.core.config.HeaderStylesModel;
 import io.korandoru.hawkeye.core.document.Document;
 import io.korandoru.hawkeye.core.document.DocumentFactory;
 import io.korandoru.hawkeye.core.document.DocumentPropertiesLoader;
@@ -94,8 +94,8 @@ public abstract class LicenseProcessor implements Callable<Report> {
         final TomlMapper mapper = new TomlMapper();
         for (String additionalHeader: config.getAdditionalHeaders()) {
             final URL source = resourceFinder.findResource(additionalHeader);
-            final HeaderDefinition definition = mapper.readValue(source, HeaderStyleModel.class).toHeaderDefinition();
-            definitionMap.put(definition.getType(), definition);
+            final HeaderStylesModel stylesModel = mapper.readValue(source, HeaderStylesModel.class);
+            definitionMap.putAll(stylesModel.toHeaderDefinitions());
         }
         // force inclusion of unknown item to manage unknown files
         definitionMap.put(HeaderType.UNKNOWN.getDefinition().getType(), HeaderType.UNKNOWN.getDefinition());

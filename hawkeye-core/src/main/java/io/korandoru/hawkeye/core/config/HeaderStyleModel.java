@@ -26,12 +26,7 @@ import lombok.extern.jackson.Jacksonized;
 @Data
 @Builder
 @Jacksonized
-public class HeaderStyleModel {
-    /**
-     * The name of this header style.
-     */
-    private final String name;
-
+class HeaderStyleModel {
     /**
      * The first fixed line of this header. Default to none.
      */
@@ -100,7 +95,7 @@ public class HeaderStyleModel {
      */
     private final String lastLineDetectionPattern;
 
-    public HeaderDefinition toHeaderDefinition() {
+    HeaderDefinition toHeaderDefinition(String name) {
         return HeaderDefinition.builder()
                 .type(name)
                 .firstLine(firstLine)
