@@ -31,6 +31,7 @@ limitations under the License.
 """
 
 excludes = [
+    "**/*.template.txt",
     "**/src/test/**/*.txt",
     "**/src/test/**/*.xml",
 ]
