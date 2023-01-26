@@ -1,3 +1,9 @@
 {
-  "resources":[{"pattern":"*.template.txt"}]
+  "resources": {
+    "includes": [
+      {
+        "pattern": ".*\\.template\\.txt"
+      }
+    ]
+  }
 }
