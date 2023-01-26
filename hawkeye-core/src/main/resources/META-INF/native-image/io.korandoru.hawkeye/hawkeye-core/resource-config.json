@@ -2,7 +2,7 @@
   "resources": {
     "includes": [
       {
-        "pattern": ".*\\.template\\.txt"
+        "pattern": ".*\\.txt"
       }
     ]
   }

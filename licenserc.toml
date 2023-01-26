@@ -14,12 +14,13 @@
 
 baseDir = "."
 
-headerPath = "Apache-2.0.template.txt"
+headerPath = "Apache-2.0.txt"
 
 excludes = [
-    "**/*.template.txt",
     "**/src/test/**/*.txt",
     "**/src/test/**/*.xml",
+
+    "hawkeye-core/src/main/resources/*.txt",
 ]
 
 [mapping]
