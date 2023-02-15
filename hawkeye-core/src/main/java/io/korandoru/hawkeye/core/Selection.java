@@ -150,6 +150,8 @@ public final class Selection {
     }
 
     private List<PathMatcher> buildPathMatchers(String[] patterns) {
+        // Patch doublestar to match zero or more segments;
+        // by default, doublestar in PathMatcher match one or more segments.
         return stream(patterns)
                 .map(p -> p.replaceAll("(?=[^/])\\*\\*/", "{,**/}"))
                 .map(p -> fs.getPathMatcher("glob:" + p))
