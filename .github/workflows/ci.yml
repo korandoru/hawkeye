@@ -55,8 +55,12 @@ jobs:
 
   unittest:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
-    name: Run unit tests
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    name: Run unit tests ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - name: Setup Java
