@@ -26,9 +26,11 @@ jobs:
     name: Release Docker image - ${{matrix.runner}}
     strategy:
       matrix:
-        runner:
-          - buildjet-4vcpu-ubuntu-2204
-          - buildjet-4vcpu-ubuntu-2204-arm
+        include:
+          - runner: buildjet-4vcpu-ubuntu-2204
+            platform: linux/amd64
+          - runner: buildjet-4vcpu-ubuntu-2204-arm
+            platform: linux/arm64
     runs-on: ${{matrix.runner}}
     permissions:
       contents: read
@@ -64,6 +66,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
+          platforms: ${{ matrix.platform }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -72,9 +75,11 @@ jobs:
     name: Release Native Docker image - ${{matrix.runner}}
     strategy:
       matrix:
-        runner:
-          - buildjet-4vcpu-ubuntu-2204
-          - buildjet-4vcpu-ubuntu-2204-arm
+        include:
+          - runner: buildjet-4vcpu-ubuntu-2204
+            platform: linux/amd64
+          - runner: buildjet-4vcpu-ubuntu-2204-arm
+            platform: linux/arm64
     runs-on: ${{matrix.runner}}
     permissions:
       contents: read
@@ -110,6 +115,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile.native
+          platforms: ${{ matrix.platform }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
