@@ -18,7 +18,7 @@ on:
   push:
     tags: ['v1.*']
   pull_request:
-    paths: ['.github/workflow/release.yml']
+    paths: ['.github/workflows/release.yml']
   workflow_dispatch:
 
 jobs:
