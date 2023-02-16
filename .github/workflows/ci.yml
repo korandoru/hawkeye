@@ -101,8 +101,8 @@ jobs:
         uses: ./
       - name: Run sanity checks
         run: |
-          docker run --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye:latest check --config licenserc.toml
-          docker run --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye-native:latest check --config licenserc.toml
+          docker run --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye:latest check
+          docker run --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye-native:latest check
 
   required:
     name: Required
