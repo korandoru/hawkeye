@@ -29,16 +29,17 @@ jobs:
       matrix:
         name: [hawkeye, hawkeye-native]
         file: [Dockerfile, Dockerfile.native]
+        runner: [buildjet-4vcpu-ubuntu-2204, buildjet-4vcpu-ubuntu-2204-arm]
+        platform: [linux/amd64, linux/arm64]
         exclude:
           - name: hawkeye
             file: Dockerfile.native
           - name: hawkeye-native
             file: Dockerfile
-        include:
           - runner: buildjet-4vcpu-ubuntu-2204
-            platform: linux/amd64
-          - runner: buildjet-4vcpu-ubuntu-2204-arm
             platform: linux/arm64
+          - runner: buildjet-4vcpu-ubuntu-2204-arm
+            platform: linux/amd64
     runs-on: ${{matrix.runner}}
     permissions:
       contents: read
