@@ -16,6 +16,7 @@ name: Release
 
 on:
   push:
+    branches: [main]
     tags: ['v1.*']
   pull_request:
     paths: ['.github/workflows/release.yml']
