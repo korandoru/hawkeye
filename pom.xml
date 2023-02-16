@@ -48,10 +48,10 @@
     </developers>
 
     <scm>
-        <connection>scm:git:https://github.com/korandoru/trufflebf.git</connection>
-        <developerConnection>scm:git:https://github.com/korandoru/trufflebf.git</developerConnection>
-        <url>https://github.com/korandoru/trufflebf</url>
-        <tag>v1.4.0</tag>
+        <connection>scm:git:https://github.com/korandoru/hawkeye.git</connection>
+        <developerConnection>scm:git:https://github.com/korandoru/hawkeye.git</developerConnection>
+        <url>https://github.com/korandoru/hawkeye</url>
+        <tag>HEAD</tag>
     </scm>
 
     <modules>
