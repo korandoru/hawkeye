@@ -73,8 +73,13 @@ jobs:
 
   docker:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
-    name: Check Docker image
-    runs-on: ubuntu-latest
+    name: Check Docker image - ${{matrix.runner}}
+    strategy:
+      matrix:
+        runner:
+          - buildjet-4vcpu-ubuntu-2204
+          - buildjet-4vcpu-ubuntu-2204-arm
+    runs-on: ${{matrix.runner}}
     steps:
       - uses: actions/checkout@v3
       - name: Build hawkeye
