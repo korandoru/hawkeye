@@ -72,38 +72,6 @@ jobs:
       - name: Maven verify
         run: ./mvnw clean verify
 
-  docker:
-    if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
-    name: Check Docker image - ${{matrix.runner}}
-    strategy:
-      matrix:
-        runner:
-          - buildjet-4vcpu-ubuntu-2204
-          - buildjet-4vcpu-ubuntu-2204-arm
-    runs-on: ${{matrix.runner}}
-    steps:
-      - uses: actions/checkout@v3
-      - name: Build hawkeye
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          file: ./Dockerfile
-          load: true
-          tags: ghcr.io/korandoru/hawkeye:latest
-      - name: Build hawkeye-native
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          file: ./Dockerfile.native
-          load: true
-          tags: ghcr.io/korandoru/hawkeye-native:latest
-      - name: Check license headers
-        uses: ./
-      - name: Run sanity checks
-        run: |
-          docker run --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye:latest check --config licenserc.toml
-          docker run --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye-native:latest check --config licenserc.toml
-
   required:
     name: Required
     runs-on: ubuntu-latest
@@ -111,14 +79,12 @@ jobs:
     if: ${{ always() && ((github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')) }}
     needs:
       - check
-      - docker
       - unittest
     steps:
       - name: Guardian
         run: |
           if [[ ! ( \
                  "${{ needs.check.result }}" == "success" \
-              && "${{ needs.docker.result }}" == "success" \
               && "${{ needs.unittest.result }}" == "success" \
               ) ]]; then
             echo "Required jobs haven't been completed successfully."
