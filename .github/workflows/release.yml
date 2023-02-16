@@ -16,14 +16,15 @@ name: Release
 
 on:
   push:
-    tags-ignore: ['v1']
+    branches: [main]
+    tags: ['v1.*']
   pull_request:
     branches: [main]
   workflow_dispatch:
 
 jobs:
   release-docker-image:
-    name: Release Docker image - ${{matrix.runner}}
+    name: Release - ${{matrix.name}} - ${{matrix.platform}}
     strategy:
       matrix:
         name: [hawkeye, hawkeye-native]
