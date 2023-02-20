@@ -94,15 +94,10 @@ jobs:
             type=semver,pattern=v{{major}}
             type=sha,format=long
             type=edge,branch=main
-      - uses: docker/build-push-action@v3
-        with:
-          context: .
-          file: ./${{ matrix.file }}
-          pull: true
-          push: true
-          cache-from: |
-            ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:${{ github.run_id }}-amd64
-            ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:${{ github.run_id }}-arm64
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+      - name: Push manifest
+        run: |
+          docker manifest create ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:local \
+            --amend ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:${{ github.run_id }}-amd64
+            --amend ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:${{ github.run_id }}-arm64
+          docker manifest inspect ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:local
+          docker manifest push ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:local
