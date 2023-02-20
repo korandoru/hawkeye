@@ -61,6 +61,7 @@ jobs:
   release-docker-image:
     name: Release Docker images
     runs-on: ubuntu-latest
+    needs: [build-docker-image]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
