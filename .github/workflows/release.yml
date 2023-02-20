@@ -58,7 +58,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}
           flavor: latest=false
-          tags: type=raw,value=${{ github.run_id }}-${{ matrix.arch }}
+          tags: type=sha,suffix=-${{ matrix.arch }}
       - uses: docker/build-push-action@v3
         with:
           context: .
@@ -93,6 +93,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Docker meta
+        id: sha
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}
+          flavor: latest=false
+          tags: type=sha
+      - name: Docker meta
         id: meta
         uses: docker/metadata-action@v4
         with:
@@ -100,15 +107,13 @@ jobs:
           tags: |
             type=semver,pattern={{raw}}
             type=semver,pattern=v{{major}}
-            type=sha,format=long
+            type=sha,format=short
             type=edge,branch=main
       - name: Push manifest
         run: |
           for tag in ${{ steps.meta.outputs.tags }}; do
             echo "Preparing manifest for tag: $tag..."
-            docker manifest create ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:$tag \
-              --amend ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:${{ github.run_id }}-amd64 \
-              --amend ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:${{ github.run_id }}-arm64
-            docker manifest inspect ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:local
-            docker manifest push ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:local
+            docker manifest create $tag --amend ${{ steps.sha.outputs.tags }}-amd64 --amend ${{ steps.sha.outputs.tags }}-arm64
+            docker manifest inspect $tag
+            docker manifest push $tag
           done
