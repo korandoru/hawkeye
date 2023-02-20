@@ -16,7 +16,7 @@ name: Release
 
 on:
   push:
-    branches:
+    branches: ['*']
     tags: ['v1.*']
   pull_request:
   workflow_dispatch:
