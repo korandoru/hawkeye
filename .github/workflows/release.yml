@@ -51,8 +51,11 @@ jobs:
         with:
           context: .
           file: ./${{ matrix.file }}
+          load: true
           tags: ghcr.io/korandoru/${{ matrix.name }}:${{ matrix.arch }}
-          outputs: type=tar,dest=${{ matrix.name }}-${{ matrix.arch }}.tar
+      - name: Save images
+        run: |
+          docker save -o ${{ matrix.name }}-${{ matrix.arch }}.tar ghcr.io/korandoru/${{ matrix.name }}:${{ matrix.arch }}
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.name }}-${{ matrix.arch }}
