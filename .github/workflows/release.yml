@@ -51,7 +51,7 @@ jobs:
         with:
           context: .
           file: ./${{ matrix.file }}
-          cache-to: type=gha
+          cache-to: type=gha,mode=max
 
   release-docker-image:
     name: Release Docker images
