@@ -16,7 +16,7 @@ name: Release
 
 on:
   push:
-    branches: ['main']
+    branches: ['*']
     tags: ['v1.*']
   pull_request:
   workflow_dispatch:
@@ -57,15 +57,28 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}
-          flavor: latest=false
-          tags: type=sha,suffix=-${{ matrix.arch }}
+      - name: Docker outputs
+        id: channel
+        run:
+          if [[ ${{ github.event_name != 'pull_request' }} ]]; then
+            echo "PATTERNS=type=image,push=true,push-by-digest=true" >> $GITHUB_OUTPUT
+          else
+            echo "PATTERNS=type=docker" >> $GITHUB_OUTPUT
+          fi
       - uses: docker/build-push-action@v3
+        id: build
         with:
           context: .
           file: ./${{ matrix.file }}
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}
           labels: ${{ steps.meta.outputs.labels }}
-          push: ${{ github.event_name != 'pull_request' }}
+          outputs: ${{ steps.channel.outputs.PATTERNS }}
+      - name: Save digest
+        run: echo "${{ steps.build.outputs.digest }}" > ${{ matrix.name }}-${{ matrix.arch }}.txt
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.name }}-${{ matrix.arch }}
+          path: ${{ matrix.name }}-${{ matrix.arch }}.txt
 
   release-docker-image:
     name: Release Docker images - ${{matrix.name}}
@@ -92,13 +105,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Docker meta
-        id: sha
-        uses: docker/metadata-action@v4
+      - uses: actions/download-artifact@v3
         with:
-          images: ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}
-          flavor: latest=false
-          tags: type=sha
+         name: ${{ matrix.name }}-amd64
+      - uses: actions/download-artifact@v3
+        with:
+         name: ${{ matrix.name }}-arm64
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v4
@@ -112,9 +124,9 @@ jobs:
             type=edge,branch=main
       - name: Push manifest
         run: |
+          export DIGEST_AMD64=$( cat ${{ matrix.name }}-amd64.txt )
+          export DIGEST_ARM64=$( cat ${{ matrix.name }}-arm64.txt )
           for tag in ${{ steps.meta.outputs.tags }}; do
             echo "Preparing manifest for tag: $tag..."
-            docker manifest create $tag --amend ${{ steps.sha.outputs.tags }}-amd64 --amend ${{ steps.sha.outputs.tags }}-arm64
-            docker manifest inspect $tag
-            docker manifest push $tag
+            docker buildx imagetools create -t $tag $DIGEST_AMD64 $DIGEST_ARM64
           done
