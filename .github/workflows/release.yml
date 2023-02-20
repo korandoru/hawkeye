@@ -52,7 +52,7 @@ jobs:
           context: .
           file: ./${{ matrix.file }}
           tags: ghcr.io/korandoru/${{ matrix.name }}:${{ matrix.arch }}
-          outputs: type=tar,dest=${{ matrix.arch }}.tar
+          outputs: type=tar,dest=${{ matrix.name }}-${{ matrix.arch }}.tar
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.name }}-${{ matrix.arch }}
