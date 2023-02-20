@@ -106,6 +106,8 @@ jobs:
         with:
           context: .
           file: ./${{ matrix.file }}
+          build-args: BUILDKIT_INLINE_CACHE=1
+          pull: true
           cache-from: |
             ghcr.io/korandoru/${{ matrix.name }}:amd64
             ghcr.io/korandoru/${{ matrix.name }}:arm64
