@@ -57,15 +57,31 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}
-          flavor: latest=false
-          tags: type=sha,suffix=-${{ matrix.arch }}
       - uses: docker/build-push-action@v3
+        if: ${{ github.event_name == 'pull_request' }}
         with:
           context: .
           file: ./${{ matrix.file }}
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}
           labels: ${{ steps.meta.outputs.labels }}
-          push: ${{ github.event_name != 'pull_request' }}
+          outputs: type=docker
+      - uses: docker/build-push-action@v3
+        id: build
+        if: ${{ github.event_name != 'pull_request' }}
+        with:
+          context: .
+          file: ./${{ matrix.file }}
+          tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}
+          labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=image,push=true,push-by-digest=true
+      - name: Save digest
+        if: ${{ github.event_name != 'pull_request' }}
+        run: echo "${{ steps.build.outputs.digest }}" > ${{ matrix.name }}-${{ matrix.arch }}.txt
+      - uses: actions/upload-artifact@v3
+        if: ${{ github.event_name != 'pull_request' }}
+        with:
+          name: ${{ matrix.name }}-${{ matrix.arch }}
+          path: ${{ matrix.name }}-${{ matrix.arch }}.txt
 
   release-docker-image:
     name: Release Docker images - ${{matrix.name}}
@@ -92,13 +108,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Docker meta
-        id: sha
-        uses: docker/metadata-action@v4
+      - uses: actions/download-artifact@v3
         with:
-          images: ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}
-          flavor: latest=false
-          tags: type=sha
+         name: ${{ matrix.name }}-amd64
+      - uses: actions/download-artifact@v3
+        with:
+         name: ${{ matrix.name }}-arm64
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v4
@@ -108,13 +123,13 @@ jobs:
           tags: |
             type=semver,pattern={{raw}}
             type=semver,pattern=v{{major}}
-            type=sha,format=short
+            type=sha,format=long
             type=edge,branch=main
       - name: Push manifest
         run: |
+          export DIGEST_AMD64=$( cat ${{ matrix.name }}-amd64.txt )
+          export DIGEST_ARM64=$( cat ${{ matrix.name }}-arm64.txt )
           for tag in ${{ steps.meta.outputs.tags }}; do
             echo "Preparing manifest for tag: $tag..."
-            docker manifest create $tag --amend ${{ steps.sha.outputs.tags }}-amd64 --amend ${{ steps.sha.outputs.tags }}-arm64
-            docker manifest inspect $tag
-            docker manifest push $tag
+            docker buildx imagetools create -t $tag $DIGEST_AMD64 $DIGEST_ARM64
           done
