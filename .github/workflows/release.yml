@@ -111,7 +111,9 @@ jobs:
             type=edge,branch=main
       - name: Push manifest
         run: |
-          for tag in ${{ steps.meta.outputs.tags }}; do
+          export tags="${{ steps.meta.outputs.tags }}"
+          echo $tags
+          for tag in $tags; do
             echo "Preparing manifest for tag: $tag..."
             docker manifest create $tag --amend ${{ steps.sha.outputs.tags }}-amd64 --amend ${{ steps.sha.outputs.tags }}-arm64
             docker manifest inspect $tag
