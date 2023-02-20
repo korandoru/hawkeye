@@ -52,11 +52,19 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}
+          flavor: latest=false
+          tags: type=raw,value=${{ github.run_id }}-${{ matrix.arch }}
       - uses: docker/build-push-action@v3
         with:
           context: .
           file: ./${{ matrix.file }}
-          tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:${{ github.run_id }}-${{ matrix.arch }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           push: ${{ github.event_name != 'pull_request' }}
 
   release-docker-image:
@@ -96,8 +104,11 @@ jobs:
             type=edge,branch=main
       - name: Push manifest
         run: |
-          docker manifest create ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:local \
-            --amend ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:${{ github.run_id }}-amd64
-            --amend ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:${{ github.run_id }}-arm64
-          docker manifest inspect ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:local
-          docker manifest push ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:local
+          for tag in ${{ steps.meta.outputs.tags }}; do
+            echo "Preparing manifest for tag: $tag..."
+            docker manifest create ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:$tag \
+              --amend ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:${{ github.run_id }}-amd64 \
+              --amend ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:${{ github.run_id }}-arm64
+            docker manifest inspect ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:local
+            docker manifest push ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:local
+          done
