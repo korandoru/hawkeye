@@ -104,6 +104,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}
+          sep-tags: ' '
           tags: |
             type=semver,pattern={{raw}}
             type=semver,pattern=v{{major}}
@@ -111,9 +112,7 @@ jobs:
             type=edge,branch=main
       - name: Push manifest
         run: |
-          export tags="${{ steps.meta.outputs.tags }}"
-          echo $tags
-          for tag in $tags; do
+          for tag in ${{ steps.meta.outputs.tags }}; do
             echo "Preparing manifest for tag: $tag..."
             docker manifest create $tag --amend ${{ steps.sha.outputs.tags }}-amd64 --amend ${{ steps.sha.outputs.tags }}-arm64
             docker manifest inspect $tag
