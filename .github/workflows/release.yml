@@ -57,25 +57,28 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}
-      - name: Docker outputs
-        id: channel
-        run:
-          if [[ ${{ github.event_name != 'pull_request' }} ]]; then
-            echo "PATTERNS=type=image,push=true,push-by-digest=true" >> $GITHUB_OUTPUT
-          else
-            echo "PATTERNS=type=docker" >> $GITHUB_OUTPUT
-          fi
       - uses: docker/build-push-action@v3
-        id: build
+        if: ${{ github.event_name == 'pull_request' }}
         with:
           context: .
           file: ./${{ matrix.file }}
           tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}
           labels: ${{ steps.meta.outputs.labels }}
-          outputs: ${{ steps.channel.outputs.PATTERNS }}
+          outputs: type=docker
+      - uses: docker/build-push-action@v3
+        id: build
+        if: ${{ github.event_name != 'pull_request' }}
+        with:
+          context: .
+          file: ./${{ matrix.file }}
+          tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}
+          labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=image,push=true,push-by-digest=true
       - name: Save digest
+        if: ${{ github.event_name != 'pull_request' }}
         run: echo "${{ steps.build.outputs.digest }}" > ${{ matrix.name }}-${{ matrix.arch }}.txt
       - uses: actions/upload-artifact@v3
+        if: ${{ github.event_name != 'pull_request' }}
         with:
           name: ${{ matrix.name }}-${{ matrix.arch }}
           path: ${{ matrix.name }}-${{ matrix.arch }}.txt
