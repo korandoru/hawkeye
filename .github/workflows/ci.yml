@@ -72,9 +72,11 @@ jobs:
         run: ./mvnw clean verify
 
   docker:
+    if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
     strategy:
+      fail-fast: false
       matrix:
-        runner: [ubuntu-latest, buildjet-4vcpu-ubuntu-2204-arm]
+        os: [ubuntu-latest, buildjet-4vcpu-ubuntu-2204-arm]
         name: [hawkeye, hawkeye-native]
         file: [Dockerfile, Dockerfile.native]
         exclude:
@@ -82,8 +84,8 @@ jobs:
             file: Dockerfile.native
           - name: hawkeye-native
             file: Dockerfile
-    runs-on: ${{matrix.runner}}
-    name: Build and test ${{matrix.name}}
+    runs-on: ${{matrix.os}}
+    name: Build and test ${{matrix.name}} ${{matrix.os}}
     steps:
       - uses: actions/checkout@v3
       - name: Build and load
