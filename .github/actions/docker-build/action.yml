@@ -40,7 +40,7 @@ runs:
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        password: ${{ github.token }}
     - name: Docker meta
       id: meta
       uses: docker/metadata-action@v4
@@ -56,7 +56,7 @@ runs:
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,push=true,push-by-digest=true
     - name: Build and load
-      if: ${{ !input.push }}
+      if: ${{ !inputs.push }}
       with:
           context: .
           file: ${{ inputs.file }}
