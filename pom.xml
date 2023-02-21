@@ -21,7 +21,7 @@
 
     <groupId>io.korandoru.hawkeye</groupId>
     <artifactId>hawkeye</artifactId>
-    <version>1.5.4-SNAPSHOT</version>
+    <version>1.5.4</version>
 
     <name>HawkEye</name>
     <description>Simple license header checker and formatter</description>
