@@ -86,7 +86,8 @@ jobs:
     name: Build and test ${{matrix.name}}
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/docker-build
+      - name: Build and load
+        uses: ./.github/actions/docker-build
         with:
           name: ${{matrix.name}}
           file: ${{matrix.file}}
