@@ -17,7 +17,6 @@ name: CI
 on:
   push:
     branches: [main]
-    tags-ignore: ['v1.*']
   pull_request:
     branches: [main]
   merge_group:
@@ -72,18 +71,47 @@ jobs:
       - name: Maven verify
         run: ./mvnw clean verify
 
+  docker:
+    if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, buildjet-4vcpu-ubuntu-2204-arm]
+        name: [hawkeye, hawkeye-native]
+        file: [Dockerfile, Dockerfile.native]
+        exclude:
+          - name: hawkeye
+            file: Dockerfile.native
+          - name: hawkeye-native
+            file: Dockerfile
+    runs-on: ${{matrix.os}}
+    name: Build and test ${{matrix.name}} ${{matrix.os}}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build and load
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ${{matrix.file}}
+          tags: ${{matrix.name}}:ci
+          outputs: type=docker
+      - name: Sanity check
+        run: docker run --rm -v $(pwd):/github/workspace ${{matrix.name}}:ci check
+
   required:
     name: Required
     runs-on: ubuntu-latest
     if: ${{ always() && ((github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')) }}
     needs:
       - check
+      - docker
       - unittest
     steps:
       - name: Guardian
         run: |
           if [[ ! ( \
                  "${{ needs.check.result }}" == "success" \
+              && "${{ needs.docker.result }}" == "success" \
               && "${{ needs.unittest.result }}" == "success" \
               ) ]]; then
             echo "Required jobs haven't been completed successfully."
