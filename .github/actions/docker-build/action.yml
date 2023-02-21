@@ -57,6 +57,7 @@ runs:
           outputs: type=image,push=true,push-by-digest=true
     - name: Build and load
       if: ${{ !inputs.push }}
+      uses: docker/build-push-action@v3
       with:
           context: .
           file: ${{ inputs.file }}
