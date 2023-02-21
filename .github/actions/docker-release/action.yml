@@ -55,5 +55,5 @@ runs:
       run: |
         for tag in ${{ steps.meta.outputs.tags }}; do
           echo "Preparing manifest for tag: $tag..."
-          docker buildx imagetools create -t $tag $${{ inputs.digests }}
+          docker buildx imagetools create -t $tag ${{ inputs.digests }}
         done
