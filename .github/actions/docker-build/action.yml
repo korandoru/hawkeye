@@ -23,8 +23,7 @@ inputs:
     required: true
   push:
     description: Whether to push by digest
-    required: false
-    default: false
+    required: true
 
 outputs:
   digest:

@@ -91,6 +91,7 @@ jobs:
         with:
           name: ${{matrix.name}}
           file: ${{matrix.file}}
+          push: false
       - run: docker run --rm -v $(pwd):/github/workspace ${{matrix.name}}:ci check
 
   required:
