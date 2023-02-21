@@ -16,7 +16,7 @@ name: Release
 
 on:
   push:
-    branches: ['main']
+    branches: ['*']
     tags: ['v1.*']
 
 jobs:
@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build and push by digest
-        uses: ./.github/actions/docker-build
+        uses: ./.github/actions/docker-push-by-digest
         id: build
         with:
           name: hawkeye
@@ -43,7 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build and push by digest
-        uses: ./.github/actions/docker-build
+        uses: ./.github/actions/docker-push-by-digest
         id: build
         with:
           name: hawkeye
@@ -59,7 +59,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build and push by digest
-        uses: ./.github/actions/docker-build
+        uses: ./.github/actions/docker-push-by-digest
         id: build
         with:
           name: hawkeye-native
@@ -75,7 +75,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build and push by digest
-        uses: ./.github/actions/docker-build
+        uses: ./.github/actions/docker-push-by-digest
         id: build
         with:
           name: hawkeye-native

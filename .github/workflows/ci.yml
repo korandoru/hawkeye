@@ -82,16 +82,17 @@ jobs:
             file: Dockerfile.native
           - name: hawkeye-native
             file: Dockerfile
-    runs-on: ${{ matrix.runner }}
+    runs-on: ${{matrix.runner}}
     name: Build and test ${{matrix.name}}
     steps:
       - uses: actions/checkout@v3
       - name: Build and load
-        uses: ./.github/actions/docker-build
+        uses: docker/build-push-action@v3
         with:
-          name: ${{matrix.name}}
+          context: .
           file: ${{matrix.file}}
-          push: false
+          tags: ${{matrix.name}}:ci
+          outputs: type=docker
       - name: Sanity check
         run: docker run --rm -v $(pwd):/github/workspace ${{matrix.name}}:ci check
 
