@@ -53,6 +53,7 @@ runs:
       with:
           context: .
           file: ${{ inputs.file }}
+          tags: ghcr.io/${{ github.repository_owner }}/${{ inputs.name }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,push=true,push-by-digest=true
     - name: Build and load

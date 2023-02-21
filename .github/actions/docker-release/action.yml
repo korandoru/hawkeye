@@ -43,7 +43,6 @@ runs:
           type=sha,format=long
           type=edge,branch=main
     - name: Build and push
-      id: push
       if: ${{ inputs.push }}
       uses: docker/build-push-action@v3
       with:
