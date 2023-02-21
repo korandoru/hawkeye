@@ -1,0 +1,157 @@
+# Copyright 2023 Korandoru Contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Docker
+
+on:
+  push:
+    branches: ['main']
+    tags: ['v1.*']
+  pull_request:
+    branches: ['main']
+
+jobs:
+  build-and-test-hawkeye:
+    strategy:
+      matrix:
+        runner: [ubuntu-latest, buildjet-4vcpu-ubuntu-2204-arm]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/docker-build
+        with:
+          name: hawkeye
+          file: Dockerfile
+      - run: docker run --rm -v $(pwd):/github/workspace ghcr.io/${{ github.repository_owner }}/hawkeye:${{ github.run_id }} check
+
+  build-and-test-hawkeye-native:
+    strategy:
+      matrix:
+        runner: [ubuntu-latest, buildjet-4vcpu-ubuntu-2204-arm]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/docker-build
+        with:
+          name: hawkeye-native
+          file: Dockerfile.native
+      - run: docker run --rm -v $(pwd):/github/workspace ghcr.io/${{ github.repository_owner }}/hawkeye-native:${{ github.run_id }} check
+
+  build-and-push-hawkeye-amd64:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' }}
+    needs: [build-and-test-hawkeye]
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/docker-build
+        id: build
+        with:
+          name: hawkeye
+          file: Dockerfile
+          push: true
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+
+  build-and-push-hawkeye-arm64:
+    runs-on: buildjet-4vcpu-ubuntu-2204-arm
+    if: ${{ github.event_name != 'pull_request' }}
+    needs: [build-and-test-hawkeye]
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/docker-build
+        id: build
+        with:
+          name: hawkeye
+          file: Dockerfile
+          push: true
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+
+  build-and-push-hawkeye-native-amd64:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' }}
+    needs: [build-and-test-hawkeye-native]
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/docker-build
+        id: build
+        with:
+          name: hawkeye-native
+          file: Dockerfile.native
+          push: true
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+
+  build-and-push-hawkeye-native-arm64:
+    runs-on: buildjet-4vcpu-ubuntu-2204-arm
+    if: ${{ github.event_name != 'pull_request' }}
+    needs: [build-and-test-hawkeye-native]
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/docker-build
+        id: build
+        with:
+          name: hawkeye-native
+          file: Dockerfile.native
+          push: true
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+
+  release:
+    name: Release ${{matrix.name}}
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' }}
+    strategy:
+      matrix:
+        name: [hawkeye, hawkeye-native]
+    permissions:
+      packages: write
+    needs:
+      - build-and-push-${{matrix.name}}-amd64
+      - build-and-push-${{matrix.name}}-arm64
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/${{matrix.name}}
+          sep-tags: ' '
+          tags: |
+            type=semver,pattern={{raw}}
+            type=semver,pattern=v{{major}}
+            type=sha,format=long
+            type=edge,branch=main
+      - name: Push manifest
+        run: |
+          export DIGEST_AMD64=${{needs.build-and-push-${{matrix.name}}-amd64.outputs.digest}}
+          export DIGEST_ARM64=${{needs.build-and-push-${{matrix.name}}-arm64.outputs.digest}}
+          for tag in ${{ steps.meta.outputs.tags }}; do
+            echo "Preparing manifest for tag: $tag..."
+            docker buildx imagetools create -t $tag $DIGEST_AMD64 $DIGEST_ARM64
+          done

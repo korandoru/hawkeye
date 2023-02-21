@@ -46,9 +46,6 @@ runs:
       uses: docker/metadata-action@v4
       with:
         images: ghcr.io/${{ github.repository_owner }}/${{ inputs.name }}
-        tags: |
-          type=raw,value=latest
-          type=semver,pattern={{raw}}
     - name: Build and push
       id: push
       if: ${{ inputs.push }}
@@ -63,6 +60,6 @@ runs:
       with:
           context: .
           file: ${{ inputs.file }}
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ghcr.io/${{ github.repository_owner }}/${{ inputs.name }}:${{ github.run_id }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=docker
