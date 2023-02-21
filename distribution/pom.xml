@@ -33,6 +33,5 @@
     <modules>
         <module>commandline</module>
         <module>native</module>
-        <module>releasehelper</module>
     </modules>
 </project>

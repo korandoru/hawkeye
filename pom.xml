@@ -51,7 +51,7 @@
         <connection>scm:git:https://github.com/korandoru/hawkeye.git</connection>
         <developerConnection>scm:git:https://github.com/korandoru/hawkeye.git</developerConnection>
         <url>https://github.com/korandoru/hawkeye</url>
-        <tag>HEAD</tag>
+        <tag>v1.5.4</tag>
     </scm>
 
     <modules>
@@ -249,15 +249,23 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
-                    <executable>${maven.multiModuleProjectDirectory}/tools/update-action-image-url.py</executable>
+                    <executable>${project.basedir}/tools/update-action-image-url.py</executable>
                     <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>
                         <id>before-prepare-release</id>
+                        <inherited>false</inherited>
+                        <configuration>
+                            <skip>false</skip>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>after-prepare-release</id>
+                        <inherited>false</inherited>
+                        <configuration>
+                            <skip>false</skip>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
