@@ -16,7 +16,7 @@ name: Release
 
 on:
   push:
-    branches: ['*']
+    branches: ['main']
     tags: ['v1.*']
 
 jobs:
@@ -32,7 +32,6 @@ jobs:
         with:
           name: hawkeye
           file: Dockerfile
-          push: true
     outputs:
       digest: ${{ steps.build.outputs.digest }}
 
@@ -48,7 +47,6 @@ jobs:
         with:
           name: hawkeye
           file: Dockerfile
-          push: true
     outputs:
       digest: ${{ steps.build.outputs.digest }}
 
@@ -64,7 +62,6 @@ jobs:
         with:
           name: hawkeye-native
           file: Dockerfile.native
-          push: true
     outputs:
       digest: ${{ steps.build.outputs.digest }}
 
@@ -80,7 +77,6 @@ jobs:
         with:
           name: hawkeye-native
           file: Dockerfile.native
-          push: true
     outputs:
       digest: ${{ steps.build.outputs.digest }}
 
