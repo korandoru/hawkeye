@@ -71,18 +71,41 @@ jobs:
       - name: Maven verify
         run: ./mvnw clean verify
 
+  docker:
+    strategy:
+      matrix:
+        runner: [ubuntu-latest, buildjet-4vcpu-ubuntu-2204-arm]
+        name: [hawkeye, hawkeye-native]
+        file: [Dockerfile, Dockerfile.native]
+        exclude:
+          - name: hawkeye
+            file: Dockerfile.native
+          - name: hawkeye-native
+            file: Dockerfile
+    runs-on: ${{ matrix.runner }}
+    name: Build and test ${{matrix.name}}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/docker-build
+        with:
+          name: ${{matrix.name}}
+          file: ${{matrix.file}}
+      - run: docker run --rm -v $(pwd):/github/workspace ${{matrix.name}}:ci check
+
   required:
     name: Required
     runs-on: ubuntu-latest
     if: ${{ always() && ((github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')) }}
     needs:
       - check
+      - docker
       - unittest
     steps:
       - name: Guardian
         run: |
           if [[ ! ( \
                  "${{ needs.check.result }}" == "success" \
+              && "${{ needs.docker.result }}" == "success" \
               && "${{ needs.unittest.result }}" == "success" \
               ) ]]; then
             echo "Required jobs haven't been completed successfully."
