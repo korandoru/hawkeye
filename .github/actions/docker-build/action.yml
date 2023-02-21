@@ -25,10 +25,10 @@ inputs:
     description: Whether to push by digest
     required: true
 
-outputs:
-  digest:
-    description: Docker image digest if pushed
-    value: ${{ steps.push.outputs.digest }}
+# outputs:
+#   digest:
+#     description: Docker image digest if pushed
+#     value: ${{ steps.push.outputs.digest }}
 
 runs:
   using: composite
