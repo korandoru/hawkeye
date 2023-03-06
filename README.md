@@ -56,6 +56,20 @@ tar -xvzf commandline-$HAWKEYE_VERSION-bin.tar.gz
 hawkeye-$HAWKEYE_VERSION/hawkeye check -h
 ```
 
+## Commands
+
+```shell
+# Check license headers.
+hawkeye check
+
+# Format license headers. Auto-fix all files that failed the check.
+hawkeye format
+
+# Remove license headers.
+hawkeye remove
+
+```
+
 ## Build
 
 ### Executable JAR
