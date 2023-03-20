@@ -28,7 +28,7 @@ import picocli.CommandLine;
 
 @CommandLine.Command(
         name = "remove",
-        version = CommandConstants.VERSION,
+        version = CommandConstantsFiltered.VERSION,
         mixinStandardHelpOptions = true,
         description = "Remove license headers."
 )

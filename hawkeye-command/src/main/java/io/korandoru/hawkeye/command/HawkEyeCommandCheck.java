@@ -28,7 +28,7 @@ import picocli.CommandLine;
 
 @CommandLine.Command(
         name = "check",
-        version = CommandConstants.VERSION,
+        version = CommandConstantsFiltered.VERSION,
         mixinStandardHelpOptions = true,
         description = "Check license headers."
 )

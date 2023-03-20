@@ -20,7 +20,7 @@ import picocli.CommandLine;
 
 @CommandLine.Command(
         name = "hawkeye",
-        version = CommandConstants.VERSION,
+        version = CommandConstantsFiltered.VERSION,
         mixinStandardHelpOptions = true,
         subcommands = {
                 HawkEyeCommandCheck.class,

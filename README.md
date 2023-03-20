@@ -4,7 +4,20 @@ Simple license header checker and formatter, in multiple distribution forms.
 
 ## Usage
 
-You can use HawkEye in GitHub Actions or in your local machine.
+You can use HawkEye in GitHub Actions or in your local machine. HawkEye provides three basic commands:
+
+```bash
+# check license headers
+hawkeye check
+
+# format license headers (auto-fix all files that failed the check)
+hawkeye format
+
+# remove license headers
+hawkeye remove
+```
+
+You can use `-h` or `--help` to list out all config options.
 
 ### GitHub Actions
 
@@ -50,24 +63,10 @@ docker run -it --rm -v $(pwd):/github/workspace -u $(id -u):$(id -g) ghcr.io/kor
 The executable JAR requires a preinstalled JRE environment (version >= 17).
 
 ```shell
-export HAWKEYE_VERSION=1.0.0 # replace with expected version
-wget https://repo1.maven.org/maven2/io/korandoru/hawkeye/commandline/$HAWKEYE_VERSION/commandline-$HAWKEYE_VERSION-bin.tar.gz
-tar -xvzf commandline-$HAWKEYE_VERSION-bin.tar.gz
-hawkeye-$HAWKEYE_VERSION/hawkeye check -h
-```
-
-## Commands
-
-```shell
-# Check license headers.
-hawkeye check
-
-# Format license headers. Auto-fix all files that failed the check.
-hawkeye format
-
-# Remove license headers.
-hawkeye remove
-
+# please replace with your expected version
+wget https://repo1.maven.org/maven2/io/korandoru/hawkeye/commandline/1.5.4/commandline-1.5.4-bin.tar.gz
+tar -xvzf commandline-1.5.4-bin.tar.gz
+hawkeye-1.5.4/hawkeye --help
 ```
 
 ## Build
