@@ -28,7 +28,7 @@ import picocli.CommandLine;
 
 @CommandLine.Command(
         name = "format",
-        version = CommandConstants.VERSION,
+        version = CommandConstantsFiltered.VERSION,
         mixinStandardHelpOptions = true,
         description = "Format license headers."
 )

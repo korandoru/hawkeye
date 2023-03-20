@@ -66,24 +66,26 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- lib dependencies -->
-        <assertj.version>3.23.1</assertj.version>
+        <assertj.version>3.24.2</assertj.version>
         <commons-io.version>2.11.0</commons-io.version>
         <commons-text.version>1.10.0</commons-text.version>
         <jackson-dataformat-toml.version>2.14.1</jackson-dataformat-toml.version>
-        <jetbrains-annotations.version>23.1.0</jetbrains-annotations.version>
-        <junit.version>5.9.1</junit.version>
-        <lombok.version>1.18.24</lombok.version>
+        <jetbrains-annotations.version>24.0.1</jetbrains-annotations.version>
+        <junit.version>5.9.2</junit.version>
+        <lombok.version>1.18.26</lombok.version>
         <picocli.version>4.6.3</picocli.version>
         <slf4j.version>1.7.36</slf4j.version>
 
         <!-- bundled maven plugins -->
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
         <maven-release-plugin.version>3.0.0-M6</maven-release-plugin.version>
+        <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
         <maven-scm-plugin.version>2.0.0-M3</maven-scm-plugin.version>
         <maven-shade-plugin.version>3.4.1</maven-shade-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
 
         <!-- community maven plugins -->
+        <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <exec-maven-plugin.version>3.1.0</exec-maven-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
         <spotless-maven-plugin.version>2.24.1</spotless-maven-plugin.version>
@@ -204,6 +206,16 @@
                     <groupId>org.sonatype.plugins</groupId>
                     <artifactId>nexus-staging-maven-plugin</artifactId>
                     <version>${nexus-staging-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${maven-resources-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>${build-helper-maven-plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
