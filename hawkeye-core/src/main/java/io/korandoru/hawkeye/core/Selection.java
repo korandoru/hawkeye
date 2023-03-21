@@ -110,17 +110,17 @@ public final class Selection {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
                 final Path path = basePath.relativize(dir);
-                final boolean isExcluded = excludeList.stream().anyMatch(m -> matchPathPattern(m, path, true));
-                final boolean isInvertExcluded = invertExcludeList.stream().anyMatch(m -> matchPathPattern(m, path, true));
+                final boolean isExcluded = excludeList.stream().anyMatch(m -> matchPathPattern(m, path));
+                final boolean isInvertExcluded = invertExcludeList.stream().anyMatch(m -> matchPathPattern(m, path));
                 return (isExcluded && !isInvertExcluded) ? FileVisitResult.SKIP_SUBTREE : FileVisitResult.CONTINUE;
             }
 
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
                 final Path path = basePath.relativize(file);
-                final boolean isIncluded = includeList.stream().anyMatch(m -> matchPathPattern(m, path, true));
-                final boolean isExcluded = excludeList.stream().anyMatch(m -> matchPathPattern(m, path, true));
-                final boolean isInvertExcluded = invertExcludeList.stream().anyMatch(m -> matchPathPattern(m, path, true));
+                final boolean isIncluded = includeList.stream().anyMatch(m -> matchPathPattern(m, path));
+                final boolean isExcluded = excludeList.stream().anyMatch(m -> matchPathPattern(m, path));
+                final boolean isInvertExcluded = invertExcludeList.stream().anyMatch(m -> matchPathPattern(m, path));
                 if (isIncluded && !(isExcluded && !isInvertExcluded)) {
                     results.add(path.toString());
                 }
@@ -154,12 +154,12 @@ public final class Selection {
         return ret.toArray(new String[0]);
     }
 
-    private static boolean matchPathPattern(String[] patDirs, Path path, boolean isCaseSensitive) {
+    private static boolean matchPathPattern(String[] patDirs, Path path) {
         final String[] strDirs = tokenizePathToString(path.toString(), File.separator);
-        return matchPathPattern(patDirs, strDirs, isCaseSensitive);
+        return matchPathPattern(patDirs, strDirs);
     }
 
-    private static boolean matchPathPattern(String[] patDirs, String[] strDirs, boolean isCaseSensitive) {
+    private static boolean matchPathPattern(String[] patDirs, String[] strDirs) {
         int patIdxStart = 0;
         int patIdxEnd = patDirs.length - 1;
         int strIdxStart = 0;
@@ -171,7 +171,7 @@ public final class Selection {
             if (patDir.equals("**")) {
                 break;
             }
-            if (!match(patDir, strDirs[strIdxStart], isCaseSensitive)) {
+            if (!match(patDir, strDirs[strIdxStart])) {
                 return false;
             }
             patIdxStart++;
@@ -198,7 +198,7 @@ public final class Selection {
             if (patDir.equals("**")) {
                 break;
             }
-            if (!match(patDir, strDirs[strIdxEnd], isCaseSensitive)) {
+            if (!match(patDir, strDirs[strIdxEnd])) {
                 return false;
             }
             patIdxEnd--;
@@ -237,7 +237,7 @@ public final class Selection {
                 for (int j = 0; j < patLength; j++) {
                     String subPat = patDirs[patIdxStart + j + 1];
                     String subStr = strDirs[strIdxStart + i + j];
-                    if (!match(subPat, subStr, isCaseSensitive)) {
+                    if (!match(subPat, subStr)) {
                         continue strLoop;
                     }
                 }
@@ -263,7 +263,8 @@ public final class Selection {
         return true;
     }
 
-    private static boolean match(String pattern, String str, boolean isCaseSensitive) {
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    private static boolean match(String pattern, String str) {
         char[] patArr = pattern.toCharArray();
         char[] strArr = str.toCharArray();
         int patIdxStart = 0;
@@ -287,7 +288,7 @@ public final class Selection {
             }
             for (int i = 0; i <= patIdxEnd; i++) {
                 ch = patArr[i];
-                if (ch != '?' && !equals(ch, strArr[i], isCaseSensitive)) {
+                if (ch != '?' && ch != strArr[i]) {
                     return false; // Character mismatch
                 }
             }
@@ -303,7 +304,7 @@ public final class Selection {
         while ((ch = patArr[patIdxStart]) != '*' && strIdxStart <= strIdxEnd)
         // CHECKSTYLE_ON: InnerAssignment
         {
-            if (ch != '?' && !equals(ch, strArr[strIdxStart], isCaseSensitive)) {
+            if (ch != '?' && ch != strArr[strIdxStart]) {
                 return false; // Character mismatch
             }
             patIdxStart++;
@@ -311,7 +312,7 @@ public final class Selection {
         }
         if (strIdxStart > strIdxEnd) {
             // All characters in the string are used. Check if only '*'s are
-            // left in the pattern. If so, we succeeded. Otherwise failure.
+            // left in the pattern. If so, we succeeded; otherwise, we failed.
             for (int i = patIdxStart; i <= patIdxEnd; i++) {
                 if (patArr[i] != '*') {
                     return false;
@@ -325,7 +326,7 @@ public final class Selection {
         while ((ch = patArr[patIdxEnd]) != '*' && strIdxStart <= strIdxEnd)
         // CHECKSTYLE_ON: InnerAssignment
         {
-            if (ch != '?' && !equals(ch, strArr[strIdxEnd], isCaseSensitive)) {
+            if (ch != '?' && ch != strArr[strIdxEnd]) {
                 return false; // Character mismatch
             }
             patIdxEnd--;
@@ -333,7 +334,7 @@ public final class Selection {
         }
         if (strIdxStart > strIdxEnd) {
             // All characters in the string are used. Check if only '*'s are
-            // left in the pattern. If so, we succeeded. Otherwise failure.
+            // left in the pattern. If so, we succeeded; otherwise, we failed.
             for (int i = patIdxStart; i <= patIdxEnd; i++) {
                 if (patArr[i] != '*') {
                     return false;
@@ -366,7 +367,7 @@ public final class Selection {
             for (int i = 0; i <= strLength - patLength; i++) {
                 for (int j = 0; j < patLength; j++) {
                     ch = patArr[patIdxStart + j + 1];
-                    if (ch != '?' && !equals(ch, strArr[strIdxStart + i + j], isCaseSensitive)) {
+                    if (ch != '?' && ch != strArr[strIdxStart + i + j]) {
                         continue strLoop;
                     }
                 }
@@ -384,24 +385,12 @@ public final class Selection {
         }
 
         // All characters in the string are used. Check if only '*'s are left
-        // in the pattern. If so, we succeeded. Otherwise failure.
+        // in the pattern. If so, we succeeded; otherwise, we failed.
         for (int i = patIdxStart; i <= patIdxEnd; i++) {
             if (patArr[i] != '*') {
                 return false;
             }
         }
         return true;
-    }
-
-    private static boolean equals(char c1, char c2, boolean isCaseSensitive) {
-        if (c1 == c2) {
-            return true;
-        }
-        if (!isCaseSensitive) {
-            // NOTE: Try both upper case and lower case as done by String.equalsIgnoreCase()
-            return Character.toUpperCase(c1) == Character.toUpperCase(c2)
-                    || Character.toLowerCase(c1) == Character.toLowerCase(c2);
-        }
-        return false;
     }
 }
