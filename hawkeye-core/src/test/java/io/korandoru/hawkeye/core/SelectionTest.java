@@ -78,6 +78,15 @@ class SelectionTest {
         assertThat(selectedFiles).containsExactlyInAnyOrderElementsOf(expectedSelectedFiles);
     }
 
+    @Test
+    void testContainsEmoji(@TempDir Path tempDir) throws IOException {
+        final File root = createFakeProject(tempDir, new String[]{"🏡Home.py"});
+        final Selection selection = new Selection(root, new String[]{"**/*.py"}, new String[0], false);
+        final String[] selectedFiles = selection.getSelectedFiles();
+        final List<String> expectedSelectedFiles = List.of("🏡Home.py");
+        assertThat(selectedFiles).containsExactlyInAnyOrderElementsOf(expectedSelectedFiles);
+    }
+
     private File createFakeProject(Path tempDir, String[] paths) throws IOException {
         final File temp = tempDir.toFile();
         for (String path : paths) {
