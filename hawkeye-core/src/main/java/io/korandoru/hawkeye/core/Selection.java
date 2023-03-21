@@ -299,10 +299,7 @@ public final class Selection {
         }
 
         // Process characters before first star
-        // CHECKSTYLE_OFF: InnerAssignment
-        while ((ch = patArr[patIdxStart]) != '*' && strIdxStart <= strIdxEnd)
-        // CHECKSTYLE_ON: InnerAssignment
-        {
+        while ((ch = patArr[patIdxStart]) != '*' && strIdxStart <= strIdxEnd) {
             if (ch != '?' && ch != strArr[strIdxStart]) {
                 return false; // Character mismatch
             }
@@ -321,10 +318,7 @@ public final class Selection {
         }
 
         // Process characters after last star
-        // CHECKSTYLE_OFF: InnerAssignment
-        while ((ch = patArr[patIdxEnd]) != '*' && strIdxStart <= strIdxEnd)
-        // CHECKSTYLE_ON: InnerAssignment
-        {
+        while ((ch = patArr[patIdxEnd]) != '*' && strIdxStart <= strIdxEnd) {
             if (ch != '?' && ch != strArr[strIdxEnd]) {
                 return false; // Character mismatch
             }
