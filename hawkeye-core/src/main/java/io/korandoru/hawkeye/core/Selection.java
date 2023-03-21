@@ -103,7 +103,6 @@ public final class Selection {
             includeList.add(tokenizePathToString(include, "/"));
         }
 
-
         final List<String> results = new ArrayList<>();
         final Set<FileVisitOption> followLinksOption = EnumSet.of(FileVisitOption.FOLLOW_LINKS);
         Files.walkFileTree(basePath, followLinksOption, Integer.MAX_VALUE, new FileVisitor<>() {

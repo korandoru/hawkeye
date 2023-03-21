@@ -26,7 +26,6 @@ import org.apache.commons.io.IOUtils;
  * A wrapper class of {@link File} and its content.
  */
 public class FileContent {
-
     private final File file;
     private final StringBuilder fileContent;
     private int oldPos;
