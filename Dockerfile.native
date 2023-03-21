@@ -13,11 +13,13 @@
 # limitations under the License.
 
 FROM ghcr.io/graalvm/native-image:ol9-java17-22.3.0 as build
+ENV LANG C.utf8
 WORKDIR /build
 COPY . .
 RUN ./mvnw -B -ntp clean package -DskipTests -Pnative
 
-FROM ubuntu:jammy
+FROM cgr.dev/chainguard/graalvm-native
+ENV LANG C.utf8
 COPY --from=build /build/distribution/native/target/hawkeye-native /bin/
 WORKDIR /github/workspace/
 ENTRYPOINT ["/bin/hawkeye-native"]
