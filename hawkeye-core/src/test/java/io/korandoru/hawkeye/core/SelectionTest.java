@@ -56,7 +56,14 @@ class SelectionTest {
 
     @Test
     void testExclusions(@TempDir Path tempDir) throws IOException {
-        final File root = createFakeProject(tempDir);
+        final File root = createFakeProject(tempDir, new String[]{
+                "included.txt",
+                "target/ignored.txt",
+                "module/src/main/java/not-ignored.txt",
+                "module/target/ignored.txt",
+                "module/sub/subsub/src/main/java/not-ignored.txt",
+                "module/sub/subsub/target/foo/not-ignored.txt",
+        });
         final Selection selection = new Selection(
                 root,
                 new String[]{"**/*.txt"},
@@ -70,14 +77,11 @@ class SelectionTest {
         assertThat(selectedFiles).containsExactlyInAnyOrderElementsOf(expectedSelectedFiles);
     }
 
-    private File createFakeProject(Path tempDir) throws IOException {
-        File temp = tempDir.toFile();
-        FileUtils.touch(new File(temp, "included.txt"));
-        FileUtils.touch(new File(temp, "target/ignored.txt"));
-        FileUtils.touch(new File(temp, "module/src/main/java/not-ignored.txt"));
-        FileUtils.touch(new File(temp, "module/target/ignored.txt"));
-        FileUtils.touch(new File(temp, "module/sub/subsub/src/main/java/not-ignored.txt"));
-        FileUtils.touch(new File(temp, "module/sub/subsub/target/foo/not-ignored.txt"));
+    private File createFakeProject(Path tempDir, String[] paths) throws IOException {
+        final File temp = tempDir.toFile();
+        for (String path : paths) {
+            FileUtils.touch(new File(temp, path));
+        }
         return temp;
     }
 }
