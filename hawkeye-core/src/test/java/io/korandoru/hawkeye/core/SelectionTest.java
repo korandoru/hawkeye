@@ -58,6 +58,7 @@ class SelectionTest {
     void testExclusions(@TempDir Path tempDir) throws IOException {
         final File root = createFakeProject(tempDir, new String[]{
                 "included.txt",
+                "ignore/ignore.txt",
                 "target/ignored.txt",
                 "module/src/main/java/not-ignored.txt",
                 "module/target/ignored.txt",
@@ -67,7 +68,7 @@ class SelectionTest {
         final Selection selection = new Selection(
                 root,
                 new String[]{"**/*.txt"},
-                new String[]{"target/**", "module/**/target/**"},
+                new String[]{"ignore", "target/**", "module/**/target/**"},
                 false);
         final String[] selectedFiles = selection.getSelectedFiles();
         final List<String> expectedSelectedFiles = List.of(
