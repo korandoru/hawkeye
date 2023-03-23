@@ -20,7 +20,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.korandoru.hawkeye</groupId>
-        <artifactId>distribution</artifactId>
+        <artifactId>hawkeye</artifactId>
         <version>1.6.1-SNAPSHOT</version>
     </parent>
 
