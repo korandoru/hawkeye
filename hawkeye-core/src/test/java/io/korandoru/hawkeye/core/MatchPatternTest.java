@@ -2,6 +2,7 @@ package io.korandoru.hawkeye.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,7 @@ class MatchPatternTest {
     }
 
     @Test
-    void testMatch() {
+    void testMatchOnePart() {
         final Set<MatchPattern> patterns = Set.of(
                 MatchPattern.of("build", false),
                 MatchPattern.of("build/", false),
@@ -31,27 +32,29 @@ class MatchPatternTest {
                 MatchPattern.of("/build/**", false)
         );
 
-        System.out.println(MatchPattern.of("build", false).match(Path.of("build", "hawkeye"), false));
-        System.exit(1);
         final Path[] paths = new Path[]{
                 Path.of("build"),
                 Path.of("build", "hawkeye"),
                 Path.of("src", "build"),
                 Path.of("src", "build", "hawkeye"),
+                Path.of("irrelevant"),
         };
 
         final Set<String> allMatches = patterns.stream().map(MatchPattern::toString).collect(Collectors.toSet());
         final Set<String> fileMatches = Set.of("build", "**/build", "/build");
         final Set<String> subMatches = Set.of("build", "build/", "build/**", "**/build", "**/build/", "**/build/**");
+        final Set<String> subFileMatches = Set.of("build", "**/build");
 
         checkMatches(paths[0], false, patterns, fileMatches);
         checkMatches(paths[0], true, patterns, allMatches);
         checkMatches(paths[1], false, patterns, allMatches);
-//        checkMatches(paths[1], true, patterns, allMatches);
-//        checkMatches(paths[2], false, patterns, fileMatches);
-//        checkMatches(paths[2], true, patterns, allMatches);
-//        checkMatches(paths[3], false, patterns, fileMatches);
-//        checkMatches(paths[3], true, patterns, allMatches);
+        checkMatches(paths[1], true, patterns, allMatches);
+        checkMatches(paths[2], false, patterns, subFileMatches);
+        checkMatches(paths[2], true, patterns, subMatches);
+        checkMatches(paths[3], false, patterns, subMatches);
+        checkMatches(paths[3], true, patterns, subMatches);
+        checkMatches(paths[4], false, patterns, Collections.emptySet());
+        checkMatches(paths[4], true, patterns, Collections.emptySet());
     }
 
 }

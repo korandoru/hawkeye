@@ -108,27 +108,6 @@ public final class MatchPattern {
             }
         }
 
-        // up to last '**'
-        while (patIdxStart <= patIdxEnd && strIdxStart <= strIdxEnd) {
-            String patDir = patDirs.get(patIdxEnd);
-            if (patDir.equals("**")) {
-                break;
-            }
-            if (!match(patDir, strDirs.get(strIdxEnd))) {
-                return false;
-            }
-            patIdxEnd--;
-            strIdxEnd--;
-        }
-
-        if (strIdxStart > strIdxEnd) {
-            // String is exhausted
-            final List<String> remainPatDirs = patDirs.subList(patIdxStart, patIdxEnd + 1);
-            // MUST consume at least one str part
-            // return true if pattern exhausted or all consecutive asterisks
-            return remainPatDirs.isEmpty() || isConsecutiveAsterisks(remainPatDirs);
-        }
-
         while (patIdxStart != patIdxEnd && strIdxStart <= strIdxEnd) {
             int patIdxTmp = -1;
             for (int i = patIdxStart + 1; i <= patIdxEnd; i++) {
@@ -169,8 +148,23 @@ public final class MatchPattern {
             strIdxStart = foundIdx + patLength;
         }
 
-        final List<String> remainPatDirs = patDirs.subList(patIdxStart, patIdxEnd + 1);
-        return isConsecutiveAsterisks(remainPatDirs);
+        if (strIdxStart > strIdxEnd) {
+            // String is exhausted
+            if (patIdxStart > patIdxEnd) {
+                // pattern is exhausted. Succeed.
+                return true;
+            }
+            final List<String> remainPatDirs = patDirs.subList(patIdxStart, patIdxEnd + 1);
+            if (isConsecutiveAsterisks(remainPatDirs)) {
+                if (dirOnly) {
+                    return isDir;
+                }
+                return true;
+            }
+            return false;
+        }
+
+        return true;
     }
 
     private boolean isConsecutiveAsterisks(List<String> patDirs) {
