@@ -137,9 +137,11 @@ strictCheck = true
 # default: true
 useDefaultExcludes = true
 
-# The supported patterns of includes and excludes follow java.nio.file.PathMatcher,
-# plus that `[^/]**/` can match zero folder.
-# See also https://docs.oracle.com/javase/8/docs/api/java/nio/file/FileSystem.html#getPathMatcher-java.lang.String-
+# The supported patterns of includes and excludes follow gitignore pattern format, plus that:
+# 1. includes does not support `!`
+# 2. backslash does not escape letter
+# 3. whitespaces and `#` are normal since we configure line by line
+# See also https://git-scm.com/docs/gitignore#_pattern_format
 
 # Patterns of path to be included on execution.
 # default: all the files under `baseDir`.
