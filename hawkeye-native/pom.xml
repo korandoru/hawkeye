@@ -25,7 +25,7 @@
     </parent>
 
     <name>HawkEye :: Distribution :: Native Image</name>
-    <artifactId>native</artifactId>
+    <artifactId>hawkeye-native</artifactId>
 
     <properties>
         <native-maven-plugin.version>0.9.19</native-maven-plugin.version>
