@@ -41,7 +41,7 @@ To check license headers in GitHub Actions, add a step in your GitHub workflow:
 
 ```yaml
 - name: Check License Header
-  uses: korandoru/hawkeye@v1
+  uses: korandoru/hawkeye@v2
 ```
 
 ### Docker
@@ -60,14 +60,10 @@ docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye check
 
 ### Executable JAR
 
-The executable JAR requires a preinstalled JRE environment (version >= 17).
+The executable JAR requires a preinstalled JRE environment (version >= 17). You can find the binaries at:
 
-```shell
-# please replace with your expected version
-wget https://repo1.maven.org/maven2/io/korandoru/hawkeye/commandline/1.5.4/commandline-1.5.4-bin.tar.gz
-tar -xvzf commandline-1.5.4-bin.tar.gz
-hawkeye-1.5.4/hawkeye --help
-```
+* https://repo1.maven.org/maven2/io/korandoru/hawkeye/hawkeye-cli/ for 2.x;
+* https://repo1.maven.org/maven2/io/korandoru/hawkeye/commandline/ for 1.x.
 
 ## Build
 
