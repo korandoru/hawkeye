@@ -11,7 +11,9 @@ public final class MatchPattern {
     private final boolean reverse;
     private final boolean dirOnly;
     private final List<String> patternParts;
-    private MatchPattern(List<String> patternParts, boolean dirOnly, boolean reverse) {
+    private final String patternOrigin;
+    private MatchPattern(String patternOrigin, List<String> patternParts, boolean dirOnly, boolean reverse) {
+        this.patternOrigin = patternOrigin;
         this.patternParts = patternParts;
         this.dirOnly = dirOnly;
         this.reverse = reverse;
@@ -36,9 +38,12 @@ public final class MatchPattern {
 
         if (fixedPattern.endsWith("/")) {
             fixedPattern = fixedPattern + "**";
+        } else {
+            fixedPattern = fixedPattern + "/**";
         }
 
         return new MatchPattern(
+                pattern,
                 tokenizePathToString(fixedPattern, "/"),
                 pattern.endsWith("/") || pattern.endsWith("/**"),
                 pattern.startsWith("!"));
@@ -46,7 +51,7 @@ public final class MatchPattern {
 
     @Override
     public String toString() {
-        return String.join("/", patternParts);
+        return patternOrigin;
     }
 
     public boolean match(Path path, boolean isDir) {
@@ -84,8 +89,18 @@ public final class MatchPattern {
 
         if (strIdxStart > strIdxEnd) {
             // String is exhausted
+            if (patIdxStart > patIdxEnd) {
+                // pattern is exhausted. Succeed.
+                return true;
+            }
             final List<String> remainPatDirs = patDirs.subList(patIdxStart, patIdxEnd + 1);
-            return isConsecutiveAsterisks(remainPatDirs, isDir);
+            if (isConsecutiveAsterisks(remainPatDirs)) {
+                if (dirOnly) {
+                    return isDir;
+                }
+                return true;
+            }
+            return false;
         } else {
             if (patIdxStart > patIdxEnd) {
                 // String not exhausted, but pattern is. Failure.
@@ -109,7 +124,9 @@ public final class MatchPattern {
         if (strIdxStart > strIdxEnd) {
             // String is exhausted
             final List<String> remainPatDirs = patDirs.subList(patIdxStart, patIdxEnd + 1);
-            return isConsecutiveAsterisks(remainPatDirs, isDir);
+            // MUST consume at least one str part
+            // return true if pattern exhausted or all consecutive asterisks
+            return remainPatDirs.isEmpty() || isConsecutiveAsterisks(remainPatDirs);
         }
 
         while (patIdxStart != patIdxEnd && strIdxStart <= strIdxEnd) {
@@ -153,30 +170,11 @@ public final class MatchPattern {
         }
 
         final List<String> remainPatDirs = patDirs.subList(patIdxStart, patIdxEnd + 1);
-        if (strIdxStart > strIdxEnd) {
-            // String is exhausted
-            return isConsecutiveAsterisks(remainPatDirs, isDir);
-        } else {
-            return remainPatDirs.stream().allMatch("**"::equals);
-        }
+        return isConsecutiveAsterisks(remainPatDirs);
     }
 
-    private boolean isConsecutiveAsterisks(List<String> patDirs, boolean isDir) {
-        for (String patDir: patDirs) {
-            if (dirOnly) {
-                if (!isDir) {
-                    return false;
-                }
-                if (!"**".equals(patDir)) {
-                    return false;
-                }
-                continue;
-            }
-            if (!"**".equals(patDir)) {
-                return false;
-            }
-        }
-        return true;
+    private boolean isConsecutiveAsterisks(List<String> patDirs) {
+        return !patDirs.isEmpty() && patDirs.stream().allMatch("**"::equals);
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

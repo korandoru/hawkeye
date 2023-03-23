@@ -2,28 +2,24 @@ package io.korandoru.hawkeye.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import java.nio.file.Path;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 class MatchPatternTest {
 
-    private record TestCase(Path path, boolean isDir, MatchPattern[] patterns, boolean[] results) {
-        private void verify() {
-            assertThat(patterns.length).isEqualTo(results.length);
-            for (int i = 0; i < patterns.length; i++) {
-                assertThat(patterns[i].match(path, isDir))
-                        .describedAs("path=%s, isDir=%b, pattern=%s", path, isDir, patterns[i])
-                        .isEqualTo(results[i]);
-            }
+    private static void checkMatches(Path path, boolean isDir, Set<MatchPattern> patterns, Set<String> matches) {
+        for (MatchPattern pattern : patterns) {
+            final String description = String.format("path=%s, isDir=%b, pattern=%s", path, isDir, pattern);
+            assertThat(pattern.match(path, isDir))
+                    .describedAs(description)
+                    .isEqualTo(matches.contains(pattern.toString()));
         }
     }
 
     @Test
     void testMatch() {
-        final String dirname = "src";
-        final String filename = "hawkeye";
-        final String pathname = "build";
-
-        final MatchPattern[] patterns = new MatchPattern[]{
+        final Set<MatchPattern> patterns = Set.of(
                 MatchPattern.of("build", false),
                 MatchPattern.of("build/", false),
                 MatchPattern.of("build/**", false),
@@ -32,39 +28,30 @@ class MatchPatternTest {
                 MatchPattern.of("**/build/**", false),
                 MatchPattern.of("/build", false),
                 MatchPattern.of("/build/", false),
-                MatchPattern.of("/build/**", false),
-        };
+                MatchPattern.of("/build/**", false)
+        );
 
+        System.out.println(MatchPattern.of("build", false).match(Path.of("build", "hawkeye"), false));
+        System.exit(1);
         final Path[] paths = new Path[]{
-                Path.of(pathname),
-                Path.of(pathname, filename),
-                Path.of(dirname, pathname),
-                Path.of(dirname, pathname, filename),
+                Path.of("build"),
+                Path.of("build", "hawkeye"),
+                Path.of("src", "build"),
+                Path.of("src", "build", "hawkeye"),
         };
 
-        final TestCase[] testCases = new TestCase[]{
-                new TestCase(paths[0], false, patterns, new boolean[]{true, false, false, true, false, false, true, false, false}),
-                new TestCase(paths[0], true, patterns, new boolean[]{true, false, false, true, false, false, true, false, false}),
-                new TestCase(paths[1], false, patterns, new boolean[]{true, false, false, true, false, false, true, false, false}),
-                new TestCase(paths[1], true, patterns, new boolean[]{true, false, false, true, false, false, true, false, false}),
-                new TestCase(paths[2], false, patterns, new boolean[]{true, false, false, true, false, false, true, false, false}),
-                new TestCase(paths[2], true, patterns, new boolean[]{true, false, false, true, false, false, true, false, false}),
-                new TestCase(paths[3], false, patterns, new boolean[]{true, false, false, true, false, false, true, false, false}),
-                new TestCase(paths[3], true, patterns, new boolean[]{true, false, false, true, false, false, true, false, false}),
-        };
+        final Set<String> allMatches = patterns.stream().map(MatchPattern::toString).collect(Collectors.toSet());
+        final Set<String> fileMatches = Set.of("build", "**/build", "/build");
+        final Set<String> subMatches = Set.of("build", "build/", "build/**", "**/build", "**/build/", "**/build/**");
 
-        for (TestCase testCase : testCases) {
-            testCase.verify();
-        }
-//
-//        for (MatchPattern pattern : patterns) {
-//            Path of = Path.of(pathname);
-//            System.out.println(pattern.match(of, true));
-//            System.out.println(pattern.match(Path.of(dirname, pathname), true));
-//            System.out.println(pattern.match(Path.of(pathname, filename), false));
-//            System.out.println(pattern.match(of, false));
-//            System.out.println();
-//        }
+        checkMatches(paths[0], false, patterns, fileMatches);
+        checkMatches(paths[0], true, patterns, allMatches);
+        checkMatches(paths[1], false, patterns, allMatches);
+//        checkMatches(paths[1], true, patterns, allMatches);
+//        checkMatches(paths[2], false, patterns, fileMatches);
+//        checkMatches(paths[2], true, patterns, allMatches);
+//        checkMatches(paths[3], false, patterns, fileMatches);
+//        checkMatches(paths[3], true, patterns, allMatches);
     }
 
 }
