@@ -11,8 +11,8 @@ public final class MatchPattern {
     private static final String PATTERN_SEPERATOR = "/";
 
     private final boolean reverse;
-    private final String[] patternParts;
-    private MatchPattern(String[] patternParts, boolean reverse) {
+    private final List<String> patternParts;
+    private MatchPattern(List<String> patternParts, boolean reverse) {
         this.patternParts = patternParts;
         this.reverse = reverse;
     }
@@ -33,46 +33,42 @@ public final class MatchPattern {
         return new MatchPattern(tokenizePathToString(fixedPattern, PATTERN_SEPERATOR), pattern.startsWith("!"));
     }
 
-    public boolean match(Path path) {
-        final String[] strDirs = tokenizePathToString(path.toString(), File.separator);
-        return reverse ^ matchPathPattern(patternParts, strDirs);
+    public boolean match(Path path, boolean isDirectory) {
+        final List<String> strDirs = tokenizePathToString(path.toString(), File.separator);
+        return reverse ^ matchPathPattern(patternParts, strDirs, isDirectory);
     }
 
-    private static String[] tokenizePathToString(String path, String separator) {
-        final List<String> ret = new ArrayList<>();
-        final StringTokenizer st = new StringTokenizer(path, separator);
-        while (st.hasMoreTokens()) {
-            ret.add(st.nextToken());
+    private static List<String> tokenizePathToString(String path, String separator) {
+        final List<String> result = new ArrayList<>();
+        final StringTokenizer tokenizer = new StringTokenizer(path, separator);
+        while (tokenizer.hasMoreTokens()) {
+            result.add(tokenizer.nextToken());
         }
-        return ret.toArray(new String[0]);
+        return result;
     }
 
-    private static boolean matchPathPattern(String[] patDirs, String[] strDirs) {
+    private static boolean matchPathPattern(List<String> patDirs, List<String> strDirs, boolean isDir) {
         int patIdxStart = 0;
-        int patIdxEnd = patDirs.length - 1;
+        int patIdxEnd = patDirs.size() - 1;
         int strIdxStart = 0;
-        int strIdxEnd = strDirs.length - 1;
+        int strIdxEnd = strDirs.size() - 1;
 
         // up to first '**'
         while (patIdxStart <= patIdxEnd && strIdxStart <= strIdxEnd) {
-            String patDir = patDirs[patIdxStart];
+            String patDir = patDirs.get(patIdxStart);
             if (patDir.equals("**")) {
                 break;
             }
-            if (!match(patDir, strDirs[strIdxStart])) {
+            if (!match(patDir, strDirs.get(strIdxStart))) {
                 return false;
             }
             patIdxStart++;
             strIdxStart++;
         }
+
         if (strIdxStart > strIdxEnd) {
             // String is exhausted
-            for (int i = patIdxStart; i <= patIdxEnd; i++) {
-                if (!patDirs[i].equals("**")) {
-                    return false;
-                }
-            }
-            return true;
+            return isConsecutiveAsterisks(patDirs.subList(patIdxStart, patIdxEnd + 1), isDir);
         } else {
             if (patIdxStart > patIdxEnd) {
                 // String not exhausted, but pattern is. Failure.
@@ -82,30 +78,26 @@ public final class MatchPattern {
 
         // up to last '**'
         while (patIdxStart <= patIdxEnd && strIdxStart <= strIdxEnd) {
-            String patDir = patDirs[patIdxEnd];
+            String patDir = patDirs.get(patIdxEnd);
             if (patDir.equals("**")) {
                 break;
             }
-            if (!match(patDir, strDirs[strIdxEnd])) {
+            if (!match(patDir, strDirs.get(strIdxEnd))) {
                 return false;
             }
             patIdxEnd--;
             strIdxEnd--;
         }
+
         if (strIdxStart > strIdxEnd) {
             // String is exhausted
-            for (int i = patIdxStart; i <= patIdxEnd; i++) {
-                if (!patDirs[i].equals("**")) {
-                    return false;
-                }
-            }
-            return true;
+            return isConsecutiveAsterisks(patDirs.subList(patIdxStart, patIdxEnd + 1), isDir);
         }
 
         while (patIdxStart != patIdxEnd && strIdxStart <= strIdxEnd) {
             int patIdxTmp = -1;
             for (int i = patIdxStart + 1; i <= patIdxEnd; i++) {
-                if (patDirs[i].equals("**")) {
+                if (patDirs.get(i).equals("**")) {
                     patIdxTmp = i;
                     break;
                 }
@@ -123,8 +115,8 @@ public final class MatchPattern {
             strLoop:
             for (int i = 0; i <= strLength - patLength; i++) {
                 for (int j = 0; j < patLength; j++) {
-                    String subPat = patDirs[patIdxStart + j + 1];
-                    String subStr = strDirs[strIdxStart + i + j];
+                    String subPat = patDirs.get(patIdxStart + j + 1);
+                    String subStr = strDirs.get(strIdxStart + i + j);
                     if (!match(subPat, subStr)) {
                         continue strLoop;
                     }
@@ -142,13 +134,11 @@ public final class MatchPattern {
             strIdxStart = foundIdx + patLength;
         }
 
-        for (int i = patIdxStart; i <= patIdxEnd; i++) {
-            if (!patDirs[i].equals("**")) {
-                return false;
-            }
-        }
+        return isConsecutiveAsterisks(patDirs.subList(patIdxStart, patIdxEnd + 1), isDir);
+    }
 
-        return true;
+    private static boolean isConsecutiveAsterisks(List<String> patDirs, boolean isDir) {
+        return patDirs.stream().allMatch(pat -> isDir && pat.equals("**"));
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

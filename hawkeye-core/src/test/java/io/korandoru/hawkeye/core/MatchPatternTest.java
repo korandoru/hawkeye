@@ -15,20 +15,22 @@ class MatchPatternTest {
                 MatchPattern.of("build", false),
                 MatchPattern.of("build/", false),
                 MatchPattern.of("build/**", false),
+                MatchPattern.of("**/build", false),
+                MatchPattern.of("**/build/", false),
+                MatchPattern.of("**/build/**", false),
         };
 
         final File buildDir = new File(tempDir0.toFile(), "build");
         final File hawkeyeFile = new File(tempDir0.toFile(), "build/hawkeye");
-        FileUtils.forceMkdir(buildDir);
         FileUtils.touch(hawkeyeFile);
 
         final File buildFile = new File(tempDir1.toFile(), "build");
         FileUtils.touch(buildFile);
 
         for (MatchPattern pattern: patterns) {
-            System.out.println(pattern.match(tempDir0.relativize(buildDir.toPath())));
-            System.out.println(pattern.match(tempDir0.relativize(hawkeyeFile.toPath())));
-            System.out.println(pattern.match(tempDir1.relativize(buildFile.toPath())));
+            System.out.println(pattern.match(tempDir0.relativize(buildDir.toPath()), true));
+            System.out.println(pattern.match(tempDir0.relativize(hawkeyeFile.toPath()), false));
+            System.out.println(pattern.match(tempDir1.relativize(buildFile.toPath()), false));
             System.out.println();
         }
     }
