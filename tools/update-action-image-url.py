@@ -23,7 +23,7 @@ from pathlib import Path
 
 if __name__ == '__main__':
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-    parser.add_argument('version', default='latest', nargs='?', help='version of hawkeye-native image')
+    parser.add_argument('version', required=True, help='version of hawkeye-native image')
     args = parser.parse_args()
 
     pattern = re.compile(r'docker://ghcr.io/korandoru/hawkeye-native.*')
