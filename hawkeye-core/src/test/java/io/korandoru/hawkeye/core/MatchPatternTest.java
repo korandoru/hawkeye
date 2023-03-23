@@ -12,7 +12,7 @@ class MatchPatternTest {
     private static void checkMatches(Path path, boolean isDir, Set<MatchPattern> patterns, Set<String> matches) {
         for (MatchPattern pattern : patterns) {
             final String description = String.format("path=%s, isDir=%b, pattern=%s", path, isDir, pattern);
-            assertThat(pattern.match(path, isDir))
+            assertThat(pattern.match(path, isDir) ^ pattern.isReverse())
                     .describedAs(description)
                     .isEqualTo(matches.contains(pattern.toString()));
         }

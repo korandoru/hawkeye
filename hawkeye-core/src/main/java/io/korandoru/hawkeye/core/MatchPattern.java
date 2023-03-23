@@ -52,7 +52,11 @@ public final class MatchPattern {
 
     public boolean match(Path path, boolean isDir) {
         final List<String> strDirs = tokenizePathToString(path.toString(), File.separator);
-        return reverse ^ matchPathPattern(patternParts, strDirs, isDir);
+        return matchPathPattern(patternParts, strDirs, isDir);
+    }
+
+    public boolean isReverse() {
+        return reverse;
     }
 
     private static List<String> tokenizePathToString(String path, String separator) {
