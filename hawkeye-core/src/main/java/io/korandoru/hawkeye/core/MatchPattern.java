@@ -88,24 +88,7 @@ public final class MatchPattern {
         }
 
         if (strIdxStart > strIdxEnd) {
-            // String is exhausted
-            if (patIdxStart > patIdxEnd) {
-                // pattern is exhausted. Succeed.
-                return true;
-            }
-            final List<String> remainPatDirs = patDirs.subList(patIdxStart, patIdxEnd + 1);
-            if (isConsecutiveAsterisks(remainPatDirs)) {
-                if (dirOnly) {
-                    return isDir;
-                }
-                return true;
-            }
-            return false;
-        } else {
-            if (patIdxStart > patIdxEnd) {
-                // String not exhausted, but pattern is. Failure.
-                return false;
-            }
+            return checkPatternOnStringExhausted(patDirs.subList(patIdxStart, patIdxEnd + 1), isDir);
         }
 
         while (patIdxStart != patIdxEnd && strIdxStart <= strIdxEnd) {
@@ -149,22 +132,27 @@ public final class MatchPattern {
         }
 
         if (strIdxStart > strIdxEnd) {
-            // String is exhausted
-            if (patIdxStart > patIdxEnd) {
-                // pattern is exhausted. Succeed.
-                return true;
-            }
-            final List<String> remainPatDirs = patDirs.subList(patIdxStart, patIdxEnd + 1);
-            if (isConsecutiveAsterisks(remainPatDirs)) {
-                if (dirOnly) {
-                    return isDir;
-                }
-                return true;
-            }
-            return false;
+            return checkPatternOnStringExhausted(patDirs.subList(patIdxStart, patIdxEnd + 1), isDir);
         }
 
+        // String is not exhausted - MUST remains the last double asterisks
         return true;
+    }
+
+    private boolean checkPatternOnStringExhausted(List<String> patDirs, boolean isDir) {
+        if (patDirs.isEmpty()) {
+            // pattern is exhausted - Succeed
+            return true;
+        }
+
+        if (isConsecutiveAsterisks(patDirs)) {
+            if (dirOnly) {
+                return isDir;
+            }
+            return true;
+        }
+
+        return false;
     }
 
     private boolean isConsecutiveAsterisks(List<String> patDirs) {
