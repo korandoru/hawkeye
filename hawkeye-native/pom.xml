@@ -20,12 +20,12 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.korandoru.hawkeye</groupId>
-        <artifactId>distribution</artifactId>
+        <artifactId>hawkeye</artifactId>
         <version>1.6.1-SNAPSHOT</version>
     </parent>
 
     <name>HawkEye :: Distribution :: Native Image</name>
-    <artifactId>native</artifactId>
+    <artifactId>hawkeye-native</artifactId>
 
     <properties>
         <native-maven-plugin.version>0.9.19</native-maven-plugin.version>

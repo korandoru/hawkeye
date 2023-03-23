@@ -20,13 +20,13 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.korandoru.hawkeye</groupId>
-        <artifactId>distribution</artifactId>
+        <artifactId>hawkeye</artifactId>
         <version>1.6.1-SNAPSHOT</version>
     </parent>
 
     <name>HawkEye :: Distribution :: Command Line Interface</name>
     <description>HawkEye command-line executables</description>
-    <artifactId>commandline</artifactId>
+    <artifactId>hawkeye-cli</artifactId>
 
     <properties>
         <spring-boot-maven-plugin.version>2.7.0</spring-boot-maven-plugin.version>
