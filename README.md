@@ -76,7 +76,7 @@ This steps requires JDK 17. Higher versions *may* work.
 ./mvnw clean install -DskipTests
 
 # Run
-./distribution/commandline/target/hawkeye.jar
+./hawkeye-cli/target/hawkeye.jar -h
 ```
 
 Build Docker image:
@@ -94,7 +94,7 @@ This steps requires GraalVM 22.3.0. Higher versions *may* work.
 ./mvnw clean package -DskipTests -Pnative
 
 # Run
-./distribution/native/target/hawkeye-native
+./hawkeye-native/target/hawkeye-native -h
 ```
 
 Build Docker image:
