@@ -8,12 +8,12 @@ import java.util.StringTokenizer;
 
 public final class MatchPattern {
 
-    private static final String PATTERN_SEPERATOR = "/";
-
     private final boolean reverse;
+    private final boolean dirOnly;
     private final List<String> patternParts;
-    private MatchPattern(List<String> patternParts, boolean reverse) {
+    private MatchPattern(List<String> patternParts, boolean dirOnly, boolean reverse) {
         this.patternParts = patternParts;
+        this.dirOnly = dirOnly;
         this.reverse = reverse;
     }
 
@@ -23,19 +23,35 @@ public final class MatchPattern {
         }
 
         String fixedPattern = pattern;
-        if (pattern.startsWith("!")) {
+
+        if (fixedPattern.startsWith("!")) {
             fixedPattern = fixedPattern.substring(1);
         }
-        if (pattern.endsWith("/")) {
+
+        if (fixedPattern.startsWith("/")) {
+            fixedPattern = fixedPattern.substring(1);
+        } else {
+            fixedPattern = "**" + "/" + fixedPattern;
+        }
+
+        if (fixedPattern.endsWith("/")) {
             fixedPattern = fixedPattern + "**";
         }
 
-        return new MatchPattern(tokenizePathToString(fixedPattern, PATTERN_SEPERATOR), pattern.startsWith("!"));
+        return new MatchPattern(
+                tokenizePathToString(fixedPattern, "/"),
+                pattern.endsWith("/") || pattern.endsWith("/**"),
+                pattern.startsWith("!"));
     }
 
-    public boolean match(Path path, boolean isDirectory) {
+    @Override
+    public String toString() {
+        return String.join("/", patternParts);
+    }
+
+    public boolean match(Path path, boolean isDir) {
         final List<String> strDirs = tokenizePathToString(path.toString(), File.separator);
-        return reverse ^ matchPathPattern(patternParts, strDirs, isDirectory);
+        return reverse ^ matchPathPattern(patternParts, strDirs, isDir);
     }
 
     private static List<String> tokenizePathToString(String path, String separator) {
@@ -47,7 +63,7 @@ public final class MatchPattern {
         return result;
     }
 
-    private static boolean matchPathPattern(List<String> patDirs, List<String> strDirs, boolean isDir) {
+    private boolean matchPathPattern(List<String> patDirs, List<String> strDirs, boolean isDir) {
         int patIdxStart = 0;
         int patIdxEnd = patDirs.size() - 1;
         int strIdxStart = 0;
@@ -68,7 +84,8 @@ public final class MatchPattern {
 
         if (strIdxStart > strIdxEnd) {
             // String is exhausted
-            return isConsecutiveAsterisks(patDirs.subList(patIdxStart, patIdxEnd + 1), isDir);
+            final List<String> remainPatDirs = patDirs.subList(patIdxStart, patIdxEnd + 1);
+            return isConsecutiveAsterisks(remainPatDirs, isDir);
         } else {
             if (patIdxStart > patIdxEnd) {
                 // String not exhausted, but pattern is. Failure.
@@ -91,7 +108,8 @@ public final class MatchPattern {
 
         if (strIdxStart > strIdxEnd) {
             // String is exhausted
-            return isConsecutiveAsterisks(patDirs.subList(patIdxStart, patIdxEnd + 1), isDir);
+            final List<String> remainPatDirs = patDirs.subList(patIdxStart, patIdxEnd + 1);
+            return isConsecutiveAsterisks(remainPatDirs, isDir);
         }
 
         while (patIdxStart != patIdxEnd && strIdxStart <= strIdxEnd) {
@@ -134,11 +152,31 @@ public final class MatchPattern {
             strIdxStart = foundIdx + patLength;
         }
 
-        return isConsecutiveAsterisks(patDirs.subList(patIdxStart, patIdxEnd + 1), isDir);
+        final List<String> remainPatDirs = patDirs.subList(patIdxStart, patIdxEnd + 1);
+        if (strIdxStart > strIdxEnd) {
+            // String is exhausted
+            return isConsecutiveAsterisks(remainPatDirs, isDir);
+        } else {
+            return remainPatDirs.stream().allMatch("**"::equals);
+        }
     }
 
-    private static boolean isConsecutiveAsterisks(List<String> patDirs, boolean isDir) {
-        return patDirs.stream().allMatch(pat -> isDir && pat.equals("**"));
+    private boolean isConsecutiveAsterisks(List<String> patDirs, boolean isDir) {
+        for (String patDir: patDirs) {
+            if (dirOnly) {
+                if (!isDir) {
+                    return false;
+                }
+                if (!"**".equals(patDir)) {
+                    return false;
+                }
+                continue;
+            }
+            if (!"**".equals(patDir)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

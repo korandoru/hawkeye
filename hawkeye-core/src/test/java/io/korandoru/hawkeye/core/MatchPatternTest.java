@@ -1,16 +1,28 @@
 package io.korandoru.hawkeye.core;
 
-import java.io.File;
-import java.nio.file.Files;
+import static org.assertj.core.api.Assertions.assertThat;
 import java.nio.file.Path;
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 class MatchPatternTest {
 
+    private record TestCase(Path path, boolean isDir, MatchPattern[] patterns, boolean[] results) {
+        private void verify() {
+            assertThat(patterns.length).isEqualTo(results.length);
+            for (int i = 0; i < patterns.length; i++) {
+                assertThat(patterns[i].match(path, isDir))
+                        .describedAs("path=%s, isDir=%b, pattern=%s", path, isDir, patterns[i])
+                        .isEqualTo(results[i]);
+            }
+        }
+    }
+
     @Test
-    void testMatch(@TempDir Path tempDir0, @TempDir Path tempDir1) throws Exception {
+    void testMatch() {
+        final String dirname = "src";
+        final String filename = "hawkeye";
+        final String pathname = "build";
+
         final MatchPattern[] patterns = new MatchPattern[]{
                 MatchPattern.of("build", false),
                 MatchPattern.of("build/", false),
@@ -18,21 +30,41 @@ class MatchPatternTest {
                 MatchPattern.of("**/build", false),
                 MatchPattern.of("**/build/", false),
                 MatchPattern.of("**/build/**", false),
+                MatchPattern.of("/build", false),
+                MatchPattern.of("/build/", false),
+                MatchPattern.of("/build/**", false),
         };
 
-        final File buildDir = new File(tempDir0.toFile(), "build");
-        final File hawkeyeFile = new File(tempDir0.toFile(), "build/hawkeye");
-        FileUtils.touch(hawkeyeFile);
+        final Path[] paths = new Path[]{
+                Path.of(pathname),
+                Path.of(pathname, filename),
+                Path.of(dirname, pathname),
+                Path.of(dirname, pathname, filename),
+        };
 
-        final File buildFile = new File(tempDir1.toFile(), "build");
-        FileUtils.touch(buildFile);
+        final TestCase[] testCases = new TestCase[]{
+                new TestCase(paths[0], false, patterns, new boolean[]{true, false, false, true, false, false, true, false, false}),
+                new TestCase(paths[0], true, patterns, new boolean[]{true, false, false, true, false, false, true, false, false}),
+                new TestCase(paths[1], false, patterns, new boolean[]{true, false, false, true, false, false, true, false, false}),
+                new TestCase(paths[1], true, patterns, new boolean[]{true, false, false, true, false, false, true, false, false}),
+                new TestCase(paths[2], false, patterns, new boolean[]{true, false, false, true, false, false, true, false, false}),
+                new TestCase(paths[2], true, patterns, new boolean[]{true, false, false, true, false, false, true, false, false}),
+                new TestCase(paths[3], false, patterns, new boolean[]{true, false, false, true, false, false, true, false, false}),
+                new TestCase(paths[3], true, patterns, new boolean[]{true, false, false, true, false, false, true, false, false}),
+        };
 
-        for (MatchPattern pattern: patterns) {
-            System.out.println(pattern.match(tempDir0.relativize(buildDir.toPath()), true));
-            System.out.println(pattern.match(tempDir0.relativize(hawkeyeFile.toPath()), false));
-            System.out.println(pattern.match(tempDir1.relativize(buildFile.toPath()), false));
-            System.out.println();
+        for (TestCase testCase : testCases) {
+            testCase.verify();
         }
+//
+//        for (MatchPattern pattern : patterns) {
+//            Path of = Path.of(pathname);
+//            System.out.println(pattern.match(of, true));
+//            System.out.println(pattern.match(Path.of(dirname, pathname), true));
+//            System.out.println(pattern.match(Path.of(pathname, filename), false));
+//            System.out.println(pattern.match(of, false));
+//            System.out.println();
+//        }
     }
 
 }
