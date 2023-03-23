@@ -21,15 +21,15 @@ class MatchPatternTest {
     @Test
     void testMatchOnePart() {
         final Set<MatchPattern> patterns = Set.of(
-                MatchPattern.of("build", false),
-                MatchPattern.of("build/", false),
-                MatchPattern.of("build/**", false),
-                MatchPattern.of("**/build", false),
-                MatchPattern.of("**/build/", false),
-                MatchPattern.of("**/build/**", false),
-                MatchPattern.of("/build", false),
-                MatchPattern.of("/build/", false),
-                MatchPattern.of("/build/**", false)
+                MatchPattern.of("build"),
+                MatchPattern.of("build/"),
+                MatchPattern.of("build/**"),
+                MatchPattern.of("**/build"),
+                MatchPattern.of("**/build/"),
+                MatchPattern.of("**/build/**"),
+                MatchPattern.of("/build"),
+                MatchPattern.of("/build/"),
+                MatchPattern.of("/build/**")
         );
 
         final Path[] paths = new Path[]{

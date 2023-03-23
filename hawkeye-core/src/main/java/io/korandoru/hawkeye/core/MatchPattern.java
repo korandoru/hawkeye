@@ -19,11 +19,7 @@ public final class MatchPattern {
         this.reverse = reverse;
     }
 
-    public static MatchPattern of(String pattern, boolean allowReverse) {
-        if (!allowReverse && pattern.startsWith("!")) {
-            throw new IllegalArgumentException("reverse pattern is not allowed: " + pattern);
-        }
-
+    public static MatchPattern of(String pattern) {
         String fixedPattern = pattern;
 
         if (fixedPattern.startsWith("!")) {
