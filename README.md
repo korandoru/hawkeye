@@ -159,19 +159,17 @@ useDefaultMapping = true
 # default: empty
 additionalHeaders = ["..."]
 
-# Mapping rules.
+# Mapping rules (repeated).
 #
-# The key of a mapping rule is:
-# 1. file extension, like 'ts' or 'java';
-# 2. filename, like 'Dockerfile.native' or 'my_executable_file'.
+# The key of a mapping rule is a header style type (case insensitive).
 #
 # Available header style types consist of those defined at `HeaderType` and user-defined ones in `additionalHeaders`.
 # The name of header style type is case insensitive.
 #
 # If useDefaultMapping is true, the mapping rules defined here can override the default one.
-[mapping]
-'extension' = 'header_style_type'
-'filename' = 'another_header_style_type'
+[mapping.STYLE_NAME]
+filenames = ["..."]  # e.g. "Dockerfile.native"
+extensions = ["..."] # e.g. "cc"
 
 # Properties to fulfill the template.
 # For a defined key-value pair, you can use ${key} in the header template, which will be substituted
