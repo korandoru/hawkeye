@@ -77,11 +77,10 @@ public abstract class LicenseProcessor implements Callable<Report> {
                 config.isUseDefaultExcludes());
         final String[] selectedFiles = selection.getSelectedFiles();
 
-        final Set<Mapping> mapping = new HashSet<>();
+        final Set<Mapping> mapping = new HashSet<>(config.getMapping());
         if (config.isUseDefaultMapping()) {
             mapping.addAll(DocumentType.defaultMapping());
         }
-        mapping.addAll(config.getMapping());
 
         final Map<String, String> globalProperties = new LinkedHashMap<>();
         globalProperties.put("builtin.thisYear", Year.now().toString());
