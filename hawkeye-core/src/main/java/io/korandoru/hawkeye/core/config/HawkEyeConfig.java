@@ -17,10 +17,12 @@
 package io.korandoru.hawkeye.core.config;
 
 import com.fasterxml.jackson.dataformat.toml.TomlMapper;
+import io.korandoru.hawkeye.core.mapping.Mapping;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -43,7 +45,7 @@ public class HawkEyeConfig {
     private final List<String> excludes;
     private final List<String> keywords;
     private final Map<String, String> properties;
-    private final Map<String, String> mapping;
+    private final Set<Mapping> mapping;
 
     private final boolean dryRun;
 
@@ -63,7 +65,7 @@ public class HawkEyeConfig {
                 .excludes(model.getExcludes())
                 .keywords(model.getKeywords())
                 .properties(model.getProperties())
-                .mapping(model.getMapping());
+                .mapping(model.getMapping().toMappings());
     }
 
     public static final class Builder {

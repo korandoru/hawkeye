@@ -17,14 +17,18 @@
 package io.korandoru.hawkeye.core.document;
 
 import io.korandoru.hawkeye.core.header.HeaderDefinition;
+import io.korandoru.hawkeye.core.header.HeaderType;
+import io.korandoru.hawkeye.core.mapping.Mapping;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import org.apache.commons.io.FilenameUtils;
 
 public final class DocumentFactory {
 
-    private final Map<String, String> mapping;
+    private final Set<Mapping> mapping;
     private final Map<String, HeaderDefinition> definitions;
     private final File basedir;
     private final Charset encoding;
@@ -33,7 +37,7 @@ public final class DocumentFactory {
 
     public DocumentFactory(
             final File basedir,
-            final Map<String, String> mapping,
+            final Set<Mapping> mapping,
             final Map<String, HeaderDefinition> definitions,
             final Charset encoding,
             final String[] keywords,
@@ -54,11 +58,11 @@ public final class DocumentFactory {
     private Document getWrapper(final String file) {
         final String lowerFileName = FilenameUtils.getName(file).toLowerCase();
 
-        String headerType = mapping.get("");
-        for (Map.Entry<String, String> entry : mapping.entrySet()) {
-            String lowerKey = entry.getKey().toLowerCase();
-            if (lowerFileName.endsWith("." + lowerKey) || lowerFileName.equals(lowerKey)) {
-                headerType = entry.getValue().toLowerCase();
+        String headerType = HeaderType.UNKNOWN.name().toLowerCase();
+        for (Mapping m : mapping) {
+            final Optional<String> type = m.headerType(lowerFileName);
+            if (type.isPresent()) {
+                headerType = type.get();
                 break;
             }
         }
