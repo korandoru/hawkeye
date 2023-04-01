@@ -24,7 +24,7 @@ excludes = [
 ]
 
 [mapping.SCRIPT_STYLE]
-filenames = ['Dockerfile.native']
+filnames = ['Dockerfile.native']
 
 [properties]
 inceptionYear = 2023

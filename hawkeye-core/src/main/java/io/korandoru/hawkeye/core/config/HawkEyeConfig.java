@@ -65,7 +65,7 @@ public class HawkEyeConfig {
                 .excludes(model.getExcludes())
                 .keywords(model.getKeywords())
                 .properties(model.getProperties())
-                .mapping(MappingModel.toMappings(model.getMapping()));
+                .mapping(model.getMapping().toMappings());
     }
 
     public static final class Builder {
