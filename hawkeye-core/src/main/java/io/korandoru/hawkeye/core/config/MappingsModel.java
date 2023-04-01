@@ -6,13 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import lombok.Builder;
-import lombok.Data;
-import lombok.extern.jackson.Jacksonized;
 
-@Data
-@Builder
-@Jacksonized
 public class MappingsModel {
 
     private final Map<String, MappingModel> models = new HashMap<>();
@@ -21,11 +15,12 @@ public class MappingsModel {
         final Set<Mapping> result = new HashSet<>();
         for (String headerType: models.keySet()){
             final MappingModel model = models.get(headerType);
+            final String lowerType = headerType.toLowerCase();
             for (String extension : model.getExtensions()) {
-                result.add(new Mapping.Extension(extension, headerType));
+                result.add(new Mapping.Extension(extension, lowerType));
             }
             for (String filename : model.getFilenames()) {
-                result.add(new Mapping.Filename(filename, headerType));
+                result.add(new Mapping.Filename(filename, lowerType));
             }
         }
         return result;
