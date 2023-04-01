@@ -16,11 +16,12 @@
 
 package io.korandoru.hawkeye.command;
 
-import lombok.experimental.UtilityClass;
-
-@UtilityClass
-public class CommandConstantsFiltered {
+public final class CommandConstantsFiltered {
 
     public static final String VERSION = "${project.version}";
+
+    private CommandConstantsFiltered() {
+        // avoid instantiate
+    }
 
 }

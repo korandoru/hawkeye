@@ -23,8 +23,8 @@ excludes = [
     "hawkeye-core/src/main/resources/*.txt",
 ]
 
-[mapping]
-'Dockerfile.native' = 'SCRIPT_STYLE'
+[mapping.SCRIPT_STYLE]
+filnames = ['Dockerfile.native']
 
 [properties]
 inceptionYear = 2023
