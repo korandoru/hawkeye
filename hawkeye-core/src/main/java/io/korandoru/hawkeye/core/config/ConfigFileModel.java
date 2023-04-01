@@ -45,8 +45,10 @@ class ConfigFileModel {
     private final List<String> includes = Collections.emptyList();
     @Builder.Default
     private final List<String> excludes = Collections.emptyList();
+    @Builder.Default
     private final List<String> keywords = Collections.singletonList("copyright");
     @Builder.Default
     private final Map<String, String> properties = Collections.emptyMap();
-    private final MappingsModel mapping;
+    @Builder.Default
+    private final MappingsModel mapping = new MappingsModel();
 }
