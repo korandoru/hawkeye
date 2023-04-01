@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-package io.korandoru.hawkeye.command;
+package io.korandoru.hawkeye.core.config;
 
-public final class CommandConstantsFiltered {
+import java.util.Collections;
+import java.util.List;
+import lombok.Builder;
+import lombok.Data;
+import lombok.extern.jackson.Jacksonized;
 
-    public static final String VERSION = "${project.version}";
+@Data
+@Builder
+@Jacksonized
+public class MappingModel {
 
-    private CommandConstantsFiltered() {
-        // avoid instantiate
-    }
+    @Builder.Default
+    private final List<String> extensions = Collections.emptyList();
+
+    @Builder.Default
+    private final List<String> filenames = Collections.emptyList();
 
 }

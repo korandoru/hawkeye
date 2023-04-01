@@ -26,6 +26,7 @@ import io.korandoru.hawkeye.core.document.DocumentType;
 import io.korandoru.hawkeye.core.header.Header;
 import io.korandoru.hawkeye.core.header.HeaderDefinition;
 import io.korandoru.hawkeye.core.header.HeaderType;
+import io.korandoru.hawkeye.core.mapping.Mapping;
 import io.korandoru.hawkeye.core.report.Report;
 import io.korandoru.hawkeye.core.report.ReportConstants;
 import io.korandoru.hawkeye.core.resource.HeaderSource;
@@ -37,8 +38,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Year;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -74,11 +77,11 @@ public abstract class LicenseProcessor implements Callable<Report> {
                 config.isUseDefaultExcludes());
         final String[] selectedFiles = selection.getSelectedFiles();
 
-        final Map<String, String> mapping = new LinkedHashMap<>();
+        final Set<Mapping> mapping = new HashSet<>();
         if (config.isUseDefaultMapping()) {
-            mapping.putAll(DocumentType.defaultMapping());
+            mapping.addAll(DocumentType.defaultMapping());
         }
-        mapping.putAll(config.getMapping());
+        mapping.addAll(config.getMapping());
 
         final Map<String, String> globalProperties = new LinkedHashMap<>();
         globalProperties.put("builtin.thisYear", Year.now().toString());
