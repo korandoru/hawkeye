@@ -40,9 +40,22 @@ jobs:
   check:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
     name: Check and build
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
+      - name: Cache local Maven repository
+        uses: actions/cache@v3
+        timeout-minutes: 5
+        with:
+          path: |
+            ~/.m2/repository/*/*/*
+            !~/.m2/repository/io/korandoru/hawkeye
+          key: ${{ matrix.os }}-m2-dependencies-core-modules-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ matrix.os }}-m2-dependencies-core-modules-
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -63,6 +76,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
+      - name: Cache local Maven repository
+        uses: actions/cache@v3
+        timeout-minutes: 5
+        with:
+          path: |
+            ~/.m2/repository/*/*/*
+            !~/.m2/repository/io/korandoru/hawkeye
+          key: ${{ matrix.os }}-m2-dependencies-core-modules-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ matrix.os }}-m2-dependencies-core-modules-
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
