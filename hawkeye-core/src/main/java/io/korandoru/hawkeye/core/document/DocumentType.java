@@ -74,6 +74,7 @@ public enum DocumentType {
     PHP("php", HeaderType.PHP, true, false),
     POM("pom", HeaderType.XML_STYLE, true, false),
     PROPERTIES("properties", HeaderType.SCRIPT_STYLE, true, false),
+    PROTO("proto", HeaderType.SLASHSTAR_STYLE, true, false),
     PYTHON("py", HeaderType.SCRIPT_STYLE, true, false),
     RUBY("rb", HeaderType.SCRIPT_STYLE, true, false),
     RUST("rs", HeaderType.DOUBLESLASH_STYLE, true, false),
@@ -105,6 +106,7 @@ public enum DocumentType {
     XSLT("xslt", HeaderType.XML_STYLE, true, false),
     YAML("yaml", HeaderType.SCRIPT_STYLE, true, false),
     YML("yml", HeaderType.SCRIPT_STYLE, true, false),
+    ZIG("zig", HeaderType.DOUBLESLASH_STYLE, true, false),
     ;
     private static final Set<Mapping> MAPPINGS = new HashSet<>();
 
