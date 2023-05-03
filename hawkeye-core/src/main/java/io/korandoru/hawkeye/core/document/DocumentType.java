@@ -34,6 +34,7 @@ public enum DocumentType {
     CC("cc", HeaderType.JAVADOC_STYLE, true, false),
     CLOJURE("clj", HeaderType.SEMICOLON_STYLE, true, false),
     CLOJURESCRIPT("cljs", HeaderType.SEMICOLON_STYLE, true, false),
+    CMAKELISTS("CMakeLists.txt", HeaderType.SCRIPT_STYLE, false, true),
     COLDFUSION_COMPONENT("cfc", HeaderType.DYNASCRIPT3_STYLE, true, false),
     COLDFUSION_ML("cfm", HeaderType.DYNASCRIPT3_STYLE, true, false),
     CPP("cpp", HeaderType.JAVADOC_STYLE, true, false),
