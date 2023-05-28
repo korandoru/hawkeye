@@ -40,10 +40,7 @@ jobs:
   check:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
     name: Check and build
-    strategy:
-      matrix:
-        os: [ ubuntu-latest ]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Cache local Maven repository
