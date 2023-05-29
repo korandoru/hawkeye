@@ -240,4 +240,4 @@ lastLineDetectionPattern = "..."
 
 ## Acknowledgment
 
-This software is strongly inspired by [license-maven-plugin](https://github.com/mathieucarbou/license-maven-plugin), with an initial motivation to bring it beyond a Maven plugin.
+This software is strongly inspired by [license-maven-plugin](https://github.com/mathieucarbou/license-maven-plugin), with an initial motivation to bring it beyond a Maven plugin. The core abstractions like `Document` `Header` and `HeaderResource` are copied from the license-maven-plugin sources under the terms of Apache License 2.0.
