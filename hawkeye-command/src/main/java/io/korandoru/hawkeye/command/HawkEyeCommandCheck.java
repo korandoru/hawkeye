@@ -28,7 +28,7 @@ import picocli.CommandLine;
 
 @CommandLine.Command(
         name = "check",
-        version = CommandConstantsFiltered.VERSION,
+        versionProvider = HawkEyeVersionProvider.class,
         mixinStandardHelpOptions = true,
         description = "Check license headers."
 )

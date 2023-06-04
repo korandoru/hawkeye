@@ -16,12 +16,11 @@
 
 package io.korandoru.hawkeye.command;
 
-public final class CommandConstantsFiltered {
+import picocli.CommandLine;
 
-    public static final String VERSION = "${project.version}";
-
-    private CommandConstantsFiltered() {
-        // avoid instantiate
+public class HawkEyeVersionProvider implements CommandLine.IVersionProvider {
+    @Override
+    public String[] getVersion() {
+        return new String[] { CommandConstants.VERSION };
     }
-
 }
