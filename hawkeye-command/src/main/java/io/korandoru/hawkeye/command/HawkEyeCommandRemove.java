@@ -28,7 +28,7 @@ import picocli.CommandLine;
 
 @CommandLine.Command(
         name = "remove",
-        version = CommandConstantsFiltered.VERSION,
+        versionProvider = HawkEyeVersionProvider.class,
         mixinStandardHelpOptions = true,
         description = "Remove license headers."
 )
