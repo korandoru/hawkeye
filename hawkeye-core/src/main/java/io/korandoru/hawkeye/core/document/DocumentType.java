@@ -55,6 +55,8 @@ public enum DocumentType {
     GROOVY("groovy", HeaderType.SLASHSTAR_STYLE, true, false),
     GSP("GSP", HeaderType.XML_STYLE, true, false),
     H("h", HeaderType.SLASHSTAR_STYLE, true, false),
+    HH("hh", HeaderType.SLASHSTAR_STYLE, true, false),
+    HPP("hpp", HeaderType.SLASHSTAR_STYLE, true, false),
     HAML("haml", HeaderType.HAML_STYLE, true, false),
     HTM("htm", HeaderType.XML_STYLE, true, false),
     HTML("html", HeaderType.XML_STYLE, true, false),
