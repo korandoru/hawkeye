@@ -17,7 +17,8 @@ name: Release
 on:
   push:
     branches: ['main']
-    tags: ['v1.*', 'v2.*']
+    tags: ['v*.*']
+  workflow_dispatch:
 
 jobs:
   build-and-push-hawkeye-amd64:
