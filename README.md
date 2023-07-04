@@ -41,7 +41,7 @@ To check license headers in GitHub Actions, add a step in your GitHub workflow:
 
 ```yaml
 - name: Check License Header
-  uses: korandoru/hawkeye@v2
+  uses: korandoru/hawkeye@v3
 ```
 
 ### Docker
@@ -62,7 +62,7 @@ docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye check
 
 The executable JAR requires a preinstalled JRE environment (version >= 17). You can find the binaries at:
 
-* https://repo1.maven.org/maven2/io/korandoru/hawkeye/hawkeye-cli/ for 2.x;
+* https://repo1.maven.org/maven2/io/korandoru/hawkeye/hawkeye-cli/ for 2.x or later;
 * https://repo1.maven.org/maven2/io/korandoru/hawkeye/commandline/ for 1.x.
 
 ## Build
@@ -240,4 +240,4 @@ lastLineDetectionPattern = "..."
 
 ## Acknowledgment
 
-This software is strongly inspired by [license-maven-plugin](https://github.com/mathieucarbou/license-maven-plugin), with an initial motivation to bring it beyond a Maven plugin. The core abstractions like `Document` `Header` and `HeaderResource` are originally copied from the license-maven-plugin sources under the terms of Apache License 2.0.
+This software is derived from [license-maven-plugin](https://github.com/mathieucarbou/license-maven-plugin), with an initial motivation to bring it beyond a Maven plugin. The core abstractions like `Document`, `Header`, and `HeaderResource` are originally copied from the license-maven-plugin sources under the terms of Apache License 2.0.
