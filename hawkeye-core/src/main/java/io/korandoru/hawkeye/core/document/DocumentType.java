@@ -79,6 +79,7 @@ public enum DocumentType {
     PROPERTIES("properties", HeaderType.SCRIPT_STYLE, true, false),
     PROTO("proto", HeaderType.SLASHSTAR_STYLE, true, false),
     PYTHON("py", HeaderType.SCRIPT_STYLE, true, false),
+    PYTHON_STUBS("pyi", HeaderType.SCRIPT_STYLE, true, false),
     RUBY("rb", HeaderType.SCRIPT_STYLE, true, false),
     RUST("rs", HeaderType.DOUBLESLASH_STYLE, true, false),
     SCALA("scala", HeaderType.SLASHSTAR_STYLE, true, false),
