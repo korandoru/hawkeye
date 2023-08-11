@@ -38,13 +38,5 @@
     "allDeclaredMethods": true,
     "allPublicMethods": true,
     "allDeclaredFields": true
-  },
-  {
-    "name": "com.fasterxml.jackson.databind.ext.Java7HandlersImpl",
-    "allDeclaredConstructors": true,
-    "allPublicConstructors": true,
-    "allDeclaredMethods": true,
-    "allPublicMethods": true,
-    "allDeclaredFields": true
   }
 ]
