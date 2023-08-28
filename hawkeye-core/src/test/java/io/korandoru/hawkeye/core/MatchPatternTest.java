@@ -45,18 +45,18 @@ class MatchPatternTest {
                 MatchPattern.of("**/build/**"),
                 MatchPattern.of("/build"),
                 MatchPattern.of("/build/"),
-                MatchPattern.of("/build/**")
-        );
+                MatchPattern.of("/build/**"));
 
-        final Path[] paths = new Path[]{
-                Path.of("build"),
-                Path.of("build", "hawkeye"),
-                Path.of("src", "build"),
-                Path.of("src", "build", "hawkeye"),
-                Path.of("irrelevant"),
+        final Path[] paths = new Path[] {
+            Path.of("build"),
+            Path.of("build", "hawkeye"),
+            Path.of("src", "build"),
+            Path.of("src", "build", "hawkeye"),
+            Path.of("irrelevant"),
         };
 
-        final Set<String> allMatches = patterns.stream().map(MatchPattern::toString).collect(Collectors.toSet());
+        final Set<String> allMatches =
+                patterns.stream().map(MatchPattern::toString).collect(Collectors.toSet());
         final Set<String> fileMatches = Set.of("build", "**/build", "/build");
         final Set<String> subMatches = Set.of("build", "build/", "build/**", "**/build", "**/build/", "**/build/**");
         final Set<String> subFileMatches = Set.of("build", "**/build");
@@ -72,5 +72,4 @@ class MatchPatternTest {
         checkMatches(paths[4], false, patterns, Collections.emptySet());
         checkMatches(paths[4], true, patterns, Collections.emptySet());
     }
-
 }

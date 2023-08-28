@@ -51,7 +51,9 @@ public class HeaderDefinition {
      * @return true if this line must be skipped or false.
      */
     public boolean isSkipLine(String line) {
-        return skipLinePattern != null && line != null && skipLinePattern.matcher(line).matches();
+        return skipLinePattern != null
+                && line != null
+                && skipLinePattern.matcher(line).matches();
     }
 
     /**
@@ -61,7 +63,9 @@ public class HeaderDefinition {
      * @return true if the first line of a header have been recognized or false.
      */
     public boolean isFirstHeaderLine(String line) {
-        return firstLineDetectionPattern != null && line != null && firstLineDetectionPattern.matcher(line).matches();
+        return firstLineDetectionPattern != null
+                && line != null
+                && firstLineDetectionPattern.matcher(line).matches();
     }
 
     /**
@@ -71,7 +75,9 @@ public class HeaderDefinition {
      * @return true if the last line of a header have been recognized or false.
      */
     public boolean isLastHeaderLine(String line) {
-        return lastLineDetectionPattern != null && line != null && lastLineDetectionPattern.matcher(line).matches();
+        return lastLineDetectionPattern != null
+                && line != null
+                && lastLineDetectionPattern.matcher(line).matches();
     }
 
     @Override
@@ -114,7 +120,8 @@ public class HeaderDefinition {
             }
 
             if (allowBlankLines && !multipleLines) {
-                final String template = "Header style %s is configured to allow blank lines, so it should be set as a multi-line header style";
+                final String template =
+                        "Header style %s is configured to allow blank lines, so it should be set as a multi-line header style";
                 throw new IllegalArgumentException(template.formatted(type.toLowerCase()));
             }
 

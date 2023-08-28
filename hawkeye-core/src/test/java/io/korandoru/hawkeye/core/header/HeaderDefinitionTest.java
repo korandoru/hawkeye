@@ -41,5 +41,4 @@ class HeaderDefinitionTest {
         assertThat(definition).isNotNull();
         assertThat(definition.getType()).isEqualTo("script_style");
     }
-
 }

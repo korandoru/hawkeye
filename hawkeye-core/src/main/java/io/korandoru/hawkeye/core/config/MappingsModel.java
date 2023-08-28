@@ -29,7 +29,7 @@ public class MappingsModel {
 
     public Set<Mapping> toMappings() {
         final Set<Mapping> result = new HashSet<>();
-        for (String headerType: models.keySet()){
+        for (String headerType : models.keySet()) {
             final MappingModel model = models.get(headerType);
             final String lowerType = headerType.toLowerCase();
             for (String extension : model.getExtensions()) {
@@ -46,5 +46,4 @@ public class MappingsModel {
     public void populate(String name, MappingModel model) {
         models.put(name, model);
     }
-
 }

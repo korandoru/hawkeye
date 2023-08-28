@@ -38,7 +38,8 @@ class ResourceFinderTest {
 
     @Test
     void testLoadAbsoluteFile() throws Exception {
-        final Path path = Paths.get("src").resolve("test/data/compileCP/test.txt").toAbsolutePath();
+        final Path path =
+                Paths.get("src").resolve("test/data/compileCP/test.txt").toAbsolutePath();
         assertThat(path).exists();
         final URL url = finder.findResource(path.toString());
         assertThat(Path.of(url.toURI())).isEqualTo(path);
@@ -69,10 +70,10 @@ class ResourceFinderTest {
 
     @Test
     void testLoadFromURL() throws Exception {
-        final Path path = Paths.get("src").resolve("test/data/compileCP/test.txt").toAbsolutePath();
+        final Path path =
+                Paths.get("src").resolve("test/data/compileCP/test.txt").toAbsolutePath();
         assertThat(path).exists();
         final String url = path.toUri().toURL().toString();
         assertThat(finder.findResource(url)).isNotNull();
     }
-
 }

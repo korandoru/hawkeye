@@ -36,7 +36,8 @@ public class Constants {
         } catch (IOException e) {
             throw new UncheckedIOException("cannot load hawkeye properties file: hawkeye.properties", e);
         } catch (Exception e) {
-            throw new UncheckedIOException("cannot load hawkeye properties file: hawkeye.properties", new IOException(e));
+            throw new UncheckedIOException(
+                    "cannot load hawkeye properties file: hawkeye.properties", new IOException(e));
         }
     }
 }

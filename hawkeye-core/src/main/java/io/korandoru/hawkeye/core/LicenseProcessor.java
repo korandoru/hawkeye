@@ -65,10 +65,8 @@ public abstract class LicenseProcessor implements Callable<Report> {
         final ResourceFinder resourceFinder = new ResourceFinder(baseDir);
         resourceFinder.setPluginClassPath(getClass().getClassLoader());
 
-        final HeaderSource headerSource = HeaderSource.of(
-                config.getInlineHeader(),
-                config.getHeaderPath(),
-                resourceFinder);
+        final HeaderSource headerSource =
+                HeaderSource.of(config.getInlineHeader(), config.getHeaderPath(), resourceFinder);
         final Header header = new Header(headerSource);
         final Selection selection = new Selection(
                 baseDir.toFile(),
@@ -94,7 +92,7 @@ public abstract class LicenseProcessor implements Callable<Report> {
 
         final Map<String, HeaderDefinition> definitionMap = new HashMap<>(HeaderType.defaultDefinitions());
         final TomlMapper mapper = new TomlMapper();
-        for (String additionalHeader: config.getAdditionalHeaders()) {
+        for (String additionalHeader : config.getAdditionalHeaders()) {
             final URL source = resourceFinder.findResource(additionalHeader);
             final HeaderStylesModel stylesModel = mapper.readValue(source, HeaderStylesModel.class);
             definitionMap.putAll(stylesModel.toHeaderDefinitions());
@@ -131,5 +129,4 @@ public abstract class LicenseProcessor implements Callable<Report> {
     protected abstract void onHeaderNotFound(Document document, Header header, Report report);
 
     protected abstract void onExistingHeader(Document document, Header header, Report report);
-
 }

@@ -54,7 +54,8 @@ public final class Selection {
         this.fs = basedir.toPath().getFileSystem();
         final String[] usedDefaultExcludes = useDefaultExcludes ? Default.EXCLUDES : new String[0];
         this.included = included.length > 0 ? included : Default.INCLUDE;
-        this.excluded = Stream.concat(stream(usedDefaultExcludes), stream(excluded)).toArray(String[]::new);
+        this.excluded =
+                Stream.concat(stream(usedDefaultExcludes), stream(excluded)).toArray(String[]::new);
         this.selectedFiles = new CompletableFuture<>();
     }
 
@@ -66,7 +67,11 @@ public final class Selection {
             return files;
         }
 
-        log.debug("Selecting files with baseDir: {}, included: {}, excluded: {}", basedir, Arrays.toString(included), Arrays.toString(excluded));
+        log.debug(
+                "Selecting files with baseDir: {}, included: {}, excluded: {}",
+                basedir,
+                Arrays.toString(included),
+                Arrays.toString(excluded));
 
         final Path basePath = basedir.toPath();
 
@@ -90,8 +95,10 @@ public final class Selection {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
                 final Path path = basePath.relativize(dir);
-                final boolean isExcluded = excludeList.stream().filter(m -> !m.isReverse()).anyMatch(m -> m.match(path, true));
-                final boolean isReserveExcluded = excludeList.stream().filter(MatchPattern::isReverse).anyMatch(m -> m.match(path, true));
+                final boolean isExcluded =
+                        excludeList.stream().filter(m -> !m.isReverse()).anyMatch(m -> m.match(path, true));
+                final boolean isReserveExcluded =
+                        excludeList.stream().filter(MatchPattern::isReverse).anyMatch(m -> m.match(path, true));
                 return (isExcluded && !isReserveExcluded) ? FileVisitResult.SKIP_SUBTREE : FileVisitResult.CONTINUE;
             }
 
@@ -99,8 +106,10 @@ public final class Selection {
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
                 final Path path = basePath.relativize(file);
                 final boolean isIncluded = includeList.stream().anyMatch(m -> m.match(path, false));
-                final boolean isExcluded = excludeList.stream().filter(m -> !m.isReverse()).anyMatch(m -> m.match(path, false));
-                final boolean isReserveExcluded = excludeList.stream().filter(MatchPattern::isReverse).anyMatch(m -> m.match(path, false));
+                final boolean isExcluded =
+                        excludeList.stream().filter(m -> !m.isReverse()).anyMatch(m -> m.match(path, false));
+                final boolean isReserveExcluded =
+                        excludeList.stream().filter(MatchPattern::isReverse).anyMatch(m -> m.match(path, false));
                 if (isIncluded && !(isExcluded && !isReserveExcluded)) {
                     results.add(path.toString());
                 }

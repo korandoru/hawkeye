@@ -41,8 +41,7 @@ public final class DocumentFactory {
             final Map<String, HeaderDefinition> definitions,
             final Charset encoding,
             final String[] keywords,
-            final DocumentPropertiesLoader documentPropertiesLoader
-    ) {
+            final DocumentPropertiesLoader documentPropertiesLoader) {
         this.mapping = mapping;
         this.definitions = definitions;
         this.basedir = basedir;
@@ -68,11 +67,6 @@ public final class DocumentFactory {
         }
 
         return new Document(
-                new File(basedir, file),
-                definitions.get(headerType),
-                encoding,
-                keywords,
-                documentPropertiesLoader);
+                new File(basedir, file), definitions.get(headerType), encoding, keywords, documentPropertiesLoader);
     }
-
 }

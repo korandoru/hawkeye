@@ -33,7 +33,7 @@ class DocumentTest {
                 new File("src/test/resources/doc/doc1.txt"),
                 DocumentType.TXT.getDefaultHeaderType().getDefinition(),
                 StandardCharsets.UTF_8,
-                new String[]{"copyright"},
+                new String[] {"copyright"},
                 d -> Map.of("year", "2008"));
         assertThat(doc.getFile().getName()).isEqualTo("doc1.txt");
         assertThat(doc.isNotSupported()).isFalse();
@@ -45,7 +45,7 @@ class DocumentTest {
                 new File("src/test/resources/doc/doc1.txt"),
                 DocumentType.UNKNOWN.getDefaultHeaderType().getDefinition(),
                 StandardCharsets.UTF_8,
-                new String[]{"copyright"},
+                new String[] {"copyright"},
                 d -> Map.of("year", "2008"));
         assertThat(doc.getFile().getName()).isEqualTo("doc1.txt");
         assertThat(doc.isNotSupported()).isTrue();
@@ -57,21 +57,23 @@ class DocumentTest {
                 new File("src/test/resources/doc/doc1.txt"),
                 DocumentType.TXT.getDefaultHeaderType().getDefinition(),
                 StandardCharsets.UTF_8,
-                new String[]{"copyright"},
+                new String[] {"copyright"},
                 d -> Map.of("year", "2008"));
-        final Header header = new Header(new UrlHeaderSource(new File("src/test/resources/test-header1.txt").toURI().toURL()));
+        final Header header = new Header(new UrlHeaderSource(
+                new File("src/test/resources/test-header1.txt").toURI().toURL()));
         assertThat(doc.hasHeader(header, true)).isFalse();
     }
 
     @Test
     void testIsHeader() throws Exception {
-        final Header header = new Header(new UrlHeaderSource(new File("src/test/resources/test-header1.txt").toURI().toURL()));
+        final Header header = new Header(new UrlHeaderSource(
+                new File("src/test/resources/test-header1.txt").toURI().toURL()));
         {
             final Document doc = new Document(
                     new File("src/test/resources/doc/doc1.txt"),
                     DocumentType.TXT.getDefaultHeaderType().getDefinition(),
                     StandardCharsets.UTF_8,
-                    new String[]{"copyright"},
+                    new String[] {"copyright"},
                     d -> Map.of("year", "2008"));
             assertThat(doc.is(header)).isFalse();
         }
@@ -80,7 +82,7 @@ class DocumentTest {
                     new File("src/test/resources/test-header1.txt"),
                     DocumentType.TXT.getDefaultHeaderType().getDefinition(),
                     StandardCharsets.UTF_8,
-                    new String[]{"copyright"},
+                    new String[] {"copyright"},
                     d -> Map.of("year", "2008"));
             assertThat(doc.is(header)).isTrue();
         }
@@ -93,17 +95,19 @@ class DocumentTest {
                     new File("src/test/resources/doc/doc1.txt"),
                     DocumentType.TXT.getDefaultHeaderType().getDefinition(),
                     StandardCharsets.UTF_8,
-                    new String[]{"copyright"},
+                    new String[] {"copyright"},
                     d -> Map.of("year", "2008"));
             doc.removeHeader();
-            assertThat(doc.getContent()).isEqualTo(FileUtils.readFileToString(new File("src/test/resources/doc/doc1.txt"), StandardCharsets.UTF_8));
+            assertThat(doc.getContent())
+                    .isEqualTo(FileUtils.readFileToString(
+                            new File("src/test/resources/doc/doc1.txt"), StandardCharsets.UTF_8));
         }
         {
             final Document doc = new Document(
                     new File("src/test/resources/doc/doc2.txt"),
                     DocumentType.TXT.getDefaultHeaderType().getDefinition(),
                     StandardCharsets.UTF_8,
-                    new String[]{"copyright"},
+                    new String[] {"copyright"},
                     d -> Map.of("year", "2008"));
             doc.removeHeader();
             assertThat(doc.getContent()).isEqualTo("some data\r\n");
@@ -113,7 +117,7 @@ class DocumentTest {
                     new File("src/test/resources/doc/doc3.txt"),
                     DocumentType.TXT.getDefaultHeaderType().getDefinition(),
                     StandardCharsets.UTF_8,
-                    new String[]{"copyright"},
+                    new String[] {"copyright"},
                     d -> Map.of("year", "2008"));
             doc.removeHeader();
             assertThat(doc.getContent()).isEqualTo("some data\r\nand other data\r\n");
@@ -127,7 +131,7 @@ class DocumentTest {
                     new File("src/test/resources/doc/doc4.xml"),
                     DocumentType.XML.getDefaultHeaderType().getDefinition(),
                     StandardCharsets.UTF_8,
-                    new String[]{"copyright"},
+                    new String[] {"copyright"},
                     d -> Map.of("year", "2008"));
             doc.removeHeader();
             assertThat(doc.getContent()).isEqualTo("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\r\n<web-app/>\r\n");
@@ -137,17 +141,18 @@ class DocumentTest {
                     new File("src/test/resources/doc/doc5.xml"),
                     DocumentType.XML.getDefaultHeaderType().getDefinition(),
                     StandardCharsets.UTF_8,
-                    new String[]{"copyright"},
+                    new String[] {"copyright"},
                     d -> Map.of("year", "2008"));
             doc.removeHeader();
-            assertThat(doc.getContent()).isEqualTo("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\r\n\r\n<web-app/>\r\n");
+            assertThat(doc.getContent())
+                    .isEqualTo("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\r\n\r\n<web-app/>\r\n");
         }
         {
             final Document doc = new Document(
                     new File("src/test/resources/doc/doc6.xml"),
                     DocumentType.XML.getDefaultHeaderType().getDefinition(),
                     StandardCharsets.UTF_8,
-                    new String[]{"copyright"},
+                    new String[] {"copyright"},
                     d -> Map.of("year", "2008"));
             doc.removeHeader();
             assertThat(doc.getContent()).isEqualTo("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\r\n<web-app/>\r\n");
@@ -156,7 +161,8 @@ class DocumentTest {
             final Document doc = new Document(
                     new File("src/test/resources/doc/doc8.xml"),
                     DocumentType.XML.getDefaultHeaderType().getDefinition(),
-                    StandardCharsets.UTF_8, new String[]{"copyright"},
+                    StandardCharsets.UTF_8,
+                    new String[] {"copyright"},
                     d -> Map.of("year", "2008"));
             doc.removeHeader();
             assertThat(doc.getContent()).contains("no key word");
@@ -165,10 +171,13 @@ class DocumentTest {
             final Document doc = new Document(
                     new File("src/test/resources/doc/doc9.xml"),
                     DocumentType.XML.getDefaultHeaderType().getDefinition(),
-                    StandardCharsets.UTF_8, new String[]{"copyright"},
+                    StandardCharsets.UTF_8,
+                    new String[] {"copyright"},
                     d -> Map.of("year", "2008"));
             doc.removeHeader();
-            assertThat(doc.getContent()).isEqualTo("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\r\n\r\n\r\n\r\n<web-app>\r\n\r\n</web-app>\r\n");
+            assertThat(doc.getContent())
+                    .isEqualTo(
+                            "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\r\n\r\n\r\n\r\n<web-app>\r\n\r\n</web-app>\r\n");
         }
     }
 }

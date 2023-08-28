@@ -26,7 +26,7 @@ public class HeaderStylesModel {
 
     public Map<String, HeaderDefinition> toHeaderDefinitions() {
         final Map<String, HeaderDefinition> result = new HashMap<>();
-        for (String name: models.keySet()){
+        for (String name : models.keySet()) {
             final HeaderStyleModel model = models.get(name);
             result.put(name, model.toHeaderDefinition(name));
         }

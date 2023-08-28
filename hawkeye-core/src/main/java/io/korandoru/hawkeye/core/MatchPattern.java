@@ -28,6 +28,7 @@ public final class MatchPattern {
     private final boolean dirOnly;
     private final List<String> patternParts;
     private final String patternOrigin;
+
     private MatchPattern(String patternOrigin, List<String> patternParts, boolean dirOnly, boolean reverse) {
         this.patternOrigin = patternOrigin;
         this.patternParts = patternParts;
@@ -299,5 +300,4 @@ public final class MatchPattern {
         }
         return true;
     }
-
 }

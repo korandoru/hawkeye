@@ -25,5 +25,4 @@ class HeaderTypeTest {
     void testDefaultDefinitions() {
         assertThat(HeaderType.defaultDefinitions()).hasSize(HeaderType.values().length);
     }
-
 }

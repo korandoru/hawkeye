@@ -30,8 +30,7 @@ import picocli.CommandLine;
         name = "check",
         versionProvider = HawkEyeVersionProvider.class,
         mixinStandardHelpOptions = true,
-        description = "Check license headers."
-)
+        description = "Check license headers.")
 @Slf4j
 public class HawkEyeCommandCheck implements Callable<Integer> {
 
