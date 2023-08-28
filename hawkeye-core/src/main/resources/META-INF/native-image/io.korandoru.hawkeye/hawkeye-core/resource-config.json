@@ -3,6 +3,9 @@
     "includes": [
       {
         "pattern": ".*\\.txt"
+      },
+      {
+        "pattern": "hawkeye.properties"
       }
     ]
   }

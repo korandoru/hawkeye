@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package io.korandoru.hawkeye.command;
+package io.korandoru.hawkeye.core;
 
-import java.io.File;
-import picocli.CommandLine;
+import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
-@CommandLine.Command
-public class CommandOptions {
-    @CommandLine.Option(names = "--config", description = "path to the config file", defaultValue = "licenserc.toml")
-    public File config;
+class ConstantsTest {
+    @Test
+    void testVersion() {
+        assertThat(Constants.VERSION).isNotEqualTo(Constants.UNKNOWN);
+    }
 }
