@@ -59,7 +59,7 @@
         <module>hawkeye-command</module>
         <module>hawkeye-core</module>
         <module>hawkeye-native</module>
-        <module>hawkeve-maven-plugin</module>
+        <module>hawkeye-maven-plugin</module>
     </modules>
 
     <properties>
