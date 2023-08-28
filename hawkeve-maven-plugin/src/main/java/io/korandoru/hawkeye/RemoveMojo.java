@@ -20,11 +20,10 @@ import io.korandoru.hawkeye.core.LicenseRemover;
 import io.korandoru.hawkeye.core.config.HawkEyeConfig;
 import io.korandoru.hawkeye.core.report.Report;
 import io.korandoru.hawkeye.core.report.ReportConstants;
-import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugins.annotations.Mojo;
-
 import java.util.List;
 import java.util.Map;
+import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugins.annotations.Mojo;
 
 @Mojo(name = "remove")
 public class RemoveMojo extends AbstractMojo {

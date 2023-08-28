@@ -16,13 +16,13 @@
 
 package io.korandoru.hawkeye;
 
-import org.apache.maven.plugins.annotations.Parameter;
-
 import java.io.File;
+import org.apache.maven.plugins.annotations.Parameter;
 
 abstract class AbstractMojo extends org.apache.maven.plugin.AbstractMojo {
     @Parameter(name = "config", alias = "cfg", defaultValue = "${project.basedir}/licenserc.toml")
     public File config;
+
     @Parameter(name = "dryRun", defaultValue = "false")
     public boolean dryRun;
 }

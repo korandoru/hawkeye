@@ -20,12 +20,11 @@ import io.korandoru.hawkeye.core.LicenseChecker;
 import io.korandoru.hawkeye.core.config.HawkEyeConfig;
 import io.korandoru.hawkeye.core.report.Report;
 import io.korandoru.hawkeye.core.report.ReportConstants;
+import java.util.List;
+import java.util.Map;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Mojo;
-
-import java.util.List;
-import java.util.Map;
 
 @Mojo(name = "check")
 public class CheckMojo extends AbstractMojo {
