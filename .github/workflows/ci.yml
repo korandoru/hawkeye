@@ -116,7 +116,9 @@ jobs:
           tags: ${{matrix.name}}:ci
           outputs: type=docker
       - name: Sanity check
-        run: docker run --rm -v $(pwd):/github/workspace ${{matrix.name}}:ci check
+        run: |
+          docker run --rm -v $(pwd):/github/workspace ${{matrix.name}}:ci -V
+          docker run --rm -v $(pwd):/github/workspace ${{matrix.name}}:ci check
 
   required:
     name: Required

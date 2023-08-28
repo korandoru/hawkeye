@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package io.korandoru.hawkeye.command;
+package io.korandoru.hawkeye.core;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.Properties;
+import lombok.experimental.UtilityClass;
 
-public final class CommandConstants {
+@UtilityClass
+public class Constants {
     public static final String UNKNOWN = "<unknown>";
     public static final String VERSION;
 
     static {
-        ClassLoader classLoader = CommandConstants.class.getClassLoader();
+        ClassLoader classLoader = Constants.class.getClassLoader();
         try (InputStream is = classLoader.getResourceAsStream("hawkeye.properties")) {
             final Properties properties = new Properties();
             properties.load(is);
