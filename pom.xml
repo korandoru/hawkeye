@@ -21,7 +21,7 @@
 
     <groupId>io.korandoru.hawkeye</groupId>
     <artifactId>hawkeye</artifactId>
-    <version>3.1.1-SNAPSHOT</version>
+    <version>3.2.0</version>
 
     <name>HawkEye</name>
     <description>Simple license header checker and formatter</description>
@@ -51,7 +51,7 @@
         <connection>scm:git:https://github.com/korandoru/hawkeye.git</connection>
         <developerConnection>scm:git:https://github.com/korandoru/hawkeye.git</developerConnection>
         <url>https://github.com/korandoru/hawkeye</url>
-        <tag>HEAD</tag>
+        <tag>v3.2.0</tag>
     </scm>
 
     <modules>
