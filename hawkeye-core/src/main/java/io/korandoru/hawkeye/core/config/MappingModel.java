@@ -32,5 +32,4 @@ public class MappingModel {
 
     @Builder.Default
     private final List<String> filenames = Collections.emptyList();
-
 }

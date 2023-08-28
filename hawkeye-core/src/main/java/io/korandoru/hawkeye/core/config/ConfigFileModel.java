@@ -31,24 +31,34 @@ class ConfigFileModel {
 
     @Builder.Default
     private final Path baseDir = Path.of(".");
+
     private final String inlineHeader;
     private final String headerPath;
+
     @Builder.Default
     private final List<String> additionalHeaders = Collections.emptyList();
+
     @Builder.Default
     private final boolean strictCheck = true;
+
     @Builder.Default
     private final boolean useDefaultExcludes = true;
+
     @Builder.Default
     private final boolean useDefaultMapping = true;
+
     @Builder.Default
     private final List<String> includes = Collections.emptyList();
+
     @Builder.Default
     private final List<String> excludes = Collections.emptyList();
+
     @Builder.Default
     private final List<String> keywords = Collections.singletonList("copyright");
+
     @Builder.Default
     private final Map<String, String> properties = Collections.emptyMap();
+
     @Builder.Default
     private final MappingsModel mapping = new MappingsModel();
 }

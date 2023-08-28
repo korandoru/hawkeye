@@ -53,5 +53,4 @@ class FileContentTest {
         c.removeDuplicatedEmptyEndLines();
         Assertions.assertEquals("\r\n", c.getContent());
     }
-
 }

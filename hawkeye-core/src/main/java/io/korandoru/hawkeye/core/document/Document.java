@@ -34,13 +34,20 @@ import org.apache.commons.text.StringSubstitutor;
 public final class Document {
     @Getter
     private final File file;
+
     @Getter
     private final HeaderDefinition headerDefinition;
+
     private final Charset encoding;
     private final DocumentPropertiesLoader documentPropertiesLoader;
     private final HeaderParser parser;
 
-    public Document(File file, HeaderDefinition headerDefinition, Charset encoding, String[] keywords, DocumentPropertiesLoader documentPropertiesLoader) {
+    public Document(
+            File file,
+            HeaderDefinition headerDefinition,
+            Charset encoding,
+            String[] keywords,
+            DocumentPropertiesLoader documentPropertiesLoader) {
         this.file = file;
         this.headerDefinition = headerDefinition;
         this.encoding = encoding;
@@ -53,7 +60,8 @@ public final class Document {
     }
 
     public boolean isNotSupported() {
-        return headerDefinition == null || HeaderType.UNKNOWN.getDefinition().getType().equals(headerDefinition.getType());
+        return headerDefinition == null
+                || HeaderType.UNKNOWN.getDefinition().getType().equals(headerDefinition.getType());
     }
 
     @SneakyThrows
@@ -68,8 +76,7 @@ public final class Document {
     }
 
     private String readFileHeaderOnOneLine(Header header) throws IOException {
-        final String firstLines = FileUtils.readLines(file, encoding)
-                .stream()
+        final String firstLines = FileUtils.readLines(file, encoding).stream()
                 .limit(header.getHeaderContentLines().length + 10)
                 .collect(Collectors.joining());
         String fileHeader = firstLines.strip();

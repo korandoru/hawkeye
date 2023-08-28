@@ -56,7 +56,11 @@ public final class Header {
         this.headerContent = location.getContent();
         this.headerContentLines = location.getContent().lines().toArray(String[]::new);
         this.headerContentOneLine = StringUtils.deleteWhitespace(this.headerContent);
-        this.maxLength = location.getContent().lines().map(String::length).max(Integer::compareTo).orElse(0);
+        this.maxLength = location.getContent()
+                .lines()
+                .map(String::length)
+                .max(Integer::compareTo)
+                .orElse(0);
         this.endOfLine = endOfLine;
         this.substitutor = buildEndOfLineSubstitutor(endOfLine);
     }
@@ -104,8 +108,7 @@ public final class Header {
     }
 
     public boolean isMatchForText(Document d, HeaderDefinition headerDefinition, Charset encoding) throws IOException {
-        final String firstLines = FileUtils.readLines(d.getFile(), encoding)
-                .stream()
+        final String firstLines = FileUtils.readLines(d.getFile(), encoding).stream()
                 .limit(headerContentLines.length + 10)
                 .collect(Collectors.joining("\n", "", "\n\n"));
         final String fileHeader = firstLines.replaceAll(" *\r?\n", "\n");

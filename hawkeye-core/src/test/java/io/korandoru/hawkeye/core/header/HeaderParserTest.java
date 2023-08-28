@@ -26,7 +26,8 @@ class HeaderParserTest {
     @Test
     void testNoHeader() {
         final FileContent content = new FileContent(new File("src/test/resources/doc/doc1.txt"));
-        final HeaderParser parser = new HeaderParser(content, HeaderType.TEXT.getDefinition(), new String[]{"copyright"});
+        final HeaderParser parser =
+                new HeaderParser(content, HeaderType.TEXT.getDefinition(), new String[] {"copyright"});
         assertThat(parser.isExistingHeader()).isFalse();
     }
 
@@ -34,14 +35,16 @@ class HeaderParserTest {
     void testHasHeader() {
         {
             final FileContent content = new FileContent(new File("src/test/resources/doc/doc2.txt"));
-            final HeaderParser parser = new HeaderParser(content, HeaderType.TEXT.getDefinition(), new String[]{"copyright"});
+            final HeaderParser parser =
+                    new HeaderParser(content, HeaderType.TEXT.getDefinition(), new String[] {"copyright"});
             assertThat(parser.isExistingHeader()).isTrue();
             assertThat(parser.getBeginPosition()).isEqualTo(0);
             assertThat(parser.getEndPosition()).isEqualTo(43);
         }
         {
             final FileContent content = new FileContent(new File("src/test/resources/doc/doc3.txt"));
-            final HeaderParser parser = new HeaderParser(content, HeaderType.TEXT.getDefinition(), new String[]{"copyright"});
+            final HeaderParser parser =
+                    new HeaderParser(content, HeaderType.TEXT.getDefinition(), new String[] {"copyright"});
             assertThat(parser.isExistingHeader()).isTrue();
             assertThat(parser.getBeginPosition()).isEqualTo(0);
             assertThat(parser.getEndPosition()).isEqualTo(49);
@@ -52,36 +55,42 @@ class HeaderParserTest {
     void testParsingXML() {
         {
             final FileContent content = new FileContent(new File("src/test/resources/doc/doc4.xml"));
-            final HeaderParser parser = new HeaderParser(content, HeaderType.XML_STYLE.getDefinition(), new String[]{"copyright"});
+            final HeaderParser parser =
+                    new HeaderParser(content, HeaderType.XML_STYLE.getDefinition(), new String[] {"copyright"});
             assertThat(parser.isExistingHeader()).isTrue();
             assertThat(parser.getBeginPosition()).isEqualTo(45);
             assertThat(parser.getEndPosition()).isEqualTo(862);
         }
         {
             final FileContent content = new FileContent(new File("src/test/resources/doc/doc5.xml"));
-            final HeaderParser parser = new HeaderParser(content, HeaderType.XML_STYLE.getDefinition(), new String[]{"copyright"});
+            final HeaderParser parser =
+                    new HeaderParser(content, HeaderType.XML_STYLE.getDefinition(), new String[] {"copyright"});
             assertThat(parser.isExistingHeader()).isTrue();
             assertThat(parser.getBeginPosition()).isEqualTo(45);
             assertThat(parser.getEndPosition()).isEqualTo(864);
         }
         {
             final FileContent content = new FileContent(new File("src/test/resources/doc/doc6.xml"));
-            final HeaderParser parser = new HeaderParser(content, HeaderType.XML_STYLE.getDefinition(), new String[]{"copyright"});
+            final HeaderParser parser =
+                    new HeaderParser(content, HeaderType.XML_STYLE.getDefinition(), new String[] {"copyright"});
             assertThat(parser.isExistingHeader()).isFalse();
         }
         {
             final FileContent content = new FileContent(new File("src/test/resources/doc/doc7.xml"));
-            final HeaderParser parser = new HeaderParser(content, HeaderType.XML_STYLE.getDefinition(), new String[]{"copyright"});
+            final HeaderParser parser =
+                    new HeaderParser(content, HeaderType.XML_STYLE.getDefinition(), new String[] {"copyright"});
             assertThat(parser.isExistingHeader()).isFalse();
         }
         {
             final FileContent content = new FileContent(new File("src/test/resources/doc/doc8.xml"));
-            final HeaderParser parser = new HeaderParser(content, HeaderType.XML_STYLE.getDefinition(), new String[]{"copyright"});
+            final HeaderParser parser =
+                    new HeaderParser(content, HeaderType.XML_STYLE.getDefinition(), new String[] {"copyright"});
             assertThat(parser.isExistingHeader()).isFalse();
         }
         {
             final FileContent content = new FileContent(new File("src/test/resources/doc/doc9.xml"));
-            final HeaderParser parser = new HeaderParser(content, HeaderType.XML_STYLE.getDefinition(), new String[]{"copyright"});
+            final HeaderParser parser =
+                    new HeaderParser(content, HeaderType.XML_STYLE.getDefinition(), new String[] {"copyright"});
             assertThat(parser.isExistingHeader()).isTrue();
             assertThat(parser.getBeginPosition()).isEqualTo(45);
             assertThat(parser.getEndPosition()).isEqualTo(864);

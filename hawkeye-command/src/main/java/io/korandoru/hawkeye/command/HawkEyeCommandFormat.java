@@ -30,8 +30,7 @@ import picocli.CommandLine;
         name = "format",
         versionProvider = HawkEyeVersionProvider.class,
         mixinStandardHelpOptions = true,
-        description = "Format license headers."
-)
+        description = "Format license headers.")
 @Slf4j
 public class HawkEyeCommandFormat implements Callable<Integer> {
 
@@ -43,7 +42,8 @@ public class HawkEyeCommandFormat implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        final HawkEyeConfig config = HawkEyeConfig.of(options.config).dryRun(dryRun).build();
+        final HawkEyeConfig config =
+                HawkEyeConfig.of(options.config).dryRun(dryRun).build();
         final LicenseFormatter formatter = new LicenseFormatter(config);
         final Report report = formatter.call();
 

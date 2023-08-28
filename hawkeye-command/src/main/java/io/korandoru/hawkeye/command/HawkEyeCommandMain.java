@@ -22,17 +22,11 @@ import picocli.CommandLine;
         name = "hawkeye",
         versionProvider = HawkEyeVersionProvider.class,
         mixinStandardHelpOptions = true,
-        subcommands = {
-                HawkEyeCommandCheck.class,
-                HawkEyeCommandFormat.class,
-                HawkEyeCommandRemove.class
-        }
-)
+        subcommands = {HawkEyeCommandCheck.class, HawkEyeCommandFormat.class, HawkEyeCommandRemove.class})
 public class HawkEyeCommandMain {
 
     @SuppressWarnings("InstantiationOfUtilityClass")
     public static void main(String[] args) {
         System.exit(new CommandLine(new HawkEyeCommandMain()).execute(args));
     }
-
 }

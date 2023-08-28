@@ -37,5 +37,4 @@ public class LicenseProcessUtils {
 
         log.info("Result saved to: {}", copy);
     }
-
 }

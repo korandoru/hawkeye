@@ -131,7 +131,6 @@ public enum DocumentType {
     private final boolean extension;
     private final boolean filename;
 
-
     DocumentType(String patten, HeaderType defaultHeaderType, boolean extension, boolean filename) {
         this.patten = patten;
         this.defaultHeaderType = defaultHeaderType;

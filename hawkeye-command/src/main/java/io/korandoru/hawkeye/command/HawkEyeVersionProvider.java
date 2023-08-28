@@ -22,6 +22,6 @@ import picocli.CommandLine;
 public class HawkEyeVersionProvider implements CommandLine.IVersionProvider {
     @Override
     public String[] getVersion() {
-        return new String[] { Constants.VERSION };
+        return new String[] {Constants.VERSION};
     }
 }

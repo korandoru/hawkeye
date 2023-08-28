@@ -30,8 +30,7 @@ import picocli.CommandLine;
         name = "remove",
         versionProvider = HawkEyeVersionProvider.class,
         mixinStandardHelpOptions = true,
-        description = "Remove license headers."
-)
+        description = "Remove license headers.")
 @Slf4j
 public class HawkEyeCommandRemove implements Callable<Integer> {
 
@@ -43,7 +42,8 @@ public class HawkEyeCommandRemove implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        final HawkEyeConfig config = HawkEyeConfig.of(options.config).dryRun(dryRun).build();
+        final HawkEyeConfig config =
+                HawkEyeConfig.of(options.config).dryRun(dryRun).build();
         final LicenseRemover remover = new LicenseRemover(config);
         final Report report = remover.call();
 

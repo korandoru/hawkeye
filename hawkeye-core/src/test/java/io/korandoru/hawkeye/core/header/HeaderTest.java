@@ -32,7 +32,8 @@ class HeaderTest {
         final Header header = new Header(source, "\r\n");
         assertThat(header.getHeaderContentLines()).hasSize(13);
         assertThat(header.getHeaderContentOneLine()).contains("${year}");
-        assertThat(header.getLocation().isFromUrl(getClass().getResource("/test-header1.txt"))).isTrue();
+        assertThat(header.getLocation().isFromUrl(getClass().getResource("/test-header1.txt")))
+                .isTrue();
 
         final File file = new File("src/test/resources/test-header2.txt");
         final String content = IOUtils.toString(file.toURI(), StandardCharsets.UTF_8);
