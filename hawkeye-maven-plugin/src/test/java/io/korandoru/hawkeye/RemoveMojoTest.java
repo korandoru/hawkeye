@@ -18,7 +18,6 @@ package io.korandoru.hawkeye;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,15 +29,16 @@ import org.junit.jupiter.api.Test;
 
 class RemoveMojoTest {
 
-  RemoveMojo removeMojo;
-  File tempFile;
+    RemoveMojo removeMojo;
+    File tempFile;
 
-  @BeforeEach
-  void setUp() throws IOException {
-    tempFile = File.createTempFile("test", ".yaml", new File("src/test/resources/test_remove"));
-    assertTrue(tempFile.setWritable(true));
+    @BeforeEach
+    void setUp() throws IOException {
+        tempFile = File.createTempFile("test", ".yaml", new File("src/test/resources/test_remove"));
+        assertTrue(tempFile.setWritable(true));
 
-    final String header = """
+        final String header =
+                """
         # Copyright 2023 Korandoru Contributors
         #
         # Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,34 +53,34 @@ class RemoveMojoTest {
         # See the License for the specific language governing permissions and
         # limitations under the License.""";
 
-    final Path path = Paths.get(tempFile.getAbsolutePath());
+        final Path path = Paths.get(tempFile.getAbsolutePath());
 
-    Files.write(path, header.getBytes());
+        Files.write(path, header.getBytes());
 
-    removeMojo = new RemoveMojo();
-    removeMojo.config = new File("src/test/resources/licenserc_t3.toml");
-  }
+        removeMojo = new RemoveMojo();
+        removeMojo.config = new File("src/test/resources/licenserc_t3.toml");
+    }
 
-  @AfterEach
-  void tearDown() {
-    assertTrue(tempFile.delete());
-  }
+    @AfterEach
+    void tearDown() {
+        assertTrue(tempFile.delete());
+    }
 
-  @Test
-  void executeWithoutDryRun() throws IOException {
-    removeMojo.execute();
+    @Test
+    void executeWithoutDryRun() throws IOException {
+        removeMojo.execute();
 
-    final String content = new String(Files.readAllBytes(tempFile.toPath()));
-    assertFalse(content.contains("Korandoru Contributors"));
-  }
+        final String content = new String(Files.readAllBytes(tempFile.toPath()));
+        assertFalse(content.contains("Korandoru Contributors"));
+    }
 
-  @Test
-  void executeWithDryRun() {
-    removeMojo.dryRun = true;
-    removeMojo.execute();
+    @Test
+    void executeWithDryRun() {
+        removeMojo.dryRun = true;
+        removeMojo.execute();
 
-    final File formatedfile = new File(tempFile.getAbsolutePath() + ".removed");
-    assertTrue(formatedfile.exists());
-    formatedfile.deleteOnExit();
-  }
+        final File formatedfile = new File(tempFile.getAbsolutePath() + ".removed");
+        assertTrue(formatedfile.exists());
+        formatedfile.deleteOnExit();
+    }
 }

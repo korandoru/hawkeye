@@ -18,7 +18,6 @@ package io.korandoru.hawkeye;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.io.File;
 import org.apache.maven.plugin.MojoFailureException;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,19 +25,18 @@ import org.junit.jupiter.api.Test;
 
 class CheckMojoTest {
 
-  CheckMojo checkMojo;
+    CheckMojo checkMojo;
 
-  @BeforeEach
-  void setUp() {
-    checkMojo = new CheckMojo();
-  }
+    @BeforeEach
+    void setUp() {
+        checkMojo = new CheckMojo();
+    }
 
-  @Test
-  void execute() {
-    checkMojo.config = new File("src/test/resources/licenserc_t1.toml");
-    assertDoesNotThrow(() -> checkMojo.execute());
-    checkMojo.config = new File("src/test/resources/licenserc_t2.toml");
-    assertThrows(MojoFailureException.class, () -> checkMojo.execute(),
-        "Missing header files found");
-  }
+    @Test
+    void execute() {
+        checkMojo.config = new File("src/test/resources/licenserc_t1.toml");
+        assertDoesNotThrow(() -> checkMojo.execute());
+        checkMojo.config = new File("src/test/resources/licenserc_t2.toml");
+        assertThrows(MojoFailureException.class, () -> checkMojo.execute(), "Missing header files found");
+    }
 }

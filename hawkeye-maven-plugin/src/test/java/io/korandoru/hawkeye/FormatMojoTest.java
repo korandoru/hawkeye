@@ -17,7 +17,6 @@
 package io.korandoru.hawkeye;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,36 +26,36 @@ import org.junit.jupiter.api.Test;
 
 class FormatMojoTest {
 
-  FormatMojo formatMojo;
-  File tempFile;
+    FormatMojo formatMojo;
+    File tempFile;
 
-  @BeforeEach
-  void setUp() throws IOException {
-    tempFile = File.createTempFile("test", ".yaml", new File("src/test/resources"));
-    assertTrue(tempFile.setWritable(true));
-    formatMojo = new FormatMojo();
-    formatMojo.config = new File("src/test/resources/licenserc_t1.toml");
-  }
+    @BeforeEach
+    void setUp() throws IOException {
+        tempFile = File.createTempFile("test", ".yaml", new File("src/test/resources"));
+        assertTrue(tempFile.setWritable(true));
+        formatMojo = new FormatMojo();
+        formatMojo.config = new File("src/test/resources/licenserc_t1.toml");
+    }
 
-  @AfterEach
-  void tearDown() {
-    assertTrue(tempFile.delete());
-  }
+    @AfterEach
+    void tearDown() {
+        assertTrue(tempFile.delete());
+    }
 
-  @Test
-  void executeWithoutDryRun() throws IOException {
-    formatMojo.execute();
-    final String content = new String(Files.readAllBytes(tempFile.toPath()));
-    assertTrue(content.contains("Korandoru Contributors"));
-  }
+    @Test
+    void executeWithoutDryRun() throws IOException {
+        formatMojo.execute();
+        final String content = new String(Files.readAllBytes(tempFile.toPath()));
+        assertTrue(content.contains("Korandoru Contributors"));
+    }
 
-  @Test
-  void executeWithDryRun() {
-    formatMojo.dryRun = true;
-    formatMojo.execute();
+    @Test
+    void executeWithDryRun() {
+        formatMojo.dryRun = true;
+        formatMojo.execute();
 
-    final File formatedfile = new File(tempFile.getAbsolutePath() + ".formatted");
-    assertTrue(formatedfile.exists());
-    formatedfile.deleteOnExit();
-  }
+        final File formatedfile = new File(tempFile.getAbsolutePath() + ".formatted");
+        assertTrue(formatedfile.exists());
+        formatedfile.deleteOnExit();
+    }
 }
