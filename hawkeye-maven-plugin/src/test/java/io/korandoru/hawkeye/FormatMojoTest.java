@@ -19,9 +19,8 @@ package io.korandoru.hawkeye;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Files;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,14 +44,10 @@ class FormatMojoTest {
   }
 
   @Test
-  void executeWithAddingHeader() {
+  void executeWithoutDryRun() throws IOException {
     formatMojo.execute();
-    try (final InputStream is = new FileInputStream(tempFile)) {
-      final String content = new String(is.readAllBytes());
-      assertTrue(content.contains("Korandoru Contributors"));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    final String content = new String(Files.readAllBytes(tempFile.toPath()));
+    assertTrue(content.contains("Korandoru Contributors"));
   }
 
   @Test
@@ -60,7 +55,7 @@ class FormatMojoTest {
     formatMojo.dryRun = true;
     formatMojo.execute();
 
-    File formatedfile = new File(tempFile.getAbsolutePath() + ".formatted");
+    final File formatedfile = new File(tempFile.getAbsolutePath() + ".formatted");
     assertTrue(formatedfile.exists());
     formatedfile.deleteOnExit();
   }
