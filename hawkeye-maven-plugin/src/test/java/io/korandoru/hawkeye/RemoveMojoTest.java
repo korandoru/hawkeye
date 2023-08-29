@@ -64,7 +64,7 @@ class RemoveMojoTest {
         Files.write(path, header.getBytes());
 
         removeMojo = new RemoveMojo();
-        removeMojo.config = new File("src/test/resources/licenserc_t3.toml");
+        removeMojo.config = new File("src/test/resources/t2.toml");
     }
 
     @AfterEach

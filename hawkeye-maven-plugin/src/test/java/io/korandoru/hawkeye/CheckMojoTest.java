@@ -16,12 +16,14 @@
 
 package io.korandoru.hawkeye;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import java.io.File;
 import org.apache.maven.plugin.MojoFailureException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.io.File;
+import java.io.IOException;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class CheckMojoTest {
 
@@ -30,13 +32,19 @@ class CheckMojoTest {
     @BeforeEach
     void setUp() {
         checkMojo = new CheckMojo();
+        checkMojo.config = new File("src/test/resources/t1.toml");
     }
 
     @Test
     void execute() {
-        checkMojo.config = new File("src/test/resources/licenserc_t1.toml");
         assertDoesNotThrow(() -> checkMojo.execute());
-        checkMojo.config = new File("src/test/resources/licenserc_t2.toml");
+    }
+
+    @Test
+    void executeFailure() throws IOException {
+        final File tempFile = File.createTempFile("test", ".yaml", new File("src/test/resources"));
+        assertTrue(tempFile.setWritable(true));
         assertThrows(MojoFailureException.class, () -> checkMojo.execute(), "Missing header files found");
+        tempFile.deleteOnExit();
     }
 }
