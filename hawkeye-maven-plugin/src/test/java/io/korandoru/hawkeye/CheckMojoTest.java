@@ -16,14 +16,12 @@
 
 package io.korandoru.hawkeye;
 
+import static org.junit.jupiter.api.Assertions.*;
+import java.io.File;
+import java.io.IOException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.io.File;
-import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class CheckMojoTest {
 
