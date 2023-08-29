@@ -19,9 +19,6 @@ headerPath = "Apache-2.0.txt"
 excludes = [
     "**/src/test/**/*.txt",
     "**/src/test/**/*.xml",
-
-    "hawkeye-maven-plugin/src/test/java/io/korandoru/hawkeye/package-info.java",
-    "hawkeye-core/src/main/resources/*.txt",
 ]
 
 [mapping.SCRIPT_STYLE]
