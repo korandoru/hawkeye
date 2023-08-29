@@ -34,7 +34,13 @@ class RemoveMojoTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        tempFile = File.createTempFile("test", ".yaml", new File("src/test/resources/test_remove"));
+
+        final File testDir = new File("src/test/resources/test_remove");
+        if (!testDir.exists()) {
+            assertTrue(testDir.mkdirs());
+        }
+        testDir.deleteOnExit();
+        tempFile = File.createTempFile("test", ".yaml", testDir);
         assertTrue(tempFile.setWritable(true));
 
         final String header =
