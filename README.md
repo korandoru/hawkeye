@@ -86,7 +86,7 @@ mvn hawkeye:check
 
 You can configure a customized location of the `licenserc.toml` file as:
 
-```shell
+```xml
 <plugin>
     <groupId>io.korandoru.hawkeye</groupId>
     <artifactId>hawkeye-maven-plugin</artifactId>
