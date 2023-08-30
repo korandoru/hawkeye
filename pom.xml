@@ -59,12 +59,18 @@
         <module>hawkeye-command</module>
         <module>hawkeye-core</module>
         <module>hawkeye-native</module>
+        <module>hawkeye-maven-plugin</module>
     </modules>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- plugin dependencies -->
+        <maven-plugin-api.version>3.9.4</maven-plugin-api.version>
+        <maven-plugin-annotation.version>3.9.0</maven-plugin-annotation.version>
+        <maven-plugin-plugin.version>3.9.0</maven-plugin-plugin.version>
 
         <!-- lib dependencies -->
         <assertj.version>3.24.2</assertj.version>

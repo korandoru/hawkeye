@@ -112,7 +112,8 @@ public final class Header {
                 .limit(headerContentLines.length + 10)
                 .collect(Collectors.joining("\n", "", "\n\n"));
         final String fileHeader = firstLines.replaceAll(" *\r?\n", "\n");
-        final String expectedHeader = d.mergeProperties(buildForDefinition(headerDefinition));
+        final String expectedHeader =
+                d.mergeProperties(buildForDefinition(headerDefinition)).replaceAll(" *\r?\n", "\n");
         return fileHeader.contains(expectedHeader);
     }
 }
