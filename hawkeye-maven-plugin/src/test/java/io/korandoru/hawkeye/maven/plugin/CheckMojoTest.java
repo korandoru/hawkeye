@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package io.korandoru.hawkeye;
+package io.korandoru.hawkeye.maven.plugin;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -24,8 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class CheckMojoTest {
-
-    CheckMojo checkMojo;
+    private CheckMojo checkMojo;
 
     @BeforeEach
     void setUp() {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.korandoru.hawkeye;
+package io.korandoru.hawkeye.maven.plugin;
 
 import java.io.File;
 import org.apache.maven.plugins.annotations.Parameter;

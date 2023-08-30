@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.korandoru.hawkeye;
+package io.korandoru.hawkeye.maven.plugin;
 
 import io.korandoru.hawkeye.core.LicenseChecker;
 import io.korandoru.hawkeye.core.config.HawkEyeConfig;
