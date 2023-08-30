@@ -67,11 +67,6 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- plugin dependencies -->
-        <maven-plugin-api.version>3.9.4</maven-plugin-api.version>
-        <maven-plugin-annotation.version>3.9.0</maven-plugin-annotation.version>
-        <maven-plugin-plugin.version>3.9.0</maven-plugin-plugin.version>
-
         <!-- lib dependencies -->
         <assertj.version>3.24.2</assertj.version>
         <commons-io.version>2.11.0</commons-io.version>
@@ -82,6 +77,11 @@
         <lombok.version>1.18.26</lombok.version>
         <picocli.version>4.6.3</picocli.version>
         <slf4j.version>1.7.36</slf4j.version>
+
+        <!-- plugin dependencies -->
+        <maven-plugin-api.version>3.9.4</maven-plugin-api.version>
+        <maven-plugin-annotation.version>3.9.0</maven-plugin-annotation.version>
+        <maven-plugin-plugin.version>3.9.0</maven-plugin-plugin.version>
 
         <!-- bundled maven plugins -->
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
@@ -408,5 +408,4 @@
             </build>
         </profile>
     </profiles>
-
 </project>

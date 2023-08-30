@@ -34,7 +34,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.korandoru.hawkeye</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>hawkeye-command</artifactId>
             <version>${project.version}</version>
         </dependency>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.korandoru.hawkeye;
+package io.korandoru.hawkeye.maven.plugin;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -28,13 +28,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class RemoveMojoTest {
-
-    RemoveMojo removeMojo;
-    File tempFile;
+    private RemoveMojo removeMojo;
+    private File tempFile;
 
     @BeforeEach
     void setUp() throws IOException {
-
         final File testDir = new File("src/test/resources/test_remove");
         if (!testDir.exists()) {
             assertTrue(testDir.mkdirs());

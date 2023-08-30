@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.korandoru.hawkeye;
+package io.korandoru.hawkeye.maven.plugin;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.File;
@@ -25,9 +25,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class FormatMojoTest {
-
-    FormatMojo formatMojo;
-    File tempFile;
+    private FormatMojo formatMojo;
+    private File tempFile;
 
     @BeforeEach
     void setUp() throws IOException {

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package io.korandoru.hawkeye;
+package io.korandoru.hawkeye.maven.plugin;
 
-import io.korandoru.hawkeye.core.LicenseFormatter;
+import io.korandoru.hawkeye.core.LicenseRemover;
 import io.korandoru.hawkeye.core.config.HawkEyeConfig;
 import io.korandoru.hawkeye.core.report.Report;
 import io.korandoru.hawkeye.core.report.ReportConstants;
@@ -25,16 +25,16 @@ import java.util.Map;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Mojo;
 
-@Mojo(name = "format")
-public class FormatMojo extends AbstractMojo {
+@Mojo(name = "remove")
+public class RemoveMojo extends AbstractMojo {
     @Override
     public void execute() {
         final Log log = getLog();
-        log.info("Formatting license headers... with cfg: %s, dryRun: %s".formatted(config, dryRun));
+        log.info("Removing license headers... with cfg: %s, dryRun: %s".formatted(config, dryRun));
 
         final HawkEyeConfig heConfig = HawkEyeConfig.of(config).dryRun(dryRun).build();
-        final LicenseFormatter checker = new LicenseFormatter(heConfig);
-        final Report report = checker.call();
+        final LicenseRemover remover = new LicenseRemover(heConfig);
+        final Report report = remover.call();
 
         final List<String> unknownHeaderFiles = report.getResults().entrySet().stream()
                 .filter(e -> ReportConstants.RESULT_UNKNOWN.equals(e.getValue()))
@@ -45,19 +45,18 @@ public class FormatMojo extends AbstractMojo {
             log.warn("Processing unknown file: %s".formatted(unknownHeaderFile));
         }
 
-        final List<Map.Entry<String, String>> updatedHeaderFiles = report.getResults().entrySet().stream()
-                .filter(e -> !ReportConstants.RESULT_UNKNOWN.equals(e.getValue()))
-                .filter(e -> !ReportConstants.RESULT_NOOP.equals(e.getValue()))
+        final List<String> removedHeaderFiles = report.getResults().entrySet().stream()
+                .filter(e -> ReportConstants.RESULT_REMOVED.equals(e.getValue()))
+                .map(Map.Entry::getKey)
                 .toList();
 
-        if (updatedHeaderFiles.isEmpty()) {
-            log.info("All files have proper header.");
+        if (removedHeaderFiles.isEmpty()) {
+            log.info("No file has been removed header.");
             return;
         }
-
         if (!dryRun) {
-            for (Map.Entry<String, String> updatedHeaderFile : updatedHeaderFiles) {
-                log.info("Updated header for file: %s".formatted(updatedHeaderFile.getKey()));
+            for (String removedHeaderFile : removedHeaderFiles) {
+                log.info("Removed header for file: %s".formatted(removedHeaderFile));
             }
         }
     }
