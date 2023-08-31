@@ -25,12 +25,12 @@ import java.util.Map;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Mojo;
 
-@Mojo(name = "format")
+@Mojo(name = "format", aggregator = true)
 public class FormatMojo extends AbstractMojo {
     @Override
     public void execute() {
         final Log log = getLog();
-        log.info("Formatting license headers... with cfg: %s, dryRun: %s".formatted(config, dryRun));
+        log.info("Formatting license headers... with config: %s, dryRun: %s".formatted(config, dryRun));
 
         final HawkEyeConfig heConfig = HawkEyeConfig.of(config).dryRun(dryRun).build();
         final LicenseFormatter checker = new LicenseFormatter(heConfig);
@@ -40,7 +40,6 @@ public class FormatMojo extends AbstractMojo {
                 .filter(e -> ReportConstants.RESULT_UNKNOWN.equals(e.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
-
         for (String unknownHeaderFile : unknownHeaderFiles) {
             log.warn("Processing unknown file: %s".formatted(unknownHeaderFile));
         }
@@ -49,7 +48,6 @@ public class FormatMojo extends AbstractMojo {
                 .filter(e -> !ReportConstants.RESULT_UNKNOWN.equals(e.getValue()))
                 .filter(e -> !ReportConstants.RESULT_NOOP.equals(e.getValue()))
                 .toList();
-
         if (updatedHeaderFiles.isEmpty()) {
             log.info("All files have proper header.");
             return;
