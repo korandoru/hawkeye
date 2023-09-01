@@ -16,19 +16,44 @@
 
 package io.korandoru.hawkeye.maven.plugin;
 
+import io.korandoru.hawkeye.core.config.HawkEyeConfig;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 
 abstract class AbstractMojo extends org.apache.maven.plugin.AbstractMojo {
     /**
      * Location of the `licenserc.toml` file.
      */
-    @Parameter(name = "config", defaultValue = "${project.basedir}/licenserc.toml")
-    public File config;
+    @Parameter(property = "hawkeye.configLocation", defaultValue = "${project.basedir}/licenserc.toml")
+    public File configLocation;
 
     /**
      * Whether to do the real formatting or removal.
      */
-    @Parameter(name = "dryRun", defaultValue = "false")
+    @Parameter(property = "hawkeye.dryRun", defaultValue = "false")
     public boolean dryRun;
+
+    /**
+     * You can set this flag to true if you want to check the headers for all
+     * modules of your project. Only used for multi-modules projects, to check
+     * for example the header licenses from the parent module for all submodules.
+     */
+    @Parameter(property = "hawkeye.aggregate", defaultValue = "false")
+    public boolean aggregate = false;
+
+    @Parameter(defaultValue = "${project}", readonly = true, required = true)
+    public MavenProject project;
+
+    protected HawkEyeConfig.Builder configBuilder() {
+        final List<String> submodulesExcludes = new ArrayList<>();
+        if (project != null && project.getModules() != null && !aggregate) {
+            for (String module : project.getModules()) {
+                submodulesExcludes.add(module + "/**");
+            }
+        }
+        return HawkEyeConfig.of(configLocation).addExcludes(submodulesExcludes);
+    }
 }

@@ -31,7 +31,7 @@ class CheckMojoTest {
     @BeforeEach
     void setUp() {
         checkMojo = new CheckMojo();
-        checkMojo.config = new File("src/test/resources/t1.toml");
+        checkMojo.configLocation = new File("src/test/resources/t1.toml");
     }
 
     @Test

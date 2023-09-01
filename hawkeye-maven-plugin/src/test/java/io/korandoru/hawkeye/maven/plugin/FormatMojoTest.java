@@ -33,7 +33,7 @@ class FormatMojoTest {
         tempFile = File.createTempFile("test", ".yaml", new File("src/test/resources"));
         assertTrue(tempFile.setWritable(true));
         formatMojo = new FormatMojo();
-        formatMojo.config = new File("src/test/resources/t1.toml");
+        formatMojo.configLocation = new File("src/test/resources/t1.toml");
     }
 
     @AfterEach

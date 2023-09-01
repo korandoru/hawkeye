@@ -17,7 +17,6 @@
 package io.korandoru.hawkeye.maven.plugin;
 
 import io.korandoru.hawkeye.core.LicenseRemover;
-import io.korandoru.hawkeye.core.config.HawkEyeConfig;
 import io.korandoru.hawkeye.core.report.Report;
 import io.korandoru.hawkeye.core.report.ReportConstants;
 import java.util.List;
@@ -30,33 +29,28 @@ public class RemoveMojo extends AbstractMojo {
     @Override
     public void execute() {
         final Log log = getLog();
-        log.info("Removing license headers... with config: %s, dryRun: %s".formatted(config, dryRun));
+        log.info("Removing license headers... with config: %s, dryRun: %s".formatted(configLocation, dryRun));
 
-        final HawkEyeConfig heConfig = HawkEyeConfig.of(config).dryRun(dryRun).build();
-        final LicenseRemover remover = new LicenseRemover(heConfig);
+        final LicenseRemover remover = new LicenseRemover(configBuilder().build());
         final Report report = remover.call();
 
         final List<String> unknownHeaderFiles = report.getResults().entrySet().stream()
                 .filter(e -> ReportConstants.RESULT_UNKNOWN.equals(e.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
-        for (String unknownHeaderFile : unknownHeaderFiles) {
-            log.warn("Processing unknown file: %s".formatted(unknownHeaderFile));
-        }
-
         final List<String> removedHeaderFiles = report.getResults().entrySet().stream()
                 .filter(e -> ReportConstants.RESULT_REMOVED.equals(e.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
-        if (removedHeaderFiles.isEmpty()) {
-            log.info("No file has been removed header.");
-            return;
+
+        if (!unknownHeaderFiles.isEmpty()) {
+            log.warn("Processing unknown files: %s".formatted(unknownHeaderFiles));
         }
 
-        if (!dryRun) {
-            for (String removedHeaderFile : removedHeaderFiles) {
-                log.info("Removed header for file: %s".formatted(removedHeaderFile));
-            }
+        if (removedHeaderFiles.isEmpty()) {
+            log.info("No file has been removed header.");
+        } else if (!dryRun) {
+            log.info("Removed header for files: %s".formatted(removedHeaderFiles));
         }
     }
 }
