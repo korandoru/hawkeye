@@ -17,7 +17,6 @@
 package io.korandoru.hawkeye.maven.plugin;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -85,7 +84,7 @@ class RemoveMojoTest {
     @Test
     void executeWithSkip() throws IOException {
         removeMojo.skip = true;
-        assertDoesNotThrow(() -> removeMojo.execute());
+        removeMojo.execute();
 
         final String content = new String(Files.readAllBytes(tempFile.toPath()));
         assertThat(content).contains("Korandoru Contributors");
