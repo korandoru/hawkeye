@@ -33,6 +33,11 @@ public class CheckMojo extends AbstractMojo {
         final Log log = getLog();
         log.info("Checking license headers... with config: %s".formatted(configLocation));
 
+        if (skip) {
+            log.info("Skipping check");
+            return;
+        }
+
         final LicenseChecker checker = new LicenseChecker(configBuilder().build());
         final Report report = checker.call();
 
