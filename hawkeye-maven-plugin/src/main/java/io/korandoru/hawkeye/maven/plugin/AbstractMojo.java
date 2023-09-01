@@ -25,9 +25,15 @@ import org.apache.maven.project.MavenProject;
 
 abstract class AbstractMojo extends org.apache.maven.plugin.AbstractMojo {
     /**
+     * The base directory, in which to search for project files.
+     */
+    @Parameter(property = "hawkeye.basedir", defaultValue = "${project.basedir}", required = true)
+    public File basedir;
+
+    /**
      * Location of the `licenserc.toml` file.
      */
-    @Parameter(property = "hawkeye.configLocation", defaultValue = "${project.basedir}/licenserc.toml")
+    @Parameter(property = "hawkeye.configLocation", defaultValue = "${project.basedir}/licenserc.toml", required = true)
     public File configLocation;
 
     /**
@@ -54,6 +60,8 @@ abstract class AbstractMojo extends org.apache.maven.plugin.AbstractMojo {
                 submodulesExcludes.add(module + "/**");
             }
         }
-        return HawkEyeConfig.of(configLocation).addExcludes(submodulesExcludes);
+        return HawkEyeConfig.of(configLocation)
+                .addExcludes(submodulesExcludes)
+                .baseDir(basedir.toPath());
     }
 }

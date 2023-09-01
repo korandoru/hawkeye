@@ -51,9 +51,11 @@ public class CheckMojo extends AbstractMojo {
 
         if (missingHeaderFiles.isEmpty()) {
             log.info("No missing header file has been found.");
-        } else {
-            log.info("Found missing header files: %s".formatted(missingHeaderFiles));
-            throw new MojoFailureException("Found missing header files.");
+            return;
         }
+        for (String filename: missingHeaderFiles) {
+            log.error("Found missing header files: %s".formatted(filename));
+        }
+        throw new MojoFailureException("Found missing header files.");
     }
 }
