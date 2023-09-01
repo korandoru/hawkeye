@@ -49,6 +49,6 @@ class CheckMojoTest {
         tempFile.deleteOnExit();
         assertThatThrownBy(() -> checkMojo.execute())
                 .isExactlyInstanceOf(MojoFailureException.class)
-                        .hasMessage("Found missing header files.");
+                .hasMessage("Found missing header files.");
     }
 }
