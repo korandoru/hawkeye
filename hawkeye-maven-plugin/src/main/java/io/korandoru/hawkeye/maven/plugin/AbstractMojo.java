@@ -61,6 +61,7 @@ abstract class AbstractMojo extends org.apache.maven.plugin.AbstractMojo {
             }
         }
         return HawkEyeConfig.of(configLocation)
+                .dryRun(dryRun)
                 .addExcludes(submodulesExcludes)
                 .baseDir(basedir.toPath());
     }

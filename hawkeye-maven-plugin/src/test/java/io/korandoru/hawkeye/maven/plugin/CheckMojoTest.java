@@ -16,34 +16,39 @@
 
 package io.korandoru.hawkeye.maven.plugin;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import org.apache.maven.plugin.MojoFailureException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class CheckMojoTest {
     private CheckMojo checkMojo;
 
+    @TempDir
+    private Path tempDir;
+
     @BeforeEach
     void setUp() {
         checkMojo = new CheckMojo();
+        checkMojo.basedir = tempDir.toFile();
         checkMojo.configLocation = new File("src/test/resources/t1.toml");
     }
 
     @Test
-    void execute() {
-        assertDoesNotThrow(() -> checkMojo.execute());
+    void execute() throws Exception {
+        checkMojo.execute();
     }
 
     @Test
     void executeFailure() throws IOException {
-        final File tempFile = File.createTempFile("test", ".yaml", new File("src/test/resources"));
-        assertTrue(tempFile.setWritable(true));
-        assertThrows(MojoFailureException.class, () -> checkMojo.execute(), "Missing header files found");
+        final File tempFile = File.createTempFile("test", ".yaml", tempDir.toFile());
         tempFile.deleteOnExit();
+        assertThatThrownBy(() -> checkMojo.execute())
+                .isExactlyInstanceOf(MojoFailureException.class)
+                        .hasMessage("Found missing header files.");
     }
 }
