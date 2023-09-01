@@ -17,7 +17,6 @@
 package io.korandoru.hawkeye.maven.plugin;
 
 import io.korandoru.hawkeye.core.LicenseFormatter;
-import io.korandoru.hawkeye.core.config.HawkEyeConfig;
 import io.korandoru.hawkeye.core.report.Report;
 import io.korandoru.hawkeye.core.report.ReportConstants;
 import java.util.List;
@@ -30,35 +29,29 @@ public class FormatMojo extends AbstractMojo {
     @Override
     public void execute() {
         final Log log = getLog();
-        log.info("Formatting license headers... with cfg: %s, dryRun: %s".formatted(config, dryRun));
+        log.info("Formatting license headers... with config: %s, dryRun: %s".formatted(configLocation, dryRun));
 
-        final HawkEyeConfig heConfig = HawkEyeConfig.of(config).dryRun(dryRun).build();
-        final LicenseFormatter checker = new LicenseFormatter(heConfig);
-        final Report report = checker.call();
+        final LicenseFormatter formatter = new LicenseFormatter(configBuilder().build());
+        final Report report = formatter.call();
 
         final List<String> unknownHeaderFiles = report.getResults().entrySet().stream()
                 .filter(e -> ReportConstants.RESULT_UNKNOWN.equals(e.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
 
-        for (String unknownHeaderFile : unknownHeaderFiles) {
-            log.warn("Processing unknown file: %s".formatted(unknownHeaderFile));
-        }
-
         final List<Map.Entry<String, String>> updatedHeaderFiles = report.getResults().entrySet().stream()
                 .filter(e -> !ReportConstants.RESULT_UNKNOWN.equals(e.getValue()))
                 .filter(e -> !ReportConstants.RESULT_NOOP.equals(e.getValue()))
                 .toList();
 
-        if (updatedHeaderFiles.isEmpty()) {
-            log.info("All files have proper header.");
-            return;
+        if (!unknownHeaderFiles.isEmpty()) {
+            log.warn("Processing unknown files: %s".formatted(unknownHeaderFiles));
         }
 
-        if (!dryRun) {
-            for (Map.Entry<String, String> updatedHeaderFile : updatedHeaderFiles) {
-                log.info("Updated header for file: %s".formatted(updatedHeaderFile.getKey()));
-            }
+        if (updatedHeaderFiles.isEmpty()) {
+            log.info("All files have proper header.");
+        } else if (!dryRun) {
+            log.info("Updated header for files: %s".formatted(updatedHeaderFiles));
         }
     }
 }

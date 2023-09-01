@@ -20,6 +20,7 @@ import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import io.korandoru.hawkeye.core.mapping.Mapping;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -71,6 +72,12 @@ public class HawkEyeConfig {
     public static final class Builder {
         private Builder() {
             // always use #of methods
+        }
+
+        public HawkEyeConfig.Builder addExcludes(List<String> excludes) {
+            this.excludes = new ArrayList<>(this.excludes);
+            this.excludes.addAll(excludes);
+            return this;
         }
 
         public HawkEyeConfig build() {

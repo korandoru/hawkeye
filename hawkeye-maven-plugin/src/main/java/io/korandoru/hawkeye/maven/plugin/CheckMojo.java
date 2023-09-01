@@ -17,7 +17,6 @@
 package io.korandoru.hawkeye.maven.plugin;
 
 import io.korandoru.hawkeye.core.LicenseChecker;
-import io.korandoru.hawkeye.core.config.HawkEyeConfig;
 import io.korandoru.hawkeye.core.report.Report;
 import io.korandoru.hawkeye.core.report.ReportConstants;
 import java.util.List;
@@ -32,32 +31,31 @@ public class CheckMojo extends AbstractMojo {
     @Override
     public void execute() throws MojoFailureException {
         final Log log = getLog();
-        log.info("Checking license headers... with cfg: %s".formatted(config));
-        final HawkEyeConfig heConfig = HawkEyeConfig.of(config).build();
-        final LicenseChecker checker = new LicenseChecker(heConfig);
+        log.info("Checking license headers... with config: %s".formatted(configLocation));
+
+        final LicenseChecker checker = new LicenseChecker(configBuilder().build());
         final Report report = checker.call();
 
         final List<String> unknownHeaderFiles = report.getResults().entrySet().stream()
                 .filter(e -> ReportConstants.RESULT_UNKNOWN.equals(e.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
-
-        for (String unknownHeaderFile : unknownHeaderFiles) {
-            log.warn("Processing unknown file: %s".formatted(unknownHeaderFile));
-        }
-
         final List<String> missingHeaderFiles = report.getResults().entrySet().stream()
                 .filter(e -> ReportConstants.RESULT_MISSING.equals(e.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
 
+        if (!unknownHeaderFiles.isEmpty()) {
+            log.warn("Processing unknown files: %s".formatted(unknownHeaderFiles));
+        }
+
         if (missingHeaderFiles.isEmpty()) {
             log.info("No missing header file has been found.");
             return;
         }
-        for (String missingHeaderFile : missingHeaderFiles) {
-            log.error("Found missing header file: %s".formatted(missingHeaderFile));
+        for (String filename : missingHeaderFiles) {
+            log.error("Found missing header files: %s".formatted(filename));
         }
-        throw new MojoFailureException("Missing header files found");
+        throw new MojoFailureException("Found missing header files.");
     }
 }

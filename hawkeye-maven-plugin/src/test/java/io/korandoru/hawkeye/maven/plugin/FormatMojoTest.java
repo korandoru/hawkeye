@@ -16,36 +16,35 @@
 
 package io.korandoru.hawkeye.maven.plugin;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import org.junit.jupiter.api.AfterEach;
+import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class FormatMojoTest {
     private FormatMojo formatMojo;
     private File tempFile;
 
+    @TempDir
+    private Path tempDir;
+
     @BeforeEach
     void setUp() throws IOException {
-        tempFile = File.createTempFile("test", ".yaml", new File("src/test/resources"));
-        assertTrue(tempFile.setWritable(true));
+        tempFile = File.createTempFile("test", ".yaml", tempDir.toFile());
         formatMojo = new FormatMojo();
-        formatMojo.config = new File("src/test/resources/t1.toml");
-    }
-
-    @AfterEach
-    void tearDown() {
-        assertTrue(tempFile.delete());
+        formatMojo.basedir = tempDir.toFile();
+        formatMojo.configLocation = new File("src/test/resources/t1.toml");
     }
 
     @Test
     void executeWithoutDryRun() throws IOException {
         formatMojo.execute();
         final String content = new String(Files.readAllBytes(tempFile.toPath()));
-        assertTrue(content.contains("Korandoru Contributors"));
+        assertThat(content).contains("Korandoru Contributors");
     }
 
     @Test
@@ -54,7 +53,6 @@ class FormatMojoTest {
         formatMojo.execute();
 
         final File formatedfile = new File(tempFile.getAbsolutePath() + ".formatted");
-        assertTrue(formatedfile.exists());
-        formatedfile.deleteOnExit();
+        assertThat(formatedfile).exists();
     }
 }

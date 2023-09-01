@@ -62,42 +62,7 @@ docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye check
 
 > :warning: `hawkeye-maven-plugin` is available since 3.3.0, but it's still Alpha which means that the API is subject to change before stable. Mainly, the configuration options may change.
 
-You can integrate HawkEye's functionality with Maven Plugin:
-
-```xml
-<plugin>
-    <groupId>io.korandoru.hawkeye</groupId>
-    <artifactId>hawkeye-maven-plugin</artifactId>
-    <version>${hawkeye.version}</version>
-</plugin>
-```
-
-The plugin provides three goals:
-
-* `check`: Check license headers.
-* `format`: Format license headers (auto-fix all files that failed the check).
-* `remove`: Remove license headers.
-
-With the plugin properly configured, you can run a specific goal as (take `check` as an example):
-
-```shell
-mvn hawkeye:check
-```
-
-You can configure a customized location of the `licenserc.toml` file as:
-
-```xml
-<plugin>
-    <groupId>io.korandoru.hawkeye</groupId>
-    <artifactId>hawkeye-maven-plugin</artifactId>
-    <version>${hawkeye.version}</version>
-    <configuration>
-      <config>${...}</config>
-    </configuration>
-</plugin>
-```
-
-... the default location is `${project.basedir}/licenserc.toml`.
+Read the [dedicated README](hawkeye-maven-plugin/README.md) for HawkEye Maven Plugin.
 
 ### Executable JAR
 

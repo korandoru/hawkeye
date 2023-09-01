@@ -16,30 +16,26 @@
 
 package io.korandoru.hawkeye.maven.plugin;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class RemoveMojoTest {
     private RemoveMojo removeMojo;
     private File tempFile;
 
+    @TempDir
+    private Path tempDir;
+
     @BeforeEach
     void setUp() throws IOException {
-        final File testDir = new File("src/test/resources/test_remove");
-        if (!testDir.exists()) {
-            assertTrue(testDir.mkdirs());
-        }
-        testDir.deleteOnExit();
-        tempFile = File.createTempFile("test", ".yaml", testDir);
-        assertTrue(tempFile.setWritable(true));
+        tempFile = File.createTempFile("test", ".yaml", tempDir.toFile());
 
         final String header =
                 """
@@ -55,19 +51,16 @@ class RemoveMojoTest {
         # distributed under the License is distributed on an "AS IS" BASIS,
         # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
         # See the License for the specific language governing permissions and
-        # limitations under the License.""";
+        # limitations under the License.
+
+        name: testfile""";
 
         final Path path = Paths.get(tempFile.getAbsolutePath());
-
         Files.write(path, header.getBytes());
 
         removeMojo = new RemoveMojo();
-        removeMojo.config = new File("src/test/resources/t2.toml");
-    }
-
-    @AfterEach
-    void tearDown() {
-        assertTrue(tempFile.delete());
+        removeMojo.basedir = tempDir.toFile();
+        removeMojo.configLocation = new File("src/test/resources/t2.toml");
     }
 
     @Test
@@ -75,7 +68,8 @@ class RemoveMojoTest {
         removeMojo.execute();
 
         final String content = new String(Files.readAllBytes(tempFile.toPath()));
-        assertFalse(content.contains("Korandoru Contributors"));
+        assertThat(content).doesNotContain("Korandoru Contributors");
+        assertThat(content).contains("testfile");
     }
 
     @Test
@@ -84,7 +78,6 @@ class RemoveMojoTest {
         removeMojo.execute();
 
         final File formatedfile = new File(tempFile.getAbsolutePath() + ".removed");
-        assertTrue(formatedfile.exists());
-        formatedfile.deleteOnExit();
+        assertThat(formatedfile).exists();
     }
 }

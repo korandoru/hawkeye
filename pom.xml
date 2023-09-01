@@ -79,9 +79,8 @@
         <slf4j.version>1.7.36</slf4j.version>
 
         <!-- plugin dependencies -->
-        <maven-plugin-api.version>3.9.4</maven-plugin-api.version>
-        <maven-plugin-annotation.version>3.9.0</maven-plugin-annotation.version>
-        <maven-plugin-plugin.version>3.9.0</maven-plugin-plugin.version>
+        <maven-core.version>3.9.4</maven-core.version>
+        <maven-plugin-tools.version>3.9.0</maven-plugin-tools.version>
 
         <!-- bundled maven plugins -->
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
