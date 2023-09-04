@@ -29,6 +29,11 @@ public class FormatMojo extends AbstractMojo {
     @Override
     public void execute() {
         final Log log = getLog();
+        if (skip) {
+            log.info("Skipping format");
+            return;
+        }
+
         log.info("Formatting license headers... with config: %s, dryRun: %s".formatted(configLocation, dryRun));
 
         final LicenseFormatter formatter = new LicenseFormatter(configBuilder().build());

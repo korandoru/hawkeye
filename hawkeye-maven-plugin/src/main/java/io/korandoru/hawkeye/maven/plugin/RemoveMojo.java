@@ -29,6 +29,11 @@ public class RemoveMojo extends AbstractMojo {
     @Override
     public void execute() {
         final Log log = getLog();
+        if (skip) {
+            log.info("Skipping remove");
+            return;
+        }
+
         log.info("Removing license headers... with config: %s, dryRun: %s".formatted(configLocation, dryRun));
 
         final LicenseRemover remover = new LicenseRemover(configBuilder().build());

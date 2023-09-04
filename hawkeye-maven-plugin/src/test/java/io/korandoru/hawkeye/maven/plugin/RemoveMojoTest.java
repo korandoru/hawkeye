@@ -80,4 +80,14 @@ class RemoveMojoTest {
         final File formatedfile = new File(tempFile.getAbsolutePath() + ".removed");
         assertThat(formatedfile).exists();
     }
+
+    @Test
+    void executeWithSkip() throws IOException {
+        removeMojo.skip = true;
+        removeMojo.execute();
+
+        final String content = new String(Files.readAllBytes(tempFile.toPath()));
+        assertThat(content).contains("Korandoru Contributors");
+        assertThat(content).contains("testfile");
+    }
 }

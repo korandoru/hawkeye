@@ -55,4 +55,12 @@ class FormatMojoTest {
         final File formatedfile = new File(tempFile.getAbsolutePath() + ".formatted");
         assertThat(formatedfile).exists();
     }
+
+    @Test
+    void executeWithSkip() throws IOException {
+        formatMojo.skip = true;
+        formatMojo.execute();
+        final String content = new String(Files.readAllBytes(tempFile.toPath()));
+        assertThat(content).doesNotContain("Korandoru Contributors");
+    }
 }

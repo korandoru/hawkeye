@@ -31,6 +31,11 @@ public class CheckMojo extends AbstractMojo {
     @Override
     public void execute() throws MojoFailureException {
         final Log log = getLog();
+        if (skip) {
+            log.info("Skipping check");
+            return;
+        }
+
         log.info("Checking license headers... with config: %s".formatted(configLocation));
 
         final LicenseChecker checker = new LicenseChecker(configBuilder().build());

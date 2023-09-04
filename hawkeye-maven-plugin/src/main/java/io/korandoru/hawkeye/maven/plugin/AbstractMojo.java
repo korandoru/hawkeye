@@ -53,6 +53,9 @@ abstract class AbstractMojo extends org.apache.maven.plugin.AbstractMojo {
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     public MavenProject project;
 
+    @Parameter(property = "hawkeye.skip", defaultValue = "false")
+    public boolean skip;
+
     protected HawkEyeConfig.Builder configBuilder() {
         final List<String> submodulesExcludes = new ArrayList<>();
         if (project != null && project.getModules() != null && !aggregate) {
