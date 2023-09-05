@@ -53,6 +53,9 @@ abstract class AbstractMojo extends org.apache.maven.plugin.AbstractMojo {
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     public MavenProject project;
 
+    /**
+     * Whether to skip the plugin execution.
+     */
     @Parameter(property = "hawkeye.skip", defaultValue = "false")
     public boolean skip;
 

@@ -70,20 +70,32 @@ Below are two recommendations for configuring multimodule project.
 
 The HawkEye plugin provides an option named `aggregate` with which you can check the headers for all modules of your project.
 
-You can configure the plugin with `aggregate` for your parent `pom.xml`:
+You can configure the plugin with `aggregate` for your parent `pom.xml` and properly skip all the submodules:
 
 ```xml
 <plugin>
-    <groupId>io.korandoru.hawkeye</groupId>
-    <artifactId>hawkeye-maven-plugin</artifactId>
-    <version>${hawkeye.version}</version>
-    <configuration>
-        <aggregate>true</aggregate>
-    </configuration>
+<groupId>io.korandoru.hawkeye</groupId>
+<artifactId>hawkeye-maven-plugin</artifactId>
+<version>${hawkeye.version}</version>
+<configuration>
+    <aggregate>true</aggregate>
+    <skip>true</skip>
+</configuration>
+<executions>
+    <execution>
+        <id>check-license-header</id>
+        <phase>verify</phase>
+        <goals>
+            <goal>check</goal>
+        </goals>
+        <inherited>false</inherited>
+        <configuration>
+            <skip>false</skip>
+        </configuration>
+    </execution>
+</executions>
 </plugin>
 ```
-
-... and properly skip all the submodules.
 
 You can also run as aggregator from the commandline:
 
