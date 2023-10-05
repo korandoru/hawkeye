@@ -68,7 +68,7 @@ class HawkEyeGradlePluginFunctionalTest {
                         plugins {  id('io.korandoru.hawkeye') }
                         hawkeye {
                             addConfig('src/test/resources/t1.toml') {
-                                baseDir = '%s'
+                                baseDir = $/%s/$
                             }
                         }
                         """
