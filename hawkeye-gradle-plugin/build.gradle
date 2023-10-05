@@ -45,29 +45,9 @@ gradlePlugin {
     plugins {
         hawkeye {
             id = 'io.korandoru.hawkeye'
-            implementationClass = 'io.korandoru.hawkeye.gradle.plugin.HawkeyeGradlePlugin'
+            implementationClass = 'io.korandoru.hawkeye.gradle.plugin.HawkEyeGradlePlugin'
         }
     }
-}
-
-sourceSets {
-    functionalTest {
-    }
-}
-
-configurations.functionalTestImplementation.extendsFrom(configurations.testImplementation)
-configurations.functionalTestRuntimeOnly.extendsFrom(configurations.testRuntimeOnly)
-
-tasks.register('functionalTest', Test) {
-    testClassesDirs = sourceSets.functionalTest.output.classesDirs
-    classpath = sourceSets.functionalTest.runtimeClasspath
-    useJUnitPlatform()
-}
-
-gradlePlugin.testSourceSets.add(sourceSets.functionalTest)
-
-tasks.named('check') {
-    dependsOn(tasks.functionalTest)
 }
 
 tasks.named('test') {

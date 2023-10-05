@@ -18,12 +18,14 @@ package io.korandoru.hawkeye.gradle.plugin;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.plugins.BasePlugin;
 
-public class HawkeyeGradlePlugin implements Plugin<Project> {
+@SuppressWarnings("unused")
+public class HawkEyeGradlePlugin implements Plugin<Project> {
+
+    @Override
     public void apply(Project project) {
-        // Register a task
-        project.getTasks().register("hawkeye", task -> {
-            task.doLast(s -> System.out.println("Hello from plugin 'io.korandoru.hawkeye'"));
-        });
+        project.getPlugins().apply(BasePlugin.class);
+        project.getExtensions().create(HawkEyeExtension.class, HawkEyeExtension.NAME, HawkEyeExtension.class, project);
     }
 }
