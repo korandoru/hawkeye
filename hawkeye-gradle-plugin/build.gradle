@@ -15,7 +15,7 @@
  */
 
 plugins {
-    id 'java-gradle-plugin'
+    id 'com.gradle.plugin-publish' version '1.1.0'
 }
 
 repositories {
@@ -23,8 +23,10 @@ repositories {
     mavenLocal()
 }
 
-sourceCompatibility = '17'
-targetCompatibility = '17'
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
 
 group = "io.korandoru.hawkeye"
 version = {
