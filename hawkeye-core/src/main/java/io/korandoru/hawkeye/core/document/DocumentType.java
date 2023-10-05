@@ -52,6 +52,7 @@ public enum DocumentType {
     FORTRAN("f", HeaderType.EXCLAMATION_STYLE, true, false),
     FREEMARKER("ftl", HeaderType.FTL, true, false),
     GO("go", HeaderType.SLASHSTAR_STYLE, true, false),
+    GRADLE("gradle", HeaderType.SLASHSTAR_STYLE, true, false),
     GROOVY("groovy", HeaderType.SLASHSTAR_STYLE, true, false),
     GSP("GSP", HeaderType.XML_STYLE, true, false),
     H("h", HeaderType.SLASHSTAR_STYLE, true, false),
