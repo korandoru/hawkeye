@@ -21,10 +21,19 @@ excludes = [
     "**/src/test/**/*.xml",
 
     "hawkeye-core/src/main/resources/*.txt",
+
+    # build output - TODO(#20) should be omitted once Git integration landed
+    "hawkeye-gradle-plugin/.gradle",
+    "hawkeye-gradle-plugin/build",
+    "action.yml.bak",
 ]
 
 [mapping.SCRIPT_STYLE]
 filenames = ['Dockerfile.native']
+
+# TODO(trivial) should be moved to default
+[mapping.SLASHSTAR_STYLE]
+extensions = ['gradle']
 
 [properties]
 inceptionYear = 2023
