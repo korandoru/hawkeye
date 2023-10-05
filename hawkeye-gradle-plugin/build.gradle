@@ -4,21 +4,30 @@ plugins {
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 sourceCompatibility = '17'
 targetCompatibility = '17'
 
+group = "io.korandoru.hawkeye"
+version = {
+    def projectRootPOM = layout.projectDirectory.file("../pom.xml")
+    def projectPOMData = new groovy.xml.XmlParser().parse(projectRootPOM.getAsFile())
+    projectPOMData.version.text()
+}()
+
 dependencies {
+    implementation "${project.group}:hawkeye-core:${project.version}"
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.3'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 gradlePlugin {
     plugins {
-        greeting {
-            id = 'io.korandoru.hawkeye.gradle.plugin.greeting'
-            implementationClass = 'io.korandoru.hawkeye.gradle.plugin.HawkeyeGradlePluginPlugin'
+        hawkeye {
+            id = 'io.korandoru.hawkeye'
+            implementationClass = 'io.korandoru.hawkeye.gradle.plugin.HawkeyeGradlePlugin'
         }
     }
 }
@@ -40,11 +49,9 @@ tasks.register('functionalTest', Test) {
 gradlePlugin.testSourceSets.add(sourceSets.functionalTest)
 
 tasks.named('check') {
-    // Run the functional tests as part of `check`
     dependsOn(tasks.functionalTest)
 }
 
 tasks.named('test') {
-    // Use JUnit Jupiter for unit tests.
     useJUnitPlatform()
 }
