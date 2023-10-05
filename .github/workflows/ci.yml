@@ -62,6 +62,8 @@ jobs:
         run: |
           ./mvnw spotless:check
           ./mvnw clean install -DskipTests
+          cd hawkeye-gradle-plugin
+          ./gradlew assemble
 
   unittest:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
@@ -89,7 +91,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - name: Maven verify
-        run: ./mvnw clean verify
+        run: ./mvnw clean verify install
+      - name: Gradle verify
+        working-directory: hawkeye-gradle-plugin
+        run: ./gradlew test
 
   docker:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')

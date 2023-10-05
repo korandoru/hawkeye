@@ -49,7 +49,7 @@ class HawkeyeGradlePluginFunctionalTest {
         GradleRunner runner = GradleRunner.create();
         runner.forwardOutput();
         runner.withPluginClasspath();
-        runner.withArguments("greeting");
+        runner.withArguments("hawkeye");
         runner.withProjectDir(projectDir);
         BuildResult result = runner.build();
 

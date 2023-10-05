@@ -58,7 +58,6 @@
         <module>hawkeye-cli</module>
         <module>hawkeye-command</module>
         <module>hawkeye-core</module>
-        <module>hawkeye-native</module>
         <module>hawkeye-maven-plugin</module>
     </modules>
 
@@ -84,11 +83,11 @@
 
         <!-- bundled maven plugins -->
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
-        <maven-release-plugin.version>3.0.0-M6</maven-release-plugin.version>
+        <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
         <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
-        <maven-scm-plugin.version>2.0.0-M3</maven-scm-plugin.version>
+        <maven-scm-plugin.version>2.0.1</maven-scm-plugin.version>
         <maven-shade-plugin.version>3.4.1</maven-shade-plugin.version>
-        <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
 
         <!-- community maven plugins -->
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
@@ -349,6 +348,17 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>develop</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>hawkeye-gradle-plugin</module>
+                <module>hawkeye-native</module>
+            </modules>
+        </profile>
+
         <profile>
             <id>release</id>
             <build>
