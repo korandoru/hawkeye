@@ -35,3 +35,19 @@ git tag -d v3
 git tag -s -m "alias v3.2.0" v3
 git push v3 -f
 ```
+
+## Gradle Plugin Portal
+
+Prerequisite - set up your Gradle account by reading [the publish plugin guide](https://plugins.gradle.org/docs/publish-plugin).
+
+The HawkEye Gradle plugin is being released after the former Maven Central artifacts released.
+
+Once `vX.Y.Z` is released to Maven Central, the Gradle plugin can be released by:
+
+```shell
+# take v3.5.2 as an example
+git checkout v3.5.2
+cd hawkeye-gradle-plugin
+./gradlew publishPlugins --validate-only
+./gradlew publishPlugins
+```
