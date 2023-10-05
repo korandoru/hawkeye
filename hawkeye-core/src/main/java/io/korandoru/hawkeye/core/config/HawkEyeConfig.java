@@ -74,6 +74,11 @@ public class HawkEyeConfig {
             // always use #of methods
         }
 
+        public HawkEyeConfig.Builder setBaseDir(String baseDir) {
+            this.baseDir = Path.of(baseDir);
+            return this;
+        }
+
         public HawkEyeConfig.Builder addExcludes(List<String> excludes) {
             this.excludes = new ArrayList<>(this.excludes);
             this.excludes.addAll(excludes);
