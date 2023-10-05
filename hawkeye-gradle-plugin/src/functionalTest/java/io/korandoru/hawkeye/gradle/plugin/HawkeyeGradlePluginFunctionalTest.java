@@ -16,7 +16,7 @@
 
 package io.korandoru.hawkeye.gradle.plugin;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -54,7 +54,7 @@ class HawkeyeGradlePluginFunctionalTest {
         BuildResult result = runner.build();
 
         // Verify the result
-        assertTrue(result.getOutput().contains("Hello from plugin 'io.korandoru.hawkeye'"));
+        assertThat(result.getOutput()).contains("Hello from plugin 'io.korandoru.hawkeye'");
     }
 
     private void writeString(File file, String string) throws IOException {

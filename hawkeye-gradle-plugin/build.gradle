@@ -35,7 +35,9 @@ version = {
 
 dependencies {
     implementation "${project.group}:hawkeye-core:${project.version}"
+
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.3'
+    testImplementation 'org.assertj:assertj-core:3.11.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 

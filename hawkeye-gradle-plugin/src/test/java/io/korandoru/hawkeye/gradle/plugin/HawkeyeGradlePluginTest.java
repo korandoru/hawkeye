@@ -16,7 +16,7 @@
 
 package io.korandoru.hawkeye.gradle.plugin;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.gradle.api.Project;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.Test;
@@ -29,6 +29,6 @@ class HawkeyeGradlePluginTest {
         project.getPlugins().apply("io.korandoru.hawkeye");
 
         // Verify the result
-        assertNotNull(project.getTasks().findByName("hawkeye"));
+        assertThat(project.getTasks().findByName("hawkeye")).isNotNull();
     }
 }
