@@ -31,10 +31,6 @@ excludes = [
 [mapping.SCRIPT_STYLE]
 filenames = ['Dockerfile.native']
 
-# TODO(trivial) should be moved to default
-[mapping.SLASHSTAR_STYLE]
-extensions = ['gradle']
-
 [properties]
 inceptionYear = 2023
 copyrightOwner = "Korandoru Contributors"
