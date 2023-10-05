@@ -64,6 +64,12 @@ docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye check
 
 Read the [dedicated README](hawkeye-maven-plugin/README.md) for HawkEye Maven Plugin.
 
+### Gradle Plugin (Alpha)
+
+> :warning: `io.koranduru.hawkeye` Gradle plugin is available since 3.5.2, but it's still Alpha which means that the API is subject to change before stable. Mainly, the extension DSL API may change.
+
+Read the [dedicated README](hawkeye-gradle-plugin/README.md) for HawkEye Gradle Plugin.
+
 ### Executable JAR
 
 The executable JAR requires a preinstalled JRE environment (version >= 17). You can find the binaries at:
