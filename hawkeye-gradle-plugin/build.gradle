@@ -49,10 +49,16 @@ dependencies {
 }
 
 gradlePlugin {
+    website = "https://github.com/korandoru/hawkeye"
+    vcsUrl = "https://github.com/korandoru/hawkeye"
+
     plugins {
         hawkeye {
             id = 'io.korandoru.hawkeye'
             implementationClass = 'io.korandoru.hawkeye.gradle.plugin.HawkEyeGradlePlugin'
+            displayName = 'HawkEye license header plugin'
+            description = 'Integrate HawkEye license header utilities into Gradle plugin system.'
+            tags.set(['format', 'license', 'header', 'style'])
         }
     }
 }
