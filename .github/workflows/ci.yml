@@ -36,10 +36,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.number || github.run_id }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-  checks: write
-
 jobs:
   check:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
@@ -99,9 +95,13 @@ jobs:
       - name: Gradle verify
         working-directory: hawkeye-gradle-plugin
         run: ./gradlew test
-      - name: Publish Test Report
-        if: ${{ success() || failure() }}
-        uses: mikepenz/action-junit-report@v4
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v3
+        if: ${{ always() }}
+        with:
+          name: junit-test-results
+          path: '**/build/test-results/test/TEST-*.xml'
+          retention-days: 1
 
   docker:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
