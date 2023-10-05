@@ -37,15 +37,9 @@ ext {
     assertjVersion = '3.11.1'
     commonsIoVersion = '2.14.0'
     junitVersion = '5.9.3'
-    lombokVersion = '1.18.30'
 }
 
 dependencies {
-    compileOnly "org.projectlombok:lombok:${lombokVersion}"
-    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
-    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
-    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
-
     implementation "${project.group}:hawkeye-core:${project.version}"
 
     testImplementation "commons-io:commons-io:${commonsIoVersion}"
