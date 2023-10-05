@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM eclipse-temurin:17 as build
+FROM public.ecr.aws/docker/library/eclipse-temurin:17 as build
 WORKDIR /build
 COPY . .
 RUN ./mvnw -B -ntp clean package -DskipTests
 
-FROM eclipse-temurin:17-jre
+FROM public.ecr.aws/docker/library/eclipse-temurin:17-jre
 COPY --from=build /build/hawkeye-cli/target/hawkeye.jar /bin/hawkeye
 WORKDIR /github/workspace/
 ENTRYPOINT ["/bin/hawkeye"]
