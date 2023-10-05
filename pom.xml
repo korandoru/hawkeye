@@ -58,7 +58,6 @@
         <module>hawkeye-cli</module>
         <module>hawkeye-command</module>
         <module>hawkeye-core</module>
-        <module>hawkeye-native</module>
         <module>hawkeye-maven-plugin</module>
     </modules>
 
@@ -83,18 +82,19 @@
         <maven-plugin-tools.version>3.9.0</maven-plugin-tools.version>
 
         <!-- bundled maven plugins -->
-        <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
-        <maven-release-plugin.version>3.0.0-M6</maven-release-plugin.version>
-        <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
-        <maven-scm-plugin.version>2.0.0-M3</maven-scm-plugin.version>
+        <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
+        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+        <maven-scm-plugin.version>2.0.1</maven-scm-plugin.version>
         <maven-shade-plugin.version>3.4.1</maven-shade-plugin.version>
-        <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
 
         <!-- community maven plugins -->
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <exec-maven-plugin.version>3.1.0</exec-maven-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
-        <spotless-maven-plugin.version>2.38.0</spotless-maven-plugin.version>
+        <spotless-maven-plugin.version>2.40.0</spotless-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -209,6 +209,11 @@
                     <version>${maven-release-plugin.version}</version>
                 </plugin>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                </plugin>
+                <plugin>
                     <groupId>org.sonatype.plugins</groupId>
                     <artifactId>nexus-staging-maven-plugin</artifactId>
                     <version>${nexus-staging-maven-plugin.version}</version>
@@ -223,6 +228,11 @@
                     <artifactId>build-helper-maven-plugin</artifactId>
                     <version>${build-helper-maven-plugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>${spotless-maven-plugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -235,7 +245,6 @@
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
-                <version>${spotless-maven-plugin.version}</version>
                 <configuration>
                     <formats>
                         <format>
@@ -349,6 +358,17 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>develop</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>hawkeye-gradle-plugin</module>
+                <module>hawkeye-native</module>
+            </modules>
+        </profile>
+
         <profile>
             <id>release</id>
             <build>

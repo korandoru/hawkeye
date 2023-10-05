@@ -12,26 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-baseDir = "."
-
 headerPath = "Apache-2.0.txt"
 
-excludes = [
-    "**/src/test/**/*.txt",
-    "**/src/test/**/*.xml",
+excludes = [".gradle", "build"]
 
-    "hawkeye-core/src/main/resources/*.txt",
-
-    # build output - TODO(#20) should be omitted once Git integration landed
-    "hawkeye-gradle-plugin/.gradle",
-    "hawkeye-gradle-plugin/build",
-    "action.yml.bak",
-]
-
-[mapping.SCRIPT_STYLE]
-filenames = ['Dockerfile.native']
-
-# TODO(trivial) should be moved to default
 [mapping.SLASHSTAR_STYLE]
 extensions = ['gradle']
 

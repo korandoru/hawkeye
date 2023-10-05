@@ -1,0 +1,68 @@
+/*
+ * Copyright 2023 Korandoru Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+plugins {
+    id 'java-gradle-plugin'
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+sourceCompatibility = '17'
+targetCompatibility = '17'
+
+group = "io.korandoru.hawkeye"
+version = {
+    def projectRootPOM = layout.projectDirectory.file("../pom.xml")
+    def projectPOMData = new groovy.xml.XmlParser().parse(projectRootPOM.getAsFile())
+    projectPOMData.version.text()
+}()
+
+ext {
+    assertjVersion = '3.11.1'
+    commonsIoVersion = '2.14.0'
+    junitVersion = '5.9.3'
+}
+
+dependencies {
+    implementation "${project.group}:hawkeye-core:${project.version}"
+
+    testImplementation "commons-io:commons-io:${commonsIoVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testImplementation "org.assertj:assertj-core:${assertjVersion}"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+gradlePlugin {
+    website = "https://github.com/korandoru/hawkeye"
+    vcsUrl = "https://github.com/korandoru/hawkeye"
+
+    plugins {
+        hawkeye {
+            id = 'io.korandoru.hawkeye'
+            implementationClass = 'io.korandoru.hawkeye.gradle.plugin.HawkEyeGradlePlugin'
+            displayName = 'HawkEye license header plugin'
+            description = 'Integrate HawkEye license header utilities into Gradle plugin system.'
+            tags.set(['format', 'license', 'header', 'style'])
+        }
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
