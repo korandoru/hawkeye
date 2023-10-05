@@ -93,7 +93,7 @@
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <exec-maven-plugin.version>3.1.0</exec-maven-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
-        <spotless-maven-plugin.version>2.38.0</spotless-maven-plugin.version>
+        <spotless-maven-plugin.version>2.40.0</spotless-maven-plugin.version>
     </properties>
 
     <dependencyManagement>

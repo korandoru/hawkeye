@@ -42,7 +42,7 @@
                         <id>add-source</id>
                         <phase>generate-sources</phase>
                         <goals>
-                            <goal>add-test-source</goal>
+                            <goal>add-source</goal>
                         </goals>
                         <configuration>
                             <sources>

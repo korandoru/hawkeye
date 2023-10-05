@@ -91,7 +91,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - name: Maven verify
-        run: ./mvnw clean verify install
+        run: ./mvnw clean install
       - name: Gradle verify
         working-directory: hawkeye-gradle-plugin
         run: ./gradlew test

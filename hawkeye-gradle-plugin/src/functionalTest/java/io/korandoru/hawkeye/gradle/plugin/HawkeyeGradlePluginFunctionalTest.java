@@ -38,12 +38,10 @@ class HawkeyeGradlePluginFunctionalTest {
         return new File(projectDir, "settings.gradle");
     }
 
-    @Test void canRunTask() throws IOException {
+    @Test
+    void canRunTask() throws IOException {
         writeString(getSettingsFile(), "");
-        writeString(getBuildFile(),
-            "plugins {" +
-            "  id('io.korandoru.hawkeye')" +
-            "}");
+        writeString(getBuildFile(), "plugins {" + "  id('io.korandoru.hawkeye')" + "}");
 
         // Run the build
         GradleRunner runner = GradleRunner.create();
