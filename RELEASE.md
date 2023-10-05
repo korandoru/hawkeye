@@ -9,13 +9,13 @@ Prerequisite - set up [your OSSRH account](https://central.sonatype.org/publish/
 First, prepare the release:
 
 ```shell
-./mvnw -Prelease,-develop release:prepare
+./mvnw release:prepare
 ```
 
 Second, perform the release:
 
 ```shell
-./mvnw -Prelease,-develop release:perform
+./mvnw release:perform
 ```
 
 This step will publish the artifacts to Maven Central, and create Git tag `vX.Y.Z` locally.
