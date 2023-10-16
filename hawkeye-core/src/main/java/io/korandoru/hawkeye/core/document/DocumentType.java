@@ -96,6 +96,7 @@ public enum DocumentType {
     TLD("tld", HeaderType.XML_STYLE, true, false),
     TOML("toml", HeaderType.SCRIPT_STYLE, true, false),
     TS("ts", HeaderType.SLASHSTAR_STYLE, true, false),
+    TSX("tsx", HeaderType.SLASHSTAR_STYLE, true, false),
     TXT("txt", HeaderType.TEXT, true, false),
     UNKNOWN("", HeaderType.UNKNOWN, true, true),
     VB("bas", HeaderType.HAML_STYLE, true, false),
