@@ -113,6 +113,13 @@ public class Default {
         "**/node/**",
         "**/node_modules/**",
 
+        // Yarn
+        "**/.yarn/**",
+        "**/yarn.lock",
+
+        // Cargo
+        "**/Cargo.lock",
+
         // code coverage tools
         "**/cobertura.ser",
         "**/.clover/**",
