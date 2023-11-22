@@ -117,6 +117,9 @@ public class Default {
         "**/.yarn/**",
         "**/yarn.lock",
 
+        // pnpm
+        "pnpm-lock.yaml",
+
         // Cargo
         "**/Cargo.lock",
 
