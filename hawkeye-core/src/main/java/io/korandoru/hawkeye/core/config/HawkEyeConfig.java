@@ -48,6 +48,8 @@ public class HawkEyeConfig {
     private final Map<String, String> properties;
     private final Set<Mapping> mapping;
 
+    private final GitModel git;
+
     private final boolean dryRun;
 
     @SneakyThrows
@@ -66,7 +68,8 @@ public class HawkEyeConfig {
                 .excludes(model.getExcludes())
                 .keywords(model.getKeywords())
                 .properties(model.getProperties())
-                .mapping(model.getMapping().toMappings());
+                .mapping(model.getMapping().toMappings())
+                .git(model.getGit());
     }
 
     public static final class Builder {
@@ -99,6 +102,7 @@ public class HawkEyeConfig {
                     keywords,
                     properties,
                     mapping,
+                    git,
                     dryRun);
         }
     }

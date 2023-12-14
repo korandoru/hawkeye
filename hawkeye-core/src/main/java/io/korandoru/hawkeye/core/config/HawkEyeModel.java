@@ -61,4 +61,7 @@ class HawkEyeModel {
 
     @Builder.Default
     private final MappingsModel mapping = new MappingsModel();
+
+    @Builder.Default
+    private final GitModel git = GitModel.builder().build();
 }
