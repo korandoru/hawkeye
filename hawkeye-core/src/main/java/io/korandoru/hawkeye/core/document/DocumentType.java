@@ -97,7 +97,6 @@ public enum DocumentType {
     TOML("toml", HeaderType.SCRIPT_STYLE, true, false),
     TS("ts", HeaderType.SLASHSTAR_STYLE, true, false),
     TSX("tsx", HeaderType.SLASHSTAR_STYLE, true, false),
-    TXT("txt", HeaderType.TEXT, true, false),
     UNKNOWN("", HeaderType.UNKNOWN, true, true),
     VB("bas", HeaderType.HAML_STYLE, true, false),
     VBA("vba", HeaderType.APOSTROPHE_STYLE, true, false),

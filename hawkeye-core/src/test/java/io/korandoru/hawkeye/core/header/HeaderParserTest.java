@@ -25,29 +25,29 @@ class HeaderParserTest {
 
     @Test
     void testNoHeader() {
-        final FileContent content = new FileContent(new File("src/test/resources/doc/doc1.txt"));
+        final FileContent content = new FileContent(new File("src/test/resources/doc/doc1.toml"));
         final HeaderParser parser =
-                new HeaderParser(content, HeaderType.TEXT.getDefinition(), new String[] {"copyright"});
+                new HeaderParser(content, HeaderType.SCRIPT_STYLE.getDefinition(), new String[] {"copyright"});
         assertThat(parser.isExistingHeader()).isFalse();
     }
 
     @Test
     void testHasHeader() {
         {
-            final FileContent content = new FileContent(new File("src/test/resources/doc/doc2.txt"));
+            final FileContent content = new FileContent(new File("src/test/resources/doc/doc2.toml"));
             final HeaderParser parser =
-                    new HeaderParser(content, HeaderType.TEXT.getDefinition(), new String[] {"copyright"});
+                    new HeaderParser(content, HeaderType.SCRIPT_STYLE.getDefinition(), new String[] {"copyright"});
             assertThat(parser.isExistingHeader()).isTrue();
             assertThat(parser.getBeginPosition()).isEqualTo(0);
-            assertThat(parser.getEndPosition()).isEqualTo(43);
+            assertThat(parser.getEndPosition()).isEqualTo(29);
         }
         {
-            final FileContent content = new FileContent(new File("src/test/resources/doc/doc3.txt"));
+            final FileContent content = new FileContent(new File("src/test/resources/doc/doc3.toml"));
             final HeaderParser parser =
-                    new HeaderParser(content, HeaderType.TEXT.getDefinition(), new String[] {"copyright"});
+                    new HeaderParser(content, HeaderType.SCRIPT_STYLE.getDefinition(), new String[] {"copyright"});
             assertThat(parser.isExistingHeader()).isTrue();
             assertThat(parser.getBeginPosition()).isEqualTo(0);
-            assertThat(parser.getEndPosition()).isEqualTo(49);
+            assertThat(parser.getEndPosition()).isEqualTo(35);
         }
     }
 

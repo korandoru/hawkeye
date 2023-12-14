@@ -109,7 +109,6 @@ public enum HeaderType {
             true,
             true,
             false),
-    TEXT("====", "    ", "====${eol}", "", null, "====.*$", "====.*$", true, true, false),
     BATCH("@REM", "@REM ", "@REM${eol}", "", null, "@REM.*$", "@REM.*$", false, false, false),
     MUSTACHE_STYLE("{{!", "    ", "}}", "", null, "\\{\\{\\!.*$", "\\}\\}.*$", false, true, false),
     // unknown
