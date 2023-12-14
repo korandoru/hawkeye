@@ -39,15 +39,15 @@ public class HawkEyeExtension {
     private final List<HawkEyeConfig> configs = new ArrayList<>();
     private final Project project;
 
-    public void addConfig(String configFile, Action<HawkEyeConfig.Builder> action) {
-        addConfig(Path.of(configFile), action);
+    public void licenseSet(String configFile, Action<HawkEyeConfig.Builder> action) {
+        licenseSet(Path.of(configFile), action);
     }
 
-    public void addConfig(Path configFile, Action<HawkEyeConfig.Builder> action) {
-        addConfig(configFile.toFile(), action);
+    public void licenseSet(Path configFile, Action<HawkEyeConfig.Builder> action) {
+        licenseSet(configFile.toFile(), action);
     }
 
-    public void addConfig(File configFile, Action<HawkEyeConfig.Builder> action) {
+    public void licenseSet(File configFile, Action<HawkEyeConfig.Builder> action) {
         final HawkEyeConfig.Builder builder = HawkEyeConfig.of(configFile);
         action.execute(builder);
         configs.add(builder.build());
