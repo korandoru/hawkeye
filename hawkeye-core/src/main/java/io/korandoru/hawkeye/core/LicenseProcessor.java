@@ -17,6 +17,7 @@
 package io.korandoru.hawkeye.core;
 
 import com.fasterxml.jackson.dataformat.toml.TomlMapper;
+import io.korandoru.hawkeye.core.config.FeatureGate;
 import io.korandoru.hawkeye.core.config.HawkEyeConfig;
 import io.korandoru.hawkeye.core.config.HeaderStylesModel;
 import io.korandoru.hawkeye.core.document.Document;
@@ -32,19 +33,22 @@ import io.korandoru.hawkeye.core.report.ReportConstants;
 import io.korandoru.hawkeye.core.resource.HeaderSource;
 import io.korandoru.hawkeye.core.resource.ResourceFinder;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Year;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.io.IOUtils;
 
 @RequiredArgsConstructor
 public abstract class LicenseProcessor implements Callable<Report> {
@@ -62,6 +66,22 @@ public abstract class LicenseProcessor implements Callable<Report> {
             throw new IOException(baseDir + " does not exist or is not a directory.");
         }
 
+        final boolean checkIgnored;
+        if (config.getGit().getCheckIgnore() != FeatureGate.DISABLE) {
+            final Process p = new ProcessBuilder()
+                    .directory(baseDir.toFile())
+                    .command("git", "check-ignore", "--help")
+                    .start();
+            final int code = p.waitFor();
+            if (code != 0) {
+                final String error = IOUtils.toString(p.getErrorStream(), StandardCharsets.UTF_8);
+                throw new Exception("cannot perform check-ignore: " + error);
+            }
+            checkIgnored = true;
+        } else {
+            checkIgnored = false;
+        }
+
         final ResourceFinder resourceFinder = new ResourceFinder(baseDir);
         resourceFinder.setPluginClassPath(getClass().getClassLoader());
 
@@ -73,7 +93,8 @@ public abstract class LicenseProcessor implements Callable<Report> {
                 config.getIncludes().toArray(new String[0]),
                 config.getExcludes().toArray(new String[0]),
                 config.isUseDefaultExcludes());
-        final String[] selectedFiles = selection.getSelectedFiles();
+        final Set<String> selectedFiles =
+                Arrays.stream(selection.getSelectedFiles()).collect(Collectors.toSet());
 
         final Set<Mapping> mapping = new HashSet<>(config.getMapping());
         if (config.isUseDefaultMapping()) {
@@ -103,6 +124,20 @@ public abstract class LicenseProcessor implements Callable<Report> {
                 StandardCharsets.UTF_8,
                 config.getKeywords().toArray(new String[0]),
                 propertiesLoader);
+
+        if (checkIgnored) {
+            final Process p = new ProcessBuilder()
+                    .directory(baseDir.toFile())
+                    .command("git", "check-ignore", "--stdin")
+                    .start();
+            try (final OutputStream stream = p.getOutputStream()) {
+                IOUtils.writeLines(selectedFiles, null, stream, StandardCharsets.UTF_8);
+            }
+            final String output = IOUtils.toString(p.getInputStream(), StandardCharsets.UTF_8);
+            final Set<String> ignoredFiles =
+                    Arrays.stream(output.split(System.lineSeparator())).collect(Collectors.toSet());
+            selectedFiles.removeAll(ignoredFiles);
+        }
 
         for (final String file : selectedFiles) {
             final Document document = documentFactory.createDocuments(file);

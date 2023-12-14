@@ -16,6 +16,7 @@
 
 package io.korandoru.hawkeye.core.config;
 
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import io.korandoru.hawkeye.core.mapping.Mapping;
 import java.io.File;
@@ -54,7 +55,9 @@ public class HawkEyeConfig {
 
     @SneakyThrows
     public static Builder of(File source) {
-        final TomlMapper mapper = new TomlMapper();
+        final TomlMapper mapper = TomlMapper.builder()
+                .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
+                .build();
         final HawkEyeModel model = mapper.readValue(source, HawkEyeModel.class);
         final Builder builder = new Builder();
         return builder.baseDir(model.getBaseDir())
