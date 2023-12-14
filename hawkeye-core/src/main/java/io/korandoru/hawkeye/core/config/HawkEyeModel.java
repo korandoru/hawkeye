@@ -27,7 +27,7 @@ import lombok.extern.jackson.Jacksonized;
 @Data
 @Builder
 @Jacksonized
-class ConfigFileModel {
+class HawkEyeModel {
 
     @Builder.Default
     private final Path baseDir = Path.of(".");

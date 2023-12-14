@@ -53,7 +53,7 @@ public class HawkEyeConfig {
     @SneakyThrows
     public static Builder of(File source) {
         final TomlMapper mapper = new TomlMapper();
-        final ConfigFileModel model = mapper.readValue(source, ConfigFileModel.class);
+        final HawkEyeModel model = mapper.readValue(source, HawkEyeModel.class);
         final Builder builder = new Builder();
         return builder.baseDir(model.getBaseDir())
                 .inlineHeader(model.getInlineHeader())
