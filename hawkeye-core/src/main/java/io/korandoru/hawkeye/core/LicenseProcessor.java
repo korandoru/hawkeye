@@ -65,22 +65,7 @@ public abstract class LicenseProcessor implements Callable<Report> {
         if (!Files.isDirectory(baseDir)) {
             throw new IOException(baseDir + " does not exist or is not a directory.");
         }
-
-        final boolean checkIgnored;
-        if (config.getGit().getCheckIgnore() != FeatureGate.DISABLE) {
-            final Process p = new ProcessBuilder()
-                    .directory(baseDir.toFile())
-                    .command("git", "check-ignore", "--help")
-                    .start();
-            final int code = p.waitFor();
-            if (code != 0) {
-                final String error = IOUtils.toString(p.getErrorStream(), StandardCharsets.UTF_8);
-                throw new Exception("cannot perform check-ignore: " + error);
-            }
-            checkIgnored = true;
-        } else {
-            checkIgnored = false;
-        }
+        final boolean checkIgnored = ifCheckIgnored();
 
         final ResourceFinder resourceFinder = new ResourceFinder(baseDir);
         resourceFinder.setPluginClassPath(getClass().getClassLoader());
@@ -160,4 +145,31 @@ public abstract class LicenseProcessor implements Callable<Report> {
     protected abstract void onHeaderNotFound(Document document, Header header, Report report);
 
     protected abstract void onExistingHeader(Document document, Header header, Report report);
+
+    @SneakyThrows
+    private boolean ifCheckIgnored() {
+        if (config.getGit().getCheckIgnore() != FeatureGate.DISABLE) {
+            final Process p;
+            try {
+                p = new ProcessBuilder()
+                        .directory(config.getBaseDir().toFile())
+                        .command("git", "check-ignore", "--help")
+                        .start();
+            } catch (IOException e) {
+                if (config.getGit().getCheckIgnore() != FeatureGate.ENABLE) {
+                    return false;
+                } else {
+                    throw new Exception("cannot perform check-ignore", e);
+                }
+            }
+
+            final int code = p.waitFor();
+            if (code != 0) {
+                final String error = IOUtils.toString(p.getErrorStream(), StandardCharsets.UTF_8);
+                throw new Exception("cannot perform check-ignore: " + error);
+            }
+            return true;
+        }
+        return false;
+    }
 }
