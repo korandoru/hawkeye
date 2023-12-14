@@ -80,13 +80,9 @@ public abstract class LicenseProcessor implements Callable<Report> {
             mapping.addAll(DocumentType.defaultMapping());
         }
 
-        final Map<String, String> globalProperties = new LinkedHashMap<>();
-        globalProperties.put("builtin.thisYear", Year.now().toString());
         final DocumentPropertiesLoader propertiesLoader = document -> {
-            final Map<String, String> properties = new LinkedHashMap<>();
-            properties.put("builtin.filename", document.getFile().getName());
-            properties.putAll(globalProperties);
-            properties.putAll(config.getProperties());
+            final Map<String, String> properties = new LinkedHashMap<>(config.getProperties());
+            properties.put("hawkeye.core.filename", document.getFile().getName());
             return properties;
         };
 

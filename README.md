@@ -185,11 +185,10 @@ extensions = ["..."] # e.g. "cc"
 
 # Properties to fulfill the template.
 # For a defined key-value pair, you can use ${key} in the header template, which will be substituted
-# with the corresponding value. Builtin properties have a 'builtin.' prefix.
+# with the corresponding value.
 #
-# Builtin properties:
-# 1. builtin.filename is the current file name, like: pom.xml.
-# 2. builtin.thisYear is the current year, like: 2023.
+# Preset properties:
+# * 'hawkeye.core.filename' is the current file name, like: pom.xml.
 [properties]
 inceptionYear = 2023
 ```
