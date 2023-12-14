@@ -18,7 +18,7 @@ WORKDIR /build
 COPY . .
 RUN ./mvnw -B -ntp clean package -DskipTests -Pnative
 
-FROM public.ecr.aws/docker/library/alpine:3.19.0 as git
+FROM public.ecr.aws/docker/library/alpine:3.19.0
 ENV LANG C.utf8
 COPY --from=build /build/hawkeye-native/target/hawkeye-native /bin/
 RUN apk fix && apk --no-cache --update add git
