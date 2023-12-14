@@ -17,11 +17,13 @@ ENV LANG C.utf8
 WORKDIR /build
 COPY . .
 RUN ./mvnw -B -ntp clean package -DskipTests -Pnative
-RUN apt-get -y update && apt-get -y install git
+
+FROM public.ecr.aws/docker/library/alpine:3.19.0 as git
+RUN apk fix && apk --no-cache --update add git
 
 FROM cgr.dev/chainguard/graalvm-native
 ENV LANG C.utf8
 COPY --from=build /build/hawkeye-native/target/hawkeye-native /bin/
-COPY --from=build /usr/bin/git /usr/bin/
+COPY --from=git /usr/bin/git /usr/bin/git
 WORKDIR /github/workspace/
 ENTRYPOINT ["/bin/hawkeye-native"]
