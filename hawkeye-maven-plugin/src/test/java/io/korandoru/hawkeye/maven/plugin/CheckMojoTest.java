@@ -28,23 +28,21 @@ import org.junit.jupiter.api.io.TempDir;
 class CheckMojoTest {
     private CheckMojo checkMojo;
 
-    @TempDir
-    private Path tempDir;
-
     @BeforeEach
     void setUp() {
         checkMojo = new CheckMojo();
-        checkMojo.basedir = tempDir.toFile();
         checkMojo.configLocation = new File("src/test/resources/t1.toml");
     }
 
     @Test
-    void execute() throws Exception {
+    void execute(@TempDir Path tempDir) throws Exception {
+        checkMojo.basedir = tempDir.toFile();
         checkMojo.execute();
     }
 
     @Test
-    void executeFailure() throws IOException {
+    void executeFailure(@TempDir Path tempDir) throws IOException {
+        checkMojo.basedir = tempDir.toFile();
         final File tempFile = File.createTempFile("test", ".yaml", tempDir.toFile());
         tempFile.deleteOnExit();
         assertThatThrownBy(() -> checkMojo.execute())

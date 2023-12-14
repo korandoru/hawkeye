@@ -24,18 +24,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 class RemoveMojoTest {
     private RemoveMojo removeMojo;
     private File tempFile;
 
-    @TempDir
-    private Path tempDir;
-
     @BeforeEach
     void setUp() throws IOException {
-        tempFile = File.createTempFile("test", ".yaml", tempDir.toFile());
+        tempFile = File.createTempFile("test", ".yaml", null);
 
         final String header =
                 """
@@ -59,7 +55,7 @@ class RemoveMojoTest {
         Files.write(path, header.getBytes());
 
         removeMojo = new RemoveMojo();
-        removeMojo.basedir = tempDir.toFile();
+        removeMojo.basedir = tempFile.getParentFile();
         removeMojo.configLocation = new File("src/test/resources/t2.toml");
     }
 

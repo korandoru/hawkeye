@@ -20,23 +20,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 class FormatMojoTest {
     private FormatMojo formatMojo;
     private File tempFile;
 
-    @TempDir
-    private Path tempDir;
-
     @BeforeEach
     void setUp() throws IOException {
-        tempFile = File.createTempFile("test", ".yaml", tempDir.toFile());
+        tempFile = File.createTempFile("test", ".yaml", null);
         formatMojo = new FormatMojo();
-        formatMojo.basedir = tempDir.toFile();
+        formatMojo.basedir = tempFile.getParentFile();
         formatMojo.configLocation = new File("src/test/resources/t1.toml");
     }
 

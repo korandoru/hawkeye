@@ -17,8 +17,8 @@ baseDir = "."
 headerPath = "Apache-2.0.txt"
 
 excludes = [
-    "**/src/test/**/*.txt",
-    "**/src/test/**/*.xml",
+    "**/src/test/resources/**/*.toml",
+    "**/src/test/resources/**/*.xml",
 ]
 
 [mapping.SCRIPT_STYLE]
