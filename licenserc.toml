@@ -30,4 +30,4 @@ inceptionYear = 2023
 copyrightOwner = "Korandoru Contributors"
 
 [git]
-checkIgnored = 'enable'
+checkIgnore = 'enable'
