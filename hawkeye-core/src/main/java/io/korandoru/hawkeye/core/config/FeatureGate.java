@@ -30,5 +30,17 @@ public enum FeatureGate {
     /**
      * Force disable the feature.
      */
-    DISABLE,
+    DISABLE;
+
+    public boolean isAuto() {
+        return this.equals(AUTO);
+    }
+
+    public boolean isEnable() {
+        return this.equals(ENABLE);
+    }
+
+    public boolean isDisable() {
+        return this.equals(DISABLE);
+    }
 }
