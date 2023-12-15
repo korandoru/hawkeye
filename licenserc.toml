@@ -17,15 +17,9 @@ baseDir = "."
 headerPath = "Apache-2.0.txt"
 
 excludes = [
-    "**/src/test/**/*.txt",
-    "**/src/test/**/*.xml",
-
-    "hawkeye-core/src/main/resources/*.txt",
-
-    # build output - TODO(#20) should be omitted once Git integration landed
-    "hawkeye-gradle-plugin/.gradle",
-    "hawkeye-gradle-plugin/build",
-    "action.yml.bak",
+    "**/*.txt",
+    "**/src/test/resources/**/*.toml",
+    "**/src/test/resources/**/*.xml",
 ]
 
 [mapping.SCRIPT_STYLE]

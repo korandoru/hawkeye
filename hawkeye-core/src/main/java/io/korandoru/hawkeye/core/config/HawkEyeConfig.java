@@ -16,6 +16,7 @@
 
 package io.korandoru.hawkeye.core.config;
 
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import io.korandoru.hawkeye.core.mapping.Mapping;
 import java.io.File;
@@ -48,12 +49,16 @@ public class HawkEyeConfig {
     private final Map<String, String> properties;
     private final Set<Mapping> mapping;
 
+    private final GitModel git;
+
     private final boolean dryRun;
 
     @SneakyThrows
     public static Builder of(File source) {
-        final TomlMapper mapper = new TomlMapper();
-        final ConfigFileModel model = mapper.readValue(source, ConfigFileModel.class);
+        final TomlMapper mapper = TomlMapper.builder()
+                .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
+                .build();
+        final HawkEyeModel model = mapper.readValue(source, HawkEyeModel.class);
         final Builder builder = new Builder();
         return builder.baseDir(model.getBaseDir())
                 .inlineHeader(model.getInlineHeader())
@@ -66,7 +71,8 @@ public class HawkEyeConfig {
                 .excludes(model.getExcludes())
                 .keywords(model.getKeywords())
                 .properties(model.getProperties())
-                .mapping(model.getMapping().toMappings());
+                .mapping(model.getMapping().toMappings())
+                .git(model.getGit());
     }
 
     public static final class Builder {
@@ -99,6 +105,7 @@ public class HawkEyeConfig {
                     keywords,
                     properties,
                     mapping,
+                    git,
                     dryRun);
         }
     }

@@ -36,13 +36,14 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Year;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
@@ -73,20 +74,21 @@ public abstract class LicenseProcessor implements Callable<Report> {
                 config.getIncludes().toArray(new String[0]),
                 config.getExcludes().toArray(new String[0]),
                 config.isUseDefaultExcludes());
-        final String[] selectedFiles = selection.getSelectedFiles();
+        final Set<String> selectedFiles =
+                Arrays.stream(selection.getSelectedFiles()).collect(Collectors.toSet());
+        final GitHelper gitHelper = GitHelper.create(baseDir, config.getGit());
+        if (gitHelper != null) {
+            gitHelper.filterIgnoredFiles(selectedFiles);
+        }
 
         final Set<Mapping> mapping = new HashSet<>(config.getMapping());
         if (config.isUseDefaultMapping()) {
             mapping.addAll(DocumentType.defaultMapping());
         }
 
-        final Map<String, String> globalProperties = new LinkedHashMap<>();
-        globalProperties.put("builtin.thisYear", Year.now().toString());
         final DocumentPropertiesLoader propertiesLoader = document -> {
-            final Map<String, String> properties = new LinkedHashMap<>();
-            properties.put("builtin.filename", document.getFile().getName());
-            properties.putAll(globalProperties);
-            properties.putAll(config.getProperties());
+            final Map<String, String> properties = new LinkedHashMap<>(config.getProperties());
+            properties.put("hawkeye.core.filename", document.getFile().getName());
             return properties;
         };
 

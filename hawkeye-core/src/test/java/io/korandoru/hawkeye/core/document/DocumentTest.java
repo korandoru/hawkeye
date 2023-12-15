@@ -30,32 +30,32 @@ class DocumentTest {
     @Test
     void testCreate() {
         final Document doc = new Document(
-                new File("src/test/resources/doc/doc1.txt"),
-                DocumentType.TXT.getDefaultHeaderType().getDefinition(),
+                new File("src/test/resources/doc/doc1.toml"),
+                DocumentType.TOML.getDefaultHeaderType().getDefinition(),
                 StandardCharsets.UTF_8,
                 new String[] {"copyright"},
                 d -> Map.of("year", "2008"));
-        assertThat(doc.getFile().getName()).isEqualTo("doc1.txt");
+        assertThat(doc.getFile().getName()).isEqualTo("doc1.toml");
         assertThat(doc.isNotSupported()).isFalse();
     }
 
     @Test
     void testUnsupported() {
         final Document doc = new Document(
-                new File("src/test/resources/doc/doc1.txt"),
+                new File("src/test/resources/doc/doc1.toml"),
                 DocumentType.UNKNOWN.getDefaultHeaderType().getDefinition(),
                 StandardCharsets.UTF_8,
                 new String[] {"copyright"},
                 d -> Map.of("year", "2008"));
-        assertThat(doc.getFile().getName()).isEqualTo("doc1.txt");
+        assertThat(doc.getFile().getName()).isEqualTo("doc1.toml");
         assertThat(doc.isNotSupported()).isTrue();
     }
 
     @Test
     void testHasHeader() throws Exception {
         final Document doc = new Document(
-                new File("src/test/resources/doc/doc1.txt"),
-                DocumentType.TXT.getDefaultHeaderType().getDefinition(),
+                new File("src/test/resources/doc/doc1.toml"),
+                DocumentType.TOML.getDefaultHeaderType().getDefinition(),
                 StandardCharsets.UTF_8,
                 new String[] {"copyright"},
                 d -> Map.of("year", "2008"));
@@ -70,8 +70,8 @@ class DocumentTest {
                 new File("src/test/resources/test-header1.txt").toURI().toURL()));
         {
             final Document doc = new Document(
-                    new File("src/test/resources/doc/doc1.txt"),
-                    DocumentType.TXT.getDefaultHeaderType().getDefinition(),
+                    new File("src/test/resources/doc/doc1.toml"),
+                    DocumentType.TOML.getDefaultHeaderType().getDefinition(),
                     StandardCharsets.UTF_8,
                     new String[] {"copyright"},
                     d -> Map.of("year", "2008"));
@@ -80,7 +80,7 @@ class DocumentTest {
         {
             final Document doc = new Document(
                     new File("src/test/resources/test-header1.txt"),
-                    DocumentType.TXT.getDefaultHeaderType().getDefinition(),
+                    DocumentType.TOML.getDefaultHeaderType().getDefinition(),
                     StandardCharsets.UTF_8,
                     new String[] {"copyright"},
                     d -> Map.of("year", "2008"));
@@ -92,35 +92,35 @@ class DocumentTest {
     void testRemoveHeader() throws Exception {
         {
             final Document doc = new Document(
-                    new File("src/test/resources/doc/doc1.txt"),
-                    DocumentType.TXT.getDefaultHeaderType().getDefinition(),
+                    new File("src/test/resources/doc/doc1.toml"),
+                    DocumentType.TOML.getDefaultHeaderType().getDefinition(),
                     StandardCharsets.UTF_8,
                     new String[] {"copyright"},
                     d -> Map.of("year", "2008"));
             doc.removeHeader();
             assertThat(doc.getContent())
                     .isEqualTo(FileUtils.readFileToString(
-                            new File("src/test/resources/doc/doc1.txt"), StandardCharsets.UTF_8));
+                            new File("src/test/resources/doc/doc1.toml"), StandardCharsets.UTF_8));
         }
         {
             final Document doc = new Document(
-                    new File("src/test/resources/doc/doc2.txt"),
-                    DocumentType.TXT.getDefaultHeaderType().getDefinition(),
+                    new File("src/test/resources/doc/doc2.toml"),
+                    DocumentType.TOML.getDefaultHeaderType().getDefinition(),
                     StandardCharsets.UTF_8,
                     new String[] {"copyright"},
                     d -> Map.of("year", "2008"));
             doc.removeHeader();
-            assertThat(doc.getContent()).isEqualTo("some data\r\n");
+            assertThat(doc.getContent()).isEqualTo("data = \"some data\"\r\n");
         }
         {
             final Document doc = new Document(
-                    new File("src/test/resources/doc/doc3.txt"),
-                    DocumentType.TXT.getDefaultHeaderType().getDefinition(),
+                    new File("src/test/resources/doc/doc3.toml"),
+                    DocumentType.TOML.getDefaultHeaderType().getDefinition(),
                     StandardCharsets.UTF_8,
                     new String[] {"copyright"},
                     d -> Map.of("year", "2008"));
             doc.removeHeader();
-            assertThat(doc.getContent()).isEqualTo("some data\r\nand other data\r\n");
+            assertThat(doc.getContent()).isEqualTo("data = \"some data\"\r\nother = \"and other data\"\r\n");
         }
     }
 

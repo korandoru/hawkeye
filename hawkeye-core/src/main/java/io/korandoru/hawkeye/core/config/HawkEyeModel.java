@@ -27,7 +27,7 @@ import lombok.extern.jackson.Jacksonized;
 @Data
 @Builder
 @Jacksonized
-class ConfigFileModel {
+class HawkEyeModel {
 
     @Builder.Default
     private final Path baseDir = Path.of(".");
@@ -61,4 +61,7 @@ class ConfigFileModel {
 
     @Builder.Default
     private final MappingsModel mapping = new MappingsModel();
+
+    @Builder.Default
+    private final GitModel git = GitModel.builder().build();
 }

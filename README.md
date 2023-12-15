@@ -140,13 +140,13 @@ headerPath = "path/to/header.txt"
 # default: true
 strictCheck = true
 
-# Whether or not use the default excludes. Check Default.EXCLUDES for the completed list.
+# Whether you use the default excludes. Check Default.EXCLUDES for the completed list.
 # To suppress part of excludes in the list, declare exact the same pattern in `includes` list.
 # default: true
 useDefaultExcludes = true
 
 # The supported patterns of includes and excludes follow gitignore pattern format, plus that:
-# 1. includes does not support `!`
+# 1. `includes` does not support `!`
 # 2. backslash does not escape letter
 # 3. whitespaces and `#` are normal since we configure line by line
 # See also https://git-scm.com/docs/gitignore#_pattern_format
@@ -155,15 +155,15 @@ useDefaultExcludes = true
 # default: all the files under `baseDir`.
 includes = ["..."]
 
-# Patterns of path to be excluded on execution. A leading bang (!) indicates a invert exclude rule.
+# Patterns of path to be excluded on execution. A leading bang (!) indicates an invert exclude rule.
 # default: empty; if useDefaultExcludes is true, append default excludes.
 excludes = ["..."]
 
-# Keywords that should occur in the header, case insensitive.
+# Keywords that should occur in the header, case-insensitive.
 # default: ["copyright"]
 keywords = ["copyright", "..."]
 
-# Whether or not use the default mapping. Check DocumentType.defaultMapping() for the completed list.
+# Whether you use the default mapping. Check DocumentType.defaultMapping() for the completed list.
 # default: true
 useDefaultMapping = true
 
@@ -173,10 +173,10 @@ additionalHeaders = ["..."]
 
 # Mapping rules (repeated).
 #
-# The key of a mapping rule is a header style type (case insensitive).
+# The key of a mapping rule is a header style type (case-insensitive).
 #
 # Available header style types consist of those defined at `HeaderType` and user-defined ones in `additionalHeaders`.
-# The name of header style type is case insensitive.
+# The name of header style type is case-insensitive.
 #
 # If useDefaultMapping is true, the mapping rules defined here can override the default one.
 [mapping.STYLE_NAME]
@@ -185,13 +185,19 @@ extensions = ["..."] # e.g. "cc"
 
 # Properties to fulfill the template.
 # For a defined key-value pair, you can use ${key} in the header template, which will be substituted
-# with the corresponding value. Builtin properties have a 'builtin.' prefix.
+# with the corresponding value.
 #
-# Builtin properties:
-# 1. builtin.filename is the current file name, like: pom.xml.
-# 2. builtin.thisYear is the current year, like: 2023.
+# Preset properties:
+# * 'hawkeye.core.filename' is the current file name, like: pom.xml.
 [properties]
 inceptionYear = 2023
+
+# Options to configure Git features.
+[git]
+# If enabled, do not process files that are ignored by Git; possible value: ['auto', 'enable', 'disable']
+# 'auto' means only enabled if basedir is in a Git repository.
+# default: 'auto'
+checkIgnore = 'auto'
 ```
 
 ### Header style file
