@@ -74,7 +74,7 @@ public class GitHelper {
     public void filterIgnoredFiles(Collection<String> files) {
         final Process p = new ProcessBuilder()
                 .directory(baseDir.toFile())
-                .command("git", "check-ignore", "--stdin")
+                .command("git", "check-ignore", "--stdin", "--no-index")
                 .start();
         try (final OutputStream stream = p.getOutputStream()) {
             IOUtils.writeLines(files, null, stream, StandardCharsets.UTF_8);
@@ -82,8 +82,8 @@ public class GitHelper {
         final String output = IOUtils.toString(p.getInputStream(), StandardCharsets.UTF_8);
         final Stream<String> lines = Arrays.stream(output.split(System.lineSeparator()));
         final Set<String> ignoredFiles = lines.collect(Collectors.toSet());
-        log.debug("Git ignores files: {}", ignoredFiles);
+        log.info("Git ignores files: {}", ignoredFiles);
         files.removeAll(ignoredFiles);
-        log.debug("Selected files after filter ignore files: {}", files);
+        log.info("Selected files after filter ignore files: {}", files);
     }
 }
