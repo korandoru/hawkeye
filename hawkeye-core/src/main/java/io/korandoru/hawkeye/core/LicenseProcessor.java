@@ -47,18 +47,13 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.RepositoryBuilder;
-import org.eclipse.jgit.treewalk.FileTreeIterator;
-import org.eclipse.jgit.treewalk.TreeWalk;
-import org.eclipse.jgit.treewalk.WorkingTreeIterator;
-import org.eclipse.jgit.treewalk.filter.PathFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RequiredArgsConstructor
-@Slf4j
 public abstract class LicenseProcessor implements Callable<Report> {
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     protected final HawkEyeConfig config;
     private final String action;
@@ -116,26 +111,11 @@ public abstract class LicenseProcessor implements Callable<Report> {
                 config.getKeywords().toArray(new String[0]),
                 propertiesLoader);
 
-        final Repository repo = new RepositoryBuilder().findGitDir(baseDir.toFile()).build();
-        final Path repoBaseDir = repo.getDirectory().getParentFile().toPath().toAbsolutePath();
-
-        process:
+        final GitHelper gitHelper = GitHelper.create(baseDir, config.getGit());
         for (final String file : selectedFiles) {
             final Path path = new File(baseDir.toFile(), file).toPath().toAbsolutePath();
-            final String relativePath = repoBaseDir.relativize(path).toString();
-            try (final TreeWalk treeWalk = new TreeWalk(repo)) {
-                treeWalk.addTree(new FileTreeIterator(repo));
-                treeWalk.setFilter(PathFilter.create(relativePath));
-                while (treeWalk.next()) {
-                    final WorkingTreeIterator it = treeWalk.getTree(0, WorkingTreeIterator.class);
-                    if (it.isEntryIgnored()) {
-                        log.debug("Skipping file by gitignore: {}", file);
-                        continue process;
-                    }
-                    if (it.getEntryFileMode().equals(FileMode.TREE)) {
-                        treeWalk.enterSubtree();
-                    }
-                }
+            if (gitHelper != null && gitHelper.checkIgnored(path)) {
+                continue;
             }
 
             log.debug("Processing file: {}", file);

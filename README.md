@@ -195,9 +195,7 @@ inceptionYear = 2023
 # Options to configure Git features.
 [git]
 # If enabled, do not process files that are ignored by Git; possible value: ['auto', 'enable', 'disable']
-# 'auto' means only enabled if
-#  1. git installed, and;
-#  2. basedir is in a Git repository.
+# 'auto' means only enabled if basedir is in a Git repository.
 # default: 'auto'
 checkIgnore = 'auto'
 ```
