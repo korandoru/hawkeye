@@ -46,13 +46,13 @@ To check license headers in GitHub Actions, add a step in your GitHub workflow:
 
 ### Docker
 
-[Native Image](https://www.graalvm.org/22.3/reference-manual/native-image/) powered image (28MB):
+[Native Image](https://www.graalvm.org/22.3/reference-manual/native-image/) powered image (~45MB):
 
 ```shell
 docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye-native check
 ```
 
-[Eclipse Temurin](https://projects.eclipse.org/projects/adoptium.temurin) JRE based image (266MB):
+[Eclipse Temurin](https://projects.eclipse.org/projects/adoptium.temurin) JRE based image (~400MB):
 
 ```shell
 docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye check
