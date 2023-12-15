@@ -21,7 +21,7 @@
     <parent>
         <groupId>io.korandoru.hawkeye</groupId>
         <artifactId>hawkeye</artifactId>
-        <version>3.6.2-SNAPSHOT</version>
+        <version>4.0.0</version>
     </parent>
 
     <name>HawkEye :: Distribution :: Native Image</name>
@@ -29,7 +29,7 @@
     <artifactId>hawkeye-native</artifactId>
 
     <properties>
-        <native-image.buildArgs/>
+        <native-image.buildArgs />
         <native-maven-plugin.version>0.9.19</native-maven-plugin.version>
     </properties>
 
