@@ -130,7 +130,7 @@ jobs:
       - name: Sanity check
         run: |
           cp action.yml action.yml.bak
-          git check-ignore --no-index action.yml.bak
+          cat .gitignore
           docker image inspect ${{matrix.name}}:ci --format='{{.Size}}'
           docker run --rm -v $(pwd):/github/workspace ${{matrix.name}}:ci -V
           docker run --rm -v $(pwd):/github/workspace ${{matrix.name}}:ci check

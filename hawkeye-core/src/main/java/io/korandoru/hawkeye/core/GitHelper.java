@@ -78,15 +78,18 @@ public class GitHelper {
                 .command("git", "check-ignore", "--stdin", "--no-index")
                 .start();
 
-        final String output;
+        final String output, error;
         try (final InputStream in = p.getInputStream();
+                final InputStream err = p.getErrorStream();
                 final OutputStream out = p.getOutputStream()) {
             IOUtils.writeLines(files, null, out, StandardCharsets.UTF_8);
             out.flush();
             out.close();
             output = IOUtils.toString(in, StandardCharsets.UTF_8);
+            error = IOUtils.toString(err, StandardCharsets.UTF_8);
         }
-        log.debug("Git check-ignore output: {}", output);
+        log.warn("Git check-ignore output: {}", output);
+        log.warn("Git check-ignore error output: {}", error);
 
         final Stream<String> lines = Arrays.stream(output.split(System.lineSeparator()));
         final Set<String> ignoredFiles = lines.collect(Collectors.toSet());
