@@ -47,10 +47,4 @@
     "allPublicMethods": true,
     "allDeclaredFields": true
   },
-  {
-    "name":"org.eclipse.jgit.internal.JGitText",
-    "allDeclaredFields":true,
-    "allDeclaredMethods":true,
-    "methods":[{"name":"<init>","parameterTypes":[] }]
-  }
 ]

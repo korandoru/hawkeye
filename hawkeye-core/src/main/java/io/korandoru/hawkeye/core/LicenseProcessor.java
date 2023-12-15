@@ -31,7 +31,6 @@ import io.korandoru.hawkeye.core.report.Report;
 import io.korandoru.hawkeye.core.report.ReportConstants;
 import io.korandoru.hawkeye.core.resource.HeaderSource;
 import io.korandoru.hawkeye.core.resource.ResourceFinder;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -47,13 +46,9 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @RequiredArgsConstructor
 public abstract class LicenseProcessor implements Callable<Report> {
-
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     protected final HawkEyeConfig config;
     private final String action;
@@ -111,14 +106,7 @@ public abstract class LicenseProcessor implements Callable<Report> {
                 config.getKeywords().toArray(new String[0]),
                 propertiesLoader);
 
-        final GitHelper gitHelper = GitHelper.create(baseDir, config.getGit());
         for (final String file : selectedFiles) {
-            final Path path = new File(baseDir.toFile(), file).toPath().toAbsolutePath();
-            if (gitHelper != null && gitHelper.checkIgnored(path)) {
-                continue;
-            }
-
-            log.debug("Processing file: {}", file);
             final Document document = documentFactory.createDocuments(file);
             if (document.is(header)) {
                 continue;

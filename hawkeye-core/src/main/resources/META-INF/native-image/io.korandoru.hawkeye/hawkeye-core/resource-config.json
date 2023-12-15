@@ -7,11 +7,6 @@
       {
         "pattern": "hawkeye.properties"
       }
-    ],
-    "bundles": [
-      {
-        "name": "org.eclipse.jgit.internal.JGitText"
-      }
     ]
   }
 }
