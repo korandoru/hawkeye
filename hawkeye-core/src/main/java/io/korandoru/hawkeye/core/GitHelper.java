@@ -18,6 +18,7 @@ package io.korandoru.hawkeye.core;
 
 import io.korandoru.hawkeye.core.config.GitModel;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -44,7 +45,7 @@ public class GitHelper {
         try {
             p = new ProcessBuilder()
                     .directory(baseDir.toFile())
-                    .command("git", "check-ignore", "--help")
+                    .command("which", "git")
                     .start();
         } catch (IOException e) {
             if (config.getCheckIgnore().isAuto()) {
@@ -74,16 +75,24 @@ public class GitHelper {
     public void filterIgnoredFiles(Collection<String> files) {
         final Process p = new ProcessBuilder()
                 .directory(baseDir.toFile())
-                .command("git", "check-ignore", "--stdin")
+                .command("git", "check-ignore", "--stdin", "--no-index")
                 .start();
-        try (final OutputStream stream = p.getOutputStream()) {
-            IOUtils.writeLines(files, null, stream, StandardCharsets.UTF_8);
+
+        final String output;
+        try (final InputStream in = p.getInputStream();
+                final OutputStream out = p.getOutputStream()) {
+            IOUtils.writeLines(files, null, out, StandardCharsets.UTF_8);
+            out.flush();
+            out.close();
+            output = IOUtils.toString(in, StandardCharsets.UTF_8);
         }
-        final String output = IOUtils.toString(p.getInputStream(), StandardCharsets.UTF_8);
+        log.warn("Git check-ignore output: {}", output);
+
         final Stream<String> lines = Arrays.stream(output.split(System.lineSeparator()));
         final Set<String> ignoredFiles = lines.collect(Collectors.toSet());
-        log.debug("Git ignores files: {}", ignoredFiles);
+        log.warn("Git ignores files: {}", ignoredFiles);
+
         files.removeAll(ignoredFiles);
-        log.debug("Selected files after filter ignore files: {}", files);
+        log.warn("Selected files after filter ignore files: {}", files);
     }
 }
