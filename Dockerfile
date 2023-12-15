@@ -18,7 +18,8 @@ COPY . .
 RUN ./mvnw -B -ntp clean package -DskipTests
 
 FROM public.ecr.aws/docker/library/eclipse-temurin:17-jre
+RUN apt-get -y update && apt-get -y install git && \
+    git config --global --add safe.directory /github/workspace
 COPY --from=build /build/hawkeye-cli/target/hawkeye.jar /bin/hawkeye
-RUN apt-get -y update && apt-get -y install git
 WORKDIR /github/workspace/
 ENTRYPOINT ["/bin/hawkeye"]

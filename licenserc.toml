@@ -29,5 +29,3 @@ filenames = ['Dockerfile.native']
 inceptionYear = 2023
 copyrightOwner = "Korandoru Contributors"
 
-[git]
-checkIgnore = 'enable'
