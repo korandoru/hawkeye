@@ -29,6 +29,7 @@
     <artifactId>hawkeye-native</artifactId>
 
     <properties>
+        <native-image.buildArgs/>
         <native-maven-plugin.version>0.9.19</native-maven-plugin.version>
     </properties>
 
@@ -80,6 +81,7 @@
                         <configuration>
                             <mainClass>io.korandoru.hawkeye.command.HawkEyeCommandMain</mainClass>
                             <imageName>hawkeye-native</imageName>
+                            <buildArgs>${native-image.buildArgs}</buildArgs>
                         </configuration>
                     </plugin>
                 </plugins>

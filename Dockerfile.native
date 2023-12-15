@@ -16,7 +16,7 @@ FROM ghcr.io/graalvm/native-image:muslib-ol9-java17-22.3.0 as build
 ENV LANG C.utf8
 WORKDIR /build
 COPY . .
-RUN ./mvnw -B -ntp clean package -DskipTests -Pnative
+RUN ./mvnw -B -ntp clean package -DskipTests -Pnative -Dnative-image.buildArgs="--static --libc=musl"
 
 FROM public.ecr.aws/docker/library/alpine:3.19.0
 ENV LANG C.utf8
