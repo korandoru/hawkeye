@@ -77,17 +77,21 @@ public class GitHelper {
                 .directory(baseDir.toFile())
                 .command("git", "check-ignore", "--stdin", "--no-index")
                 .start();
+
         final String output;
-        try (final OutputStream out = p.getOutputStream(); final InputStream in = p.getInputStream()) {
+        try (final InputStream in = p.getInputStream();
+                final OutputStream out = p.getOutputStream()) {
             IOUtils.writeLines(files, null, out, StandardCharsets.UTF_8);
             out.flush();
             out.close();
             output = IOUtils.toString(in, StandardCharsets.UTF_8);
         }
+        log.warn("Git check-ignore output: {}", output);
+
         final Stream<String> lines = Arrays.stream(output.split(System.lineSeparator()));
         final Set<String> ignoredFiles = lines.collect(Collectors.toSet());
-        log.warn("Git check-ignore output: {}", output);
         log.warn("Git ignores files: {}", ignoredFiles);
+
         files.removeAll(ignoredFiles);
         log.warn("Selected files after filter ignore files: {}", files);
     }
