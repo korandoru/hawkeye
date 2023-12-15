@@ -18,9 +18,8 @@ WORKDIR /build
 COPY . .
 RUN ./mvnw -B -ntp clean package -DskipTests -Pnative
 
-FROM public.ecr.aws/ubuntu/ubuntu:22.04
+FROM cgr.dev/chainguard/graalvm-native
 ENV LANG C.utf8
 COPY --from=build /build/hawkeye-native/target/hawkeye-native /bin/
-RUN apt-get -y update && apt-get -y install git
 WORKDIR /github/workspace/
 ENTRYPOINT ["/bin/hawkeye-native"]
