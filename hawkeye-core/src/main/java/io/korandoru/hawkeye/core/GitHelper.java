@@ -45,7 +45,7 @@ public class GitHelper {
         try {
             p = new ProcessBuilder()
                     .directory(baseDir.toFile())
-                    .command("which", "git")
+                    .command("git", "status", "--short")
                     .start();
         } catch (IOException e) {
             if (config.getCheckIgnore().isEnable()) {
@@ -85,12 +85,14 @@ public class GitHelper {
                 .start();
 
         final String output;
-        try (final InputStream in = p.getInputStream();
-                final OutputStream out = p.getOutputStream()) {
-            IOUtils.writeLines(files, null, out, StandardCharsets.UTF_8);
-            out.flush();
-            out.close();
-            output = IOUtils.toString(in, StandardCharsets.UTF_8);
+
+        try (OutputStream pStdIn = p.getOutputStream()) {
+            try (InputStream pStdOut = p.getInputStream()) {
+                IOUtils.writeLines(files, null, pStdIn, StandardCharsets.UTF_8);
+                pStdIn.flush();
+                pStdIn.close();
+                output = IOUtils.toString(pStdOut, StandardCharsets.UTF_8);
+            }
         }
         log.debug("git check-ignore outputs {}", output);
 

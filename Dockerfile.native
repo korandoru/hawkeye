@@ -22,7 +22,7 @@ RUN ./mvnw -B -ntp clean package -DskipTests -Pnative \
 FROM public.ecr.aws/docker/library/alpine:3.19.0
 ENV LANG C.utf8
 RUN apk fix && apk --no-cache --update add gcompat git && \
-      git config --global --add safe.directory /github/workspace
+    git config --global --add safe.directory /github/workspace
 COPY --from=build /build/hawkeye-native/target/hawkeye-native /bin/
 WORKDIR /github/workspace/
 ENTRYPOINT ["/bin/hawkeye-native"]
