@@ -44,7 +44,7 @@ public class GitHelper {
         try {
             p = new ProcessBuilder()
                     .directory(baseDir.toFile())
-                    .command("git", "check-ignore", "--help")
+                    .command("which", "git")
                     .start();
         } catch (IOException e) {
             if (config.getCheckIgnore().isAuto()) {
@@ -82,8 +82,8 @@ public class GitHelper {
         final String output = IOUtils.toString(p.getInputStream(), StandardCharsets.UTF_8);
         final Stream<String> lines = Arrays.stream(output.split(System.lineSeparator()));
         final Set<String> ignoredFiles = lines.collect(Collectors.toSet());
-        log.info("Git ignores files: {}", ignoredFiles);
+        log.debug("Git ignores files: {}", ignoredFiles);
         files.removeAll(ignoredFiles);
-        log.info("Selected files after filter ignore files: {}", files);
+        log.debug("Selected files after filter ignore files: {}", files);
     }
 }
