@@ -41,32 +41,38 @@ public class GitHelper {
             return null;
         }
 
-        final Process p;
+        Process p = null;
         try {
-            p = new ProcessBuilder()
-                    .directory(baseDir.toFile())
-                    .command("git", "check-ignore", "--help")
-                    .start();
-        } catch (IOException e) {
-            if (config.getCheckIgnore().isAuto()) {
-                return null;
-            } else {
-                throw new Exception("cannot perform check-ignore", e);
-            }
-        }
-
-        if (p.waitFor() != 0) {
-            if (config.getCheckIgnore().isEnable()) {
-                try (final InputStream stream = p.getErrorStream()) {
-                    final String error = IOUtils.toString(stream, StandardCharsets.UTF_8);
-                    throw new Exception("cannot perform check-ignore: " + error);
+            try {
+                p = new ProcessBuilder()
+                        .directory(baseDir.toFile())
+                        .command("git", "check-ignore", "--help")
+                        .start();
+            } catch (IOException e) {
+                if (config.getCheckIgnore().isAuto()) {
+                    return null;
+                } else {
+                    throw new Exception("cannot perform check-ignore", e);
                 }
-            } else {
-                return null;
+            }
+
+            if (p.waitFor() != 0) {
+                if (config.getCheckIgnore().isEnable()) {
+                    try (InputStream stream = p.getErrorStream()) {
+                        final String error = IOUtils.toString(stream, StandardCharsets.UTF_8);
+                        throw new Exception("cannot perform check-ignore: " + error);
+                    }
+                } else {
+                    return null;
+                }
+            }
+
+            return new GitHelper(baseDir);
+        } finally {
+            if (p != null) {
+                p.destroyForcibly();
             }
         }
-
-        return new GitHelper(baseDir);
     }
 
     public GitHelper(Path baseDir) {
@@ -79,14 +85,14 @@ public class GitHelper {
                 .directory(baseDir.toFile())
                 .command("git", "check-ignore", "--stdin")
                 .start();
-        try (final OutputStream stream = p.getOutputStream()) {
+        try (OutputStream stream = p.getOutputStream()) {
             IOUtils.writeLines(files, null, stream, StandardCharsets.UTF_8);
         }
         final String output;
-        try (final InputStream stream = p.getInputStream()) {
+        try (InputStream stream = p.getInputStream()) {
             output = IOUtils.toString(stream, StandardCharsets.UTF_8);
         }
-        p.destroy();
+        p.destroyForcibly();
         final Stream<String> lines = Arrays.stream(output.split(System.lineSeparator()));
         final Set<String> ignoredFiles = lines.collect(Collectors.toSet());
         log.debug("Git ignores files: {}", ignoredFiles);
