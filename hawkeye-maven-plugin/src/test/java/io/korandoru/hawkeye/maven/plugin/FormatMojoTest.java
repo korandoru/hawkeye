@@ -23,17 +23,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 class FormatMojoTest {
     private FormatMojo formatMojo;
     private File tempFile;
 
-    @TempDir
-    private Path tempDir;
-
     @BeforeEach
     void setUp() throws IOException {
+        final Path tempDir = Files.createTempDirectory("FormatMojoTest");
         tempFile = File.createTempFile("test", ".yaml", tempDir.toFile());
         formatMojo = new FormatMojo();
         formatMojo.basedir = tempDir.toFile();

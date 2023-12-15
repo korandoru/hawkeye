@@ -19,20 +19,19 @@ package io.korandoru.hawkeye.maven.plugin;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.maven.plugin.MojoFailureException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 class CheckMojoTest {
     private CheckMojo checkMojo;
-
-    @TempDir
     private Path tempDir;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
+        tempDir = Files.createTempDirectory("CheckMojoTest");
         checkMojo = new CheckMojo();
         checkMojo.basedir = tempDir.toFile();
         checkMojo.configLocation = new File("src/test/resources/t1.toml");
