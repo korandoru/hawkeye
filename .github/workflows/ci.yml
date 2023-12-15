@@ -132,7 +132,7 @@ jobs:
           cp action.yml action.yml.bak
           docker image inspect ${{matrix.name}}:ci --format='{{.Size}}'
           docker run --rm -v $(pwd):/github/workspace ${{matrix.name}}:ci -V
-          docker run --rm -v $(pwd):/github/workspace ${{matrix.name}}:ci check
+          docker run --rm -v $(pwd):/github/workspace ${{matrix.name}}:ci -Dorg.slf4j.simpleLogger.defaultLogLevel=debug check
 
   required:
     name: Required
