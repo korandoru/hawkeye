@@ -78,10 +78,13 @@ public class GitHelper {
                 .start();
         try (final OutputStream stream = p.getOutputStream()) {
             IOUtils.writeLines(files, null, stream, StandardCharsets.UTF_8);
+            stream.flush();
         }
+        p.waitFor();
         final String output = IOUtils.toString(p.getInputStream(), StandardCharsets.UTF_8);
         final Stream<String> lines = Arrays.stream(output.split(System.lineSeparator()));
         final Set<String> ignoredFiles = lines.collect(Collectors.toSet());
+        log.debug("Git check-ignore output: {}", output);
         log.debug("Git ignores files: {}", ignoredFiles);
         files.removeAll(ignoredFiles);
         log.debug("Selected files after filter ignore files: {}", files);
