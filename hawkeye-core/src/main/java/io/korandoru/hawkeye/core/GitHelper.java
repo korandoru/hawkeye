@@ -18,6 +18,7 @@ package io.korandoru.hawkeye.core;
 
 import io.korandoru.hawkeye.core.config.GitModel;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -56,8 +57,10 @@ public class GitHelper {
 
         if (p.waitFor() != 0) {
             if (config.getCheckIgnore().isEnable()) {
-                final String error = IOUtils.toString(p.getErrorStream(), StandardCharsets.UTF_8);
-                throw new Exception("cannot perform check-ignore: " + error);
+                try (final InputStream stream = p.getErrorStream()) {
+                    final String error = IOUtils.toString(stream, StandardCharsets.UTF_8);
+                    throw new Exception("cannot perform check-ignore: " + error);
+                }
             } else {
                 return null;
             }
@@ -79,7 +82,11 @@ public class GitHelper {
         try (final OutputStream stream = p.getOutputStream()) {
             IOUtils.writeLines(files, null, stream, StandardCharsets.UTF_8);
         }
-        final String output = IOUtils.toString(p.getInputStream(), StandardCharsets.UTF_8);
+        final String output;
+        try (final InputStream stream = p.getInputStream()) {
+            output = IOUtils.toString(stream, StandardCharsets.UTF_8);
+        }
+        p.destroy();
         final Stream<String> lines = Arrays.stream(output.split(System.lineSeparator()));
         final Set<String> ignoredFiles = lines.collect(Collectors.toSet());
         log.debug("Git ignores files: {}", ignoredFiles);
