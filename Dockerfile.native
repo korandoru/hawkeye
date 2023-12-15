@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM ghcr.io/graalvm/native-image:muslib-ol9-java17-22.3.0 as build
+FROM ghcr.io/graalvm/native-image:ol9-java17-22.3.0 as build
 ENV LANG C.utf8
 WORKDIR /build
 COPY . .
-RUN ./mvnw -B -ntp clean package -DskipTests -Pnative -Dnative-image.buildArgs='--static --libc=musl'
+RUN ./mvnw -B -ntp clean package -DskipTests -Pnative
 
 FROM public.ecr.aws/docker/library/alpine:3.19.0
 ENV LANG C.utf8
 COPY --from=build /build/hawkeye-native/target/hawkeye-native /bin/
-RUN apk fix && apk --no-cache --update add git
+RUN apk fix && apk --no-cache --update add gcompat git
 WORKDIR /github/workspace/
 ENTRYPOINT ["/bin/hawkeye-native"]
