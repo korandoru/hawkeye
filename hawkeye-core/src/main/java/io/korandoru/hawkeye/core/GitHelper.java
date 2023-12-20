@@ -51,7 +51,7 @@ public class GitHelper {
             if (config.getCheckIgnore().isEnable()) {
                 throw new Exception("Git NotFound", e);
             } else {
-                log.debug("checkIgnore auto is resolved to disable");
+                log.debug("checkIgnore=auto is resolved to disable");
                 return null;
             }
         }
@@ -84,15 +84,11 @@ public class GitHelper {
                 .command("git", "check-ignore", "--stdin")
                 .start();
 
-        final Collection<String> localFiles = files.stream()
-                .filter(file -> noSymbolLink(baseDir.resolve(file)))
-                .toList();
-
-        log.debug("git check-ignore inputs {}", localFiles);
+        log.debug("git check-ignore inputs {}", files);
         final String output;
         try (OutputStream pStdIn = p.getOutputStream()) {
             try (InputStream pStdOut = p.getInputStream()) {
-                IOUtils.writeLines(localFiles, null, pStdIn, StandardCharsets.UTF_8);
+                IOUtils.writeLines(files, null, pStdIn, StandardCharsets.UTF_8);
                 pStdIn.flush();
                 pStdIn.close();
                 output = IOUtils.toString(pStdOut, StandardCharsets.UTF_8);
@@ -115,14 +111,5 @@ public class GitHelper {
 
         files.removeAll(ignoredFiles);
         log.debug("Selected files after filter ignore files: {}", files);
-    }
-
-    @SneakyThrows
-    private static boolean noSymbolLink(Path path) {
-        if (path.toAbsolutePath().normalize().equals(path.toRealPath())) {
-            return true;
-        }
-        log.debug("Skip symbol link {}", path);
-        return false;
     }
 }
