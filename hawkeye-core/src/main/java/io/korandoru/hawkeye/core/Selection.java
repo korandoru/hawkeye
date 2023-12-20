@@ -20,7 +20,6 @@ import static java.util.Arrays.stream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystem;
-import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
@@ -28,9 +27,8 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumSet;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -90,8 +88,7 @@ public final class Selection {
         }
 
         final List<String> results = new ArrayList<>();
-        final Set<FileVisitOption> followLinksOption = EnumSet.of(FileVisitOption.FOLLOW_LINKS);
-        Files.walkFileTree(basePath, followLinksOption, Integer.MAX_VALUE, new FileVisitor<>() {
+        Files.walkFileTree(basePath, Collections.emptySet(), Integer.MAX_VALUE, new FileVisitor<>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
                 final Path path = basePath.relativize(dir);
@@ -104,6 +101,10 @@ public final class Selection {
 
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                if (attrs.isSymbolicLink()) {
+                    log.debug("Skip symbol link {}", file);
+                    return FileVisitResult.CONTINUE;
+                }
                 final Path path = basePath.relativize(file);
                 final boolean isIncluded = includeList.stream().anyMatch(m -> m.match(path, false));
                 final boolean isExcluded =
