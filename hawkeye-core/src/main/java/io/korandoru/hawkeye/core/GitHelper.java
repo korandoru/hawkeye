@@ -81,14 +81,18 @@ public class GitHelper {
     public void filterIgnoredFiles(Collection<String> files) {
         final Process p = new ProcessBuilder()
                 .directory(baseDir.toFile())
-                .command("git", "check-ignore", "--stdin", "--no-index")
+                .command("git", "check-ignore", "--stdin")
                 .start();
 
-        final String output;
+        final Collection<String> localFiles = files.stream()
+                .filter(file -> noSymbolLink(baseDir.resolve(file)))
+                .toList();
 
+        log.debug("git check-ignore inputs {}", localFiles);
+        final String output;
         try (OutputStream pStdIn = p.getOutputStream()) {
             try (InputStream pStdOut = p.getInputStream()) {
-                IOUtils.writeLines(files, null, pStdIn, StandardCharsets.UTF_8);
+                IOUtils.writeLines(localFiles, null, pStdIn, StandardCharsets.UTF_8);
                 pStdIn.flush();
                 pStdIn.close();
                 output = IOUtils.toString(pStdOut, StandardCharsets.UTF_8);
@@ -96,9 +100,13 @@ public class GitHelper {
         }
         log.debug("git check-ignore outputs {}", output);
 
-        if (p.waitFor() != 0) {
+        final int code = p.waitFor();
+        // 0   - One or more of the provided paths is ignored.
+        // 1   - None of the provided paths are ignored.
+        // 128 - A fatal error was encountered.
+        if (code != 0 && code != 1) {
             final String error = IOUtils.toString(p.getErrorStream(), StandardCharsets.UTF_8);
-            throw new Exception("git check-ignore failed:\n" + error);
+            throw new Exception("git check-ignore failed with code " + code + ":\n" + error);
         }
 
         final Stream<String> lines = Arrays.stream(output.split(System.lineSeparator()));
@@ -107,5 +115,14 @@ public class GitHelper {
 
         files.removeAll(ignoredFiles);
         log.debug("Selected files after filter ignore files: {}", files);
+    }
+
+    @SneakyThrows
+    private static boolean noSymbolLink(Path path) {
+        if (path.toAbsolutePath().normalize().equals(path.toRealPath())) {
+            return true;
+        }
+        log.debug("Skip symbol link {}", path);
+        return false;
     }
 }
