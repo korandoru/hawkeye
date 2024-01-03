@@ -102,7 +102,6 @@ public final class HeaderParser {
                 // we detected previously a one line comment block that matches the header detection
                 // it is not a header it is a comment
                 return false;
-
             } else {
                 inPlaceHeader.append(line.toLowerCase());
             }
@@ -114,6 +113,8 @@ public final class HeaderParser {
 
             boolean foundEnd = false;
             if (headerDefinition.isMultipleLines() && headerDefinition.isLastHeaderLine(line)) {
+                foundEnd = true;
+            } else if (line.trim().isEmpty()) {
                 foundEnd = true;
             } else {
                 while ((line = fileContent.nextLine()) != null && line.startsWith(before)) {
@@ -131,7 +132,6 @@ public final class HeaderParser {
                     line = fileContent.nextLine();
                 } while (line != null && line.trim().isEmpty());
                 fileContent.rewind();
-
             } else if (!headerDefinition.isMultipleLines() && !foundEnd) {
                 fileContent.rewind();
             }
