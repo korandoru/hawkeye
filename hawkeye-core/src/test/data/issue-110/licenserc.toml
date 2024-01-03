@@ -1,0 +1,11 @@
+baseDir = "src/test/data/issue-110"
+
+headerPath = "Apache-2.0.txt"
+
+includes = [
+    "*.rs",
+]
+
+[properties]
+inceptionYear = 2023
+copyrightOwner = "The CopyrightOwner"

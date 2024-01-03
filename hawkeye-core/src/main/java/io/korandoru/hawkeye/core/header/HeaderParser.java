@@ -78,7 +78,7 @@ public final class HeaderParser {
 
     private boolean hasHeader() {
         // skip blank lines
-        while (line != null && "".equals(line.trim())) {
+        while (line != null && line.trim().isEmpty()) {
             line = fileContent.nextLine();
         }
         // check if there is already a header
@@ -91,7 +91,7 @@ public final class HeaderParser {
 
             // skip blank lines before header text
             if (headerDefinition.isAllowBlankLines()) {
-                while (line != null && "".equals(line.trim())) {
+                while (line != null && line.trim().isEmpty()) {
                     line = fileContent.nextLine();
                 }
             }
@@ -102,20 +102,20 @@ public final class HeaderParser {
                 // we detected previously a one line comment block that matches the header detection
                 // it is not a header it is a comment
                 return false;
-
             } else {
                 inPlaceHeader.append(line.toLowerCase());
             }
 
             String before = headerDefinition.getBeforeEachLine().stripTrailing();
-            if ("".equals(before) && !headerDefinition.isMultipleLines()) {
+            if (before.isEmpty() && !headerDefinition.isMultipleLines()) {
                 before = headerDefinition.getBeforeEachLine();
             }
 
             boolean foundEnd = false;
             if (headerDefinition.isMultipleLines() && headerDefinition.isLastHeaderLine(line)) {
                 foundEnd = true;
-
+            } else if (line.trim().isEmpty()) {
+                foundEnd = true;
             } else {
                 while ((line = fileContent.nextLine()) != null && line.startsWith(before)) {
                     inPlaceHeader.append(line.toLowerCase());
@@ -130,9 +130,8 @@ public final class HeaderParser {
             if (headerDefinition.isMultipleLines() && headerDefinition.isAllowBlankLines() && !foundEnd) {
                 do {
                     line = fileContent.nextLine();
-                } while (line != null && "".equals(line.trim()));
+                } while (line != null && line.trim().isEmpty());
                 fileContent.rewind();
-
             } else if (!headerDefinition.isMultipleLines() && !foundEnd) {
                 fileContent.rewind();
             }
@@ -143,7 +142,7 @@ public final class HeaderParser {
                 // check if the line is the end line
                 while (line != null
                         && !headerDefinition.isLastHeaderLine(line)
-                        && (headerDefinition.isAllowBlankLines() || !"".equals(line.trim()))
+                        && (headerDefinition.isAllowBlankLines() || !line.trim().isEmpty())
                         && line.startsWith(before)) {
                     line = fileContent.nextLine();
                 }
@@ -175,12 +174,14 @@ public final class HeaderParser {
         int end = fileContent.getPosition();
         line = fileContent.nextLine();
         if (beginPosition == 0) {
-            while (line != null && "".equals(line.trim())) {
+            while (line != null && line.trim().isEmpty()) {
                 end = fileContent.getPosition();
                 line = fileContent.nextLine();
             }
         }
-        if (headerDefinition.getEndLine().endsWith("EOL") && line != null && "".equals(line.trim())) {
+        if (headerDefinition.getEndLine().endsWith("EOL")
+                && line != null
+                && line.trim().isEmpty()) {
             end = fileContent.getPosition();
         }
         return end;
