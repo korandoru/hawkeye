@@ -179,7 +179,9 @@ public final class HeaderParser {
                 line = fileContent.nextLine();
             }
         }
-        if (headerDefinition.getEndLine().endsWith("EOL") && line != null && line.trim().isEmpty()) {
+        if (headerDefinition.getEndLine().endsWith("EOL")
+                && line != null
+                && line.trim().isEmpty()) {
             end = fileContent.getPosition();
         }
         return end;
