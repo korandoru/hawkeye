@@ -17,9 +17,10 @@ baseDir = "."
 headerPath = "Apache-2.0.txt"
 
 excludes = [
-    "**/*.txt",
-    "**/src/test/resources/**/*.toml",
-    "**/src/test/resources/**/*.xml",
+    "*.txt",
+    "hawkeye-core/src/test/resources/**/*.toml",
+    "hawkeye-core/src/test/resources/**/*.xml",
+    "hawkeye-core/src/test/data/**",
 ]
 
 [mapping.SCRIPT_STYLE]
