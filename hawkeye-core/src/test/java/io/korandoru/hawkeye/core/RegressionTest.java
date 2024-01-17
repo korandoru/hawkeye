@@ -33,4 +33,16 @@ public class RegressionTest {
         final File actual = new File("src/test/data/issue-110/main.rs.formatted");
         assertThat(actual).hasSameTextualContentAs(expected);
     }
+
+    @Test
+    void testIssue113() {
+        final File file = new File("src/test/data/issue-113/licenserc.toml");
+        final HawkEyeConfig config = HawkEyeConfig.of(file).dryRun(true).build();
+        final LicenseFormatter formatter = new LicenseFormatter(config);
+        formatter.call();
+
+        final File expected = new File("src/test/data/issue-113/main.rs.formatted.expected");
+        final File actual = new File("src/test/data/issue-113/main.rs.formatted");
+        assertThat(actual).hasSameTextualContentAs(expected);
+    }
 }

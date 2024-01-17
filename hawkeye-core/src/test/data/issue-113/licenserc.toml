@@ -1,0 +1,17 @@
+baseDir = "src/test/data/issue-113"
+
+inlineHeader = """
+${hawkeye.core.filename}
+------------------------------------------
+Copyright (c) ${year}
+${owner}
+------------------------------------------
+"""
+
+includes = [
+    "*.rs",
+]
+
+[properties]
+year = 2024
+owner = "Some_Name"
