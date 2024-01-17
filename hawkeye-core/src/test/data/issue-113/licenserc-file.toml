@@ -1,0 +1,11 @@
+baseDir = "src/test/data/issue-113"
+
+headerPath = "header.txt"
+
+includes = [
+    "*.rs",
+]
+
+[properties]
+year = 2024
+owner = "Some_Name"
