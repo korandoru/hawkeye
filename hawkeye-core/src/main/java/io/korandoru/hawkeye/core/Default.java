@@ -120,6 +120,9 @@ public class Default {
         // pnpm
         "pnpm-lock.yaml",
 
+        // Golang
+        "**/go.sum",
+
         // Cargo
         "**/Cargo.lock",
 
