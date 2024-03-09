@@ -41,7 +41,7 @@ To check license headers in GitHub Actions, add a step in your GitHub workflow:
 
 ```yaml
 - name: Check License Header
-  uses: korandoru/hawkeye@v3
+  uses: korandoru/hawkeye@v4
 ```
 
 ### Docker
