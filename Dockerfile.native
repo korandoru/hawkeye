@@ -25,7 +25,7 @@ COPY . .
 RUN ./mvnw -B -ntp clean package -DskipTests -Pnative \
     -Dnative-image.buildArgs='-H:+StaticExecutableWithDynamicLibC'
 
-FROM gcr.io/distroless/base-debian12:nonroot
+FROM debian:bullseye-slim
 ENV LANG C.utf8
 COPY --from=rust-build /build/hawkeye-core/native/target/release/libhawkeyejni.so /bin/
 COPY --from=build /build/hawkeye-native/target/hawkeye-native /bin/
