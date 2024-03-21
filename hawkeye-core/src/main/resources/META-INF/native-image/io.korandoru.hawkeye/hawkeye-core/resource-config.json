@@ -6,6 +6,9 @@
       },
       {
         "pattern": "hawkeye.properties"
+      },
+      {
+        "pattern": ".*hawkeyejni.*"
       }
     ]
   }
