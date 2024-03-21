@@ -12,14 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM public.ecr.aws/docker/library/eclipse-temurin:17 as build
+FROM public.ecr.aws/docker/library/rust:1.76.0-alpine3.19 as rust-build
+ENV LANG C.utf8
+ENV RUSTFLAGS="-C target-feature=-crt-static"
+WORKDIR /build
+COPY . .
+RUN apk fix && apk --no-cache --update add musl-dev && \
+    cd hawkeye-core/native && cargo build --release
+
+FROM public.ecr.aws/docker/library/eclipse-temurin:17-jdk-alpine as build
 WORKDIR /build
 COPY . .
 RUN ./mvnw -B -ntp clean package -DskipTests
 
-FROM public.ecr.aws/docker/library/eclipse-temurin:17-jre
-RUN apt-get -y update && apt-get -y install git && \
-    git config --global --add safe.directory /github/workspace
+FROM public.ecr.aws/docker/library/eclipse-temurin:17-jre-alpine
+ENV JAVA_OPTS="-Djava.library.path=/lib"
+RUN apk fix && apk --no-cache --update add git && \
+    git config --global --add safe.directory /github/workspace \
+COPY --from=rust-build /build/hawkeye-core/native/target/release/libhawkeye_core.so /lib/
 COPY --from=build /build/hawkeye-cli/target/hawkeye.jar /bin/hawkeye
 WORKDIR /github/workspace/
 ENTRYPOINT ["/bin/hawkeye"]
