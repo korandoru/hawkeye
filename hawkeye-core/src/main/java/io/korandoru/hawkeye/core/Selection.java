@@ -98,8 +98,14 @@ public final class Selection {
                         excludeList.stream().filter(m -> !m.isReverse()).anyMatch(m -> m.match(path, true));
                 final boolean isReserveExcluded =
                         excludeList.stream().filter(MatchPattern::isReverse).anyMatch(m -> m.match(path, true));
-                final boolean isIgnored = gitHelper != null && gitHelper.isPathIgnored(dir.toAbsolutePath().toString());
-                return ((isExcluded || isIgnored) && !isReserveExcluded) ? FileVisitResult.SKIP_SUBTREE : FileVisitResult.CONTINUE;
+                final Path normalized = dir.toAbsolutePath().normalize();
+                final boolean isIgnored = gitHelper != null && gitHelper.isPathIgnored(normalized.toString());
+                if ((isExcluded || isIgnored) && !isReserveExcluded) {
+                    log.debug("Skip directory {}", dir);
+                    return FileVisitResult.SKIP_SUBTREE;
+                } else {
+                    return FileVisitResult.CONTINUE;
+                }
             }
 
             @Override
@@ -114,9 +120,12 @@ public final class Selection {
                         excludeList.stream().filter(m -> !m.isReverse()).anyMatch(m -> m.match(path, false));
                 final boolean isReserveExcluded =
                         excludeList.stream().filter(MatchPattern::isReverse).anyMatch(m -> m.match(path, false));
-                final boolean isIgnored = gitHelper != null && gitHelper.isPathIgnored(file.toAbsolutePath().toString());
+                final Path normalized = file.toAbsolutePath().normalize();
+                final boolean isIgnored = gitHelper != null && gitHelper.isPathIgnored(normalized.toString());
                 if (isIncluded && !((isExcluded || isIgnored) && !isReserveExcluded)) {
                     results.add(path.toString());
+                } else {
+                    log.debug("Skip file {}", file);
                 }
                 return FileVisitResult.CONTINUE;
             }

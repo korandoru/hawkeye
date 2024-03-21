@@ -10,6 +10,17 @@ import lombok.extern.slf4j.Slf4j;
 public class GitHelper {
     private final long repo;
 
+    static {
+        try {
+            // try dynamic library - the search path can be configured via "-Djava.library.path"
+            System.loadLibrary("hawkeyejni");
+            log.debug("Loaded the hawkeyejni shared library.");
+        } catch (UnsatisfiedLinkError e) {
+            // ignore - try from classpath
+            log.debug("Unable to load the hawkeyejni shared library.", e);
+        }
+    }
+
     public static GitHelper create(Path baseDir, GitModel config) {
         final FeatureGate checkIgnore = config.getCheckIgnore();
         if (checkIgnore.isDisable()) {
@@ -17,10 +28,13 @@ public class GitHelper {
         }
         try {
             final long repo = discoverRepo(baseDir.toAbsolutePath().toString());
-            return new GitHelper(repo);
-        } catch (ResultException e) {
             if (checkIgnore.isAuto()) {
-                log.debug("git.checkIgnore=auto is resolved to disable", e);
+                log.info("git.checkIgnore=auto is resolved to enable");
+            }
+            return new GitHelper(repo);
+        } catch (UnsatisfiedLinkError | ResultException e) {
+            if (checkIgnore.isAuto()) {
+                log.info("git.checkIgnore=auto is resolved to disable", e);
                 return null;
             }
             throw e;
