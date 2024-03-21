@@ -27,8 +27,7 @@ RUN ./mvnw -B -ntp clean package -DskipTests -Pnative \
 
 FROM gcr.io/distroless/base-debian12:nonroot
 ENV LANG C.utf8
-ENV JAVA_OPTS="-Djava.library.path=/lib"
-COPY --from=rust-build /build/hawkeye-core/native/target/release/libhawkeyejni.so /lib/
+COPY --from=rust-build /build/hawkeye-core/native/target/release/libhawkeyejni.so /bin/
 COPY --from=build /build/hawkeye-native/target/hawkeye-native /bin/
 WORKDIR /github/workspace/
 ENTRYPOINT ["/bin/hawkeye-native"]
