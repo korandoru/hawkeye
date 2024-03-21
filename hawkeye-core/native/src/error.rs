@@ -19,12 +19,12 @@ use snafu::Snafu;
 #[derive(Debug, Snafu)]
 #[snafu(visibility(pub))]
 pub enum Error {
-    #[snafu(display("Git operation failed."))]
+    #[snafu(display("Git operation failed. {}", source))]
     GitError {
         #[snafu(source)]
         source: git2::Error,
     },
-    #[snafu(display("Git operation failed."))]
+    #[snafu(display("JNI failure. {}", source))]
     JNIError {
         #[snafu(source)]
         source: jni::errors::Error,

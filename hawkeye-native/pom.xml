@@ -29,7 +29,10 @@
     <artifactId>hawkeye-native</artifactId>
 
     <properties>
-        <native-image.buildArgs />
+        <native-image.buildArgs>
+            --initialize-at-build-time=io.korandoru.hawkeye.core.GitHelper
+            -Djava.library.path=${project.basedir}/../hawkeye-core/native/target/release
+        </native-image.buildArgs>
         <native-maven-plugin.version>0.9.19</native-maven-plugin.version>
     </properties>
 
