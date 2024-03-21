@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM 1.76-alpine as rust-build
+FROM public.ecr.aws/docker/library/rust:1.76.0-alpine3.19 as rust-build
 ENV LANG C.utf8
 WORKDIR /build
 COPY . .
