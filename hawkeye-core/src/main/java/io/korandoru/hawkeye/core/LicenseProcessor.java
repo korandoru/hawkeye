@@ -76,10 +76,6 @@ public abstract class LicenseProcessor implements Callable<Report> {
                 config.isUseDefaultExcludes());
         final Set<String> selectedFiles =
                 Arrays.stream(selection.getSelectedFiles()).collect(Collectors.toSet());
-        final OldGitHelper oldGitHelper = OldGitHelper.create(baseDir, config.getGit());
-        if (oldGitHelper != null) {
-            oldGitHelper.filterIgnoredFiles(selectedFiles);
-        }
 
         final Set<Mapping> mapping = new HashSet<>(config.getMapping());
         if (config.isUseDefaultMapping()) {
