@@ -44,11 +44,13 @@ public final class Selection {
     private final FileSystem fs;
     private final String[] included;
     private final String[] excluded;
+    private final GitHelper gitHelper;
 
     private final CompletableFuture<String[]> selectedFiles;
 
-    public Selection(File basedir, String[] included, String[] excluded, boolean useDefaultExcludes) {
+    public Selection(File basedir, GitHelper gitHelper, String[] included, String[] excluded, boolean useDefaultExcludes) {
         this.basedir = basedir;
+        this.gitHelper = gitHelper;
         this.fs = basedir.toPath().getFileSystem();
         final String[] usedDefaultExcludes = useDefaultExcludes ? Default.EXCLUDES : new String[0];
         this.included = included.length > 0 ? included : Default.INCLUDE;
@@ -96,7 +98,8 @@ public final class Selection {
                         excludeList.stream().filter(m -> !m.isReverse()).anyMatch(m -> m.match(path, true));
                 final boolean isReserveExcluded =
                         excludeList.stream().filter(MatchPattern::isReverse).anyMatch(m -> m.match(path, true));
-                return (isExcluded && !isReserveExcluded) ? FileVisitResult.SKIP_SUBTREE : FileVisitResult.CONTINUE;
+                final boolean isIgnored = gitHelper != null && gitHelper.isPathIgnored(dir.toAbsolutePath().toString());
+                return ((isExcluded || isIgnored) && !isReserveExcluded) ? FileVisitResult.SKIP_SUBTREE : FileVisitResult.CONTINUE;
             }
 
             @Override
@@ -111,7 +114,8 @@ public final class Selection {
                         excludeList.stream().filter(m -> !m.isReverse()).anyMatch(m -> m.match(path, false));
                 final boolean isReserveExcluded =
                         excludeList.stream().filter(MatchPattern::isReverse).anyMatch(m -> m.match(path, false));
-                if (isIncluded && !(isExcluded && !isReserveExcluded)) {
+                final boolean isIgnored = gitHelper != null && gitHelper.isPathIgnored(file.toAbsolutePath().toString());
+                if (isIncluded && !((isExcluded || isIgnored) && !isReserveExcluded)) {
                     results.add(path.toString());
                 }
                 return FileVisitResult.CONTINUE;

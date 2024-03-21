@@ -30,7 +30,7 @@ class SelectionTest {
 
     @Test
     void testDefaultSelectAll() {
-        final Selection selection = new Selection(new File("."), new String[0], new String[0], false);
+        final Selection selection = new Selection(new File("."), null, new String[0], new String[0], false);
         assertThat(selection.getExcluded()).hasSize(0);
         assertThat(selection.getIncluded()).hasSize(1);
         assertThat(selection.getSelectedFiles()).hasSizeGreaterThan(0);
@@ -38,7 +38,7 @@ class SelectionTest {
 
     @Test
     void testLimitInclusion() {
-        final Selection selection = new Selection(new File("."), new String[] {"toto"}, new String[] {"tata"}, false);
+        final Selection selection = new Selection(new File("."), null, new String[] {"toto"}, new String[] {"tata"}, false);
         assertThat(selection.getExcluded()).hasSize(1);
         assertThat(selection.getIncluded()).hasSize(1);
         assertThat(selection.getSelectedFiles()).hasSize(0);
@@ -46,7 +46,7 @@ class SelectionTest {
 
     @Test
     void testLimitInclusionAndCheckDefaultExcludes() {
-        final Selection selection = new Selection(new File("."), new String[] {"toto"}, new String[0], true);
+        final Selection selection = new Selection(new File("."), null, new String[] {"toto"}, new String[0], true);
         // default excludes from Scanner and Selection + toto
         assertThat(selection.getExcluded()).hasSameSizeAs(Default.EXCLUDES);
         assertThat(selection.getIncluded()).hasSize(1);
@@ -66,7 +66,7 @@ class SelectionTest {
             "module/sub/subsub/target/foo/not-ignored.txt",
         });
         final Selection selection = new Selection(
-                root, new String[] {"**/*.txt"}, new String[] {"ignore", "target/**", "module/**/target/**"}, false);
+                root, null, new String[] {"**/*.txt"}, new String[] {"ignore", "target/**", "module/**/target/**"}, false);
         final String[] selectedFiles = selection.getSelectedFiles();
         final List<String> expectedSelectedFiles = List.of(
                 "included.txt",
@@ -78,7 +78,7 @@ class SelectionTest {
     @Test
     void testContainsEmoji(@TempDir Path tempDir) throws IOException {
         final File root = createFakeProject(tempDir, new String[] {"🏡Home.py"});
-        final Selection selection = new Selection(root, new String[] {"**/*.py"}, new String[0], false);
+        final Selection selection = new Selection(root, null, new String[] {"**/*.py"}, new String[0], false);
         final String[] selectedFiles = selection.getSelectedFiles();
         final List<String> expectedSelectedFiles = List.of("🏡Home.py");
         assertThat(selectedFiles).containsExactlyInAnyOrderElementsOf(expectedSelectedFiles);

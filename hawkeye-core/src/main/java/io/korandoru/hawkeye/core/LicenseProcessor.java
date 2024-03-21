@@ -69,8 +69,10 @@ public abstract class LicenseProcessor implements Callable<Report> {
         final HeaderSource headerSource =
                 HeaderSource.of(config.getInlineHeader(), config.getHeaderPath(), resourceFinder);
         final Header header = new Header(headerSource);
+        final GitHelper gitHelper = GitHelper.create(baseDir, config.getGit());
         final Selection selection = new Selection(
                 baseDir.toFile(),
+                gitHelper,
                 config.getIncludes().toArray(new String[0]),
                 config.getExcludes().toArray(new String[0]),
                 config.isUseDefaultExcludes());
