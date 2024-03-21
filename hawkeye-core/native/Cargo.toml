@@ -24,6 +24,6 @@ crate-type = ["cdylib"]
 doc = false
 
 [dependencies]
-git2 = "0.18.3"
+git2 = { version = "0.18.3", default-features = false }
 jni = "0.21.1"
 snafu = "0.8.2"

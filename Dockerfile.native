@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM public.ecr.aws/docker/library/rust:1.76.0-slim-bookworm as rust-build
+FROM public.ecr.aws/docker/library/rust:1.76.0-bookworm as rust-build
 ENV LANG C.utf8
 WORKDIR /build
 COPY . .
@@ -28,7 +28,7 @@ COPY --from=rust-build \
 RUN ./mvnw -B -ntp clean package -DskipTests -Pnative \
     -Dnative-image.buildArgs='-H:+StaticExecutableWithDynamicLibC'
 
-FROM public.ecr.aws/docker/library/debian:bookworm-slim
+FROM public.ecr.aws/docker/library/debian:bookworm
 ENV LANG C.utf8
 COPY --from=build /build/hawkeye-native/target/hawkeye-native /bin/
 WORKDIR /github/workspace/
