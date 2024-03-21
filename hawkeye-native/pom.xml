@@ -16,7 +16,8 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.korandoru.hawkeye</groupId>
@@ -29,10 +30,7 @@
     <artifactId>hawkeye-native</artifactId>
 
     <properties>
-        <native-image.buildArgs>
-            --initialize-at-build-time=io.korandoru.hawkeye.core.GitHelper
-            -Djava.library.path=${project.basedir}/../hawkeye-core/native/target/release
-        </native-image.buildArgs>
+        <native-image.buildArgs/>
         <native-maven-plugin.version>0.9.19</native-maven-plugin.version>
     </properties>
 
