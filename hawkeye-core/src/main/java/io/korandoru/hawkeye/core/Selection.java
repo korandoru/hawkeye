@@ -48,7 +48,8 @@ public final class Selection {
 
     private final CompletableFuture<String[]> selectedFiles;
 
-    public Selection(File basedir, GitHelper gitHelper, String[] included, String[] excluded, boolean useDefaultExcludes) {
+    public Selection(
+            File basedir, GitHelper gitHelper, String[] included, String[] excluded, boolean useDefaultExcludes) {
         this.basedir = basedir;
         this.gitHelper = gitHelper;
         this.fs = basedir.toPath().getFileSystem();

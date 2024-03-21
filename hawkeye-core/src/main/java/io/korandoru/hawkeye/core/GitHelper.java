@@ -79,5 +79,6 @@ public class GitHelper {
     }
 
     private static native long discoverRepo(String baseDir);
+
     private static native boolean isPathIgnored(long repo, String path);
 }

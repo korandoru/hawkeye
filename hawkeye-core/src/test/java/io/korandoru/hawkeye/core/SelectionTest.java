@@ -38,7 +38,8 @@ class SelectionTest {
 
     @Test
     void testLimitInclusion() {
-        final Selection selection = new Selection(new File("."), null, new String[] {"toto"}, new String[] {"tata"}, false);
+        final Selection selection =
+                new Selection(new File("."), null, new String[] {"toto"}, new String[] {"tata"}, false);
         assertThat(selection.getExcluded()).hasSize(1);
         assertThat(selection.getIncluded()).hasSize(1);
         assertThat(selection.getSelectedFiles()).hasSize(0);
@@ -66,7 +67,11 @@ class SelectionTest {
             "module/sub/subsub/target/foo/not-ignored.txt",
         });
         final Selection selection = new Selection(
-                root, null, new String[] {"**/*.txt"}, new String[] {"ignore", "target/**", "module/**/target/**"}, false);
+                root,
+                null,
+                new String[] {"**/*.txt"},
+                new String[] {"ignore", "target/**", "module/**/target/**"},
+                false);
         final String[] selectedFiles = selection.getSelectedFiles();
         final List<String> expectedSelectedFiles = List.of(
                 "included.txt",
