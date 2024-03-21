@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+FROM 1.76-alpine as rust-build
+ENV LANG C.utf8
+WORKDIR /build
+COPY . .
+RUN cd hawkeye-core/native && cargo build --release
+
 FROM ghcr.io/graalvm/native-image:ol9-java17-22.3.0 as build
 ENV LANG C.utf8
 WORKDIR /build
@@ -21,8 +27,8 @@ RUN ./mvnw -B -ntp clean package -DskipTests -Pnative \
 
 FROM public.ecr.aws/docker/library/alpine:3.19.0
 ENV LANG C.utf8
-RUN apk fix && apk --no-cache --update add gcompat git && \
-    git config --global --add safe.directory /github/workspace
+ENV JAVA_OPTS="-Djava.library.path=/lib"
+COPY --from=rust-build /build/hawkeye-core/native/target/release/libhawkeyejni.so /lib/
 COPY --from=build /build/hawkeye-native/target/hawkeye-native /bin/
 WORKDIR /github/workspace/
 ENTRYPOINT ["/bin/hawkeye-native"]

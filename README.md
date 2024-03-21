@@ -196,7 +196,7 @@ inceptionYear = 2023
 [git]
 # If enabled, do not process files that are ignored by Git; possible value: ['auto', 'enable', 'disable']
 # 'auto' means this feature only enabled if both:
-#   * `git` is avaialble
+#   * `hawkeyejni` is under 'java.library.path'; this is true if you use the hawkeye-native image.
 #   * `basedir` is in a Git repository.
 # default: 'auto'
 checkIgnore = 'auto'

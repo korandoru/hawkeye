@@ -19,7 +19,7 @@ inputs:
     description: The name of Docker image
     required: true
   digests:
-    descriptions: The digest of images to be merged
+    description: The digest of images to be merged
     required: true
 
 runs:

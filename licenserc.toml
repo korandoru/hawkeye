@@ -29,4 +29,3 @@ filenames = ['Dockerfile.native']
 [properties]
 inceptionYear = 2023
 copyrightOwner = "Korandoru Contributors"
-
