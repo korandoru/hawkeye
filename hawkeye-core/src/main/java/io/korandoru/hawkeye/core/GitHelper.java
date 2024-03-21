@@ -24,11 +24,14 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class GitHelper {
-    private static final boolean NATIVE_LIBRARY_LOADED;
-
     private final long repo;
 
-    static {
+    public static GitHelper create(Path baseDir, GitModel config) {
+        final FeatureGate checkIgnore = config.getCheckIgnore();
+        if (checkIgnore.isDisable()) {
+            return null;
+        }
+
         boolean nativeLibraryLoaded = false;
         try {
             // try dynamic library - the search path can be configured via "-Djava.library.path"
@@ -38,16 +41,8 @@ public class GitHelper {
         } catch (UnsatisfiedLinkError e) {
             log.warn("Unable to load the hawkeyejni shared library.", e);
         }
-        NATIVE_LIBRARY_LOADED = nativeLibraryLoaded;
-    }
 
-    public static GitHelper create(Path baseDir, GitModel config) {
-        final FeatureGate checkIgnore = config.getCheckIgnore();
-        if (checkIgnore.isDisable()) {
-            return null;
-        }
-
-        if (!NATIVE_LIBRARY_LOADED) {
+        if (!nativeLibraryLoaded) {
             if (checkIgnore.isAuto()) {
                 log.info("git.checkIgnore=auto is resolved to disable; unable to load the hawkeyejni shared library.");
                 return null;
