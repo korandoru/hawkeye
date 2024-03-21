@@ -126,7 +126,12 @@ jobs:
           context: .
           file: ${{matrix.file}}
           tags: ${{matrix.name}}:ci
-          outputs: type=docker
+          outputs: type=docker,dest=/tmp/${{matrix.name}}-${{matrix.os}}.tar
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{matrix.name}}-${{matrix.os}}
+          path: /tmp/${{matrix.name}}-${{matrix.os}}.tar
       - name: Sanity check
         run: |
           cp action.yml action.yml.bak

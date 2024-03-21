@@ -1,0 +1,14 @@
+[
+  {
+    "name": "io.korandoru.hawkeye.core.rust.ResultException",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.lang.String",
+          "java.lang.String"
+        ]
+      }
+    ]
+  }
+]
