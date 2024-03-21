@@ -20,7 +20,7 @@ COPY . .
 RUN apk fix && apk --no-cache --update add musl-dev gcompat && \
     cd hawkeye-core/native && cargo build --release
 
-FROM ghcr.io/graalvm/native-image-community:21-muslib-ol9 as build
+FROM ghcr.io/graalvm/native-image-community:17-muslib-ol9 as build
 ENV LANG C.utf8
 WORKDIR /build
 COPY . .
