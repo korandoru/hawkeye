@@ -2,7 +2,7 @@ use jni::JNIEnv;
 use jni::objects::{JThrowable, JValue};
 use snafu::Snafu;
 
-#[derive(Snafu)]
+#[derive(Debug, Snafu)]
 #[snafu(visibility(pub))]
 pub enum Error {
     #[snafu(display("Git operation failed."))]
