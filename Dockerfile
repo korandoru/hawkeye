@@ -28,7 +28,7 @@ RUN ./mvnw -B -ntp clean package -DskipTests
 FROM public.ecr.aws/docker/library/eclipse-temurin:17-jre-alpine
 ENV JAVA_OPTS="-Djava.library.path=/lib"
 RUN apk fix && apk --no-cache --update add git && \
-    git config --global --add safe.directory /github/workspace \
+    git config --global --add safe.directory /github/workspace
 COPY --from=rust-build /build/hawkeye-core/native/target/release/libhawkeye_core.so /lib/
 COPY --from=build /build/hawkeye-cli/target/hawkeye.jar /bin/hawkeye
 WORKDIR /github/workspace/
