@@ -30,7 +30,7 @@ RUN ./mvnw -B -ntp clean package -DskipTests -Pnative \
 FROM public.ecr.aws/docker/library/alpine:3.19.0
 ENV LANG C.utf8
 RUN apk fix && apk --no-cache --update add musl-dev gcompat git && \
-    git config --global --add safe.directory /github/workspace \
+    git config --global --add safe.directory /github/workspace
 COPY --from=rust-build /build/hawkeye-core/native/target/release/libhawkeyejni.so /bin/
 COPY --from=build /build/hawkeye-native/target/hawkeye-native /bin/
 WORKDIR /github/workspace/
