@@ -2,6 +2,12 @@
 name = "native"
 version = "0.1.0"
 edition = "2021"
-public = false
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+doc = false
 
 [dependencies]
+git2 = "0.18.3"
+jni = "0.21.1"
