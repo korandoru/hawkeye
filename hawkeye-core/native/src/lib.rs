@@ -11,18 +11,20 @@ mod error;
 pub type Result<T> = std::result::Result<T, error::Error>;
 
 #[no_mangle]
-pub extern "system" fn Java_io_korandoru_hawkeye_core_GitHelper_openRepository(
+pub extern "system" fn Java_io_korandoru_hawkeye_core_GitHelper_discoverRepo(
     mut env: JNIEnv,
     _: JClass,
+    basedir: JString,
 ) -> jlong {
-    intern_open_repository().unwrap_or_else(|e| {
+    intern_discover_repo(&mut env, basedir).unwrap_or_else(|e| {
         e.throw(&mut env);
         0 as jlong
     })
 }
 
-fn intern_open_repository() -> Result<jlong> {
-    let repo = Repository::open_from_env().context(GitSnafu)?;
+fn intern_discover_repo(env: &mut JNIEnv, basedir: JString,) -> Result<jlong> {
+    let basedir = jstring_to_string(env, &basedir)?;
+    let repo = Repository::discover(basedir).context(GitSnafu)?;
     if repo.workdir().is_some() {
         Ok(Box::into_raw(Box::new(repo)) as jlong)
     } else {
