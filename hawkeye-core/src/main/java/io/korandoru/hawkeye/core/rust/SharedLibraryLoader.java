@@ -19,6 +19,7 @@ package io.korandoru.hawkeye.core.rust;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.atomic.AtomicReference;
@@ -28,37 +29,26 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @UtilityClass
 public class SharedLibraryLoader {
-    private enum LibraryState {
+    public enum LibraryState {
         NOT_LOADED,
         LOADING,
         LOADED,
-        FAILED,
     }
 
     private static final AtomicReference<LibraryState> libraryLoaded = new AtomicReference<>(LibraryState.NOT_LOADED);
-
-    static {
-        SharedLibraryLoader.loadLibrary();
-    }
 
     public static void loadLibrary() {
         if (libraryLoaded.get() == LibraryState.LOADED) {
             return;
         }
 
-        if (libraryLoaded.get() == LibraryState.FAILED) {
-            return;
-        }
-
         if (libraryLoaded.compareAndSet(LibraryState.NOT_LOADED, LibraryState.LOADING)) {
             try {
                 doLoadLibrary();
-                log.info("Loaded the hawkeyejni shared library");
-                libraryLoaded.set(LibraryState.LOADED);
             } catch (IOException e) {
-                log.info("Unable to load the hawkeyejni shared library", e);
-                libraryLoaded.set(LibraryState.FAILED);
+                throw new UncheckedIOException("Unable to load the hawkeyejni shared library", e);
             }
+            libraryLoaded.set(LibraryState.LOADED);
             return;
         }
 
@@ -93,6 +83,6 @@ public class SharedLibraryLoader {
     }
 
     private static String bundledLibraryPath() {
-        return "/" + System.mapLibraryName("hawkeyejni");
+        return "/%s".formatted(System.mapLibraryName("hawkeyejni"));
     }
 }

@@ -18,46 +18,54 @@ package io.korandoru.hawkeye.core;
 
 import io.korandoru.hawkeye.core.config.FeatureGate;
 import io.korandoru.hawkeye.core.config.GitModel;
-import io.korandoru.hawkeye.core.rust.ResultException;
 import io.korandoru.hawkeye.core.rust.SharedLibraryLoader;
 import java.nio.file.Path;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class GitHelper {
-    static {
-        SharedLibraryLoader.loadLibrary();
-    }
-
     public static GitHelper create(Path baseDir, GitModel config) {
         final FeatureGate checkIgnore = config.getCheckIgnore();
         if (checkIgnore.isDisable()) {
             return null;
         }
 
+        final boolean isAuto = checkIgnore.isAuto();
         try {
-            final long repo = discoverRepo(baseDir.toAbsolutePath().toString());
-            if (checkIgnore.isAuto()) {
-                log.info("git.checkIgnore=auto is resolved to enable");
-            }
-            return new GitHelper(repo);
-        } catch (UnsatisfiedLinkError | ResultException e) {
-            if (checkIgnore.isAuto()) {
+            SharedLibraryLoader.loadLibrary();
+        } catch (Exception e) {
+            if (isAuto) {
                 log.info("git.checkIgnore=auto is resolved to disable", e);
                 return null;
             }
             throw e;
         }
+
+        final long repoNativeHandle;
+        try {
+            repoNativeHandle = discoverRepo(baseDir.toAbsolutePath().toString());
+        } catch (Exception e) {
+            if (isAuto) {
+                log.info("git.checkIgnore=auto is resolved to disable", e);
+                return null;
+            }
+            throw e;
+        }
+
+        if (isAuto) {
+            log.info("git.checkIgnore=auto is resolved to enable");
+        }
+        return new GitHelper(repoNativeHandle);
     }
 
-    private final long repo;
+    private final long repoNativeHandle;
 
-    private GitHelper(long repo) {
-        this.repo = repo;
+    private GitHelper(long repoNativeHandle) {
+        this.repoNativeHandle = repoNativeHandle;
     }
 
     public boolean isPathIgnored(String path) {
-        return isPathIgnored(repo, path);
+        return isPathIgnored(repoNativeHandle, path);
     }
 
     private static native long discoverRepo(String baseDir);
