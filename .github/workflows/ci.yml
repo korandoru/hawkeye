@@ -126,7 +126,9 @@ jobs:
           context: .
           file: ${{matrix.file}}
           tags: ${{matrix.name}}:ci
-          outputs: type=docker,dest=/tmp/${{matrix.name}}-${{matrix.os}}.tar
+          outputs: type=docker
+      - name: Save image
+        run: docker save ${{matrix.name}}:ci -o /tmp/${{matrix.name}}-${{matrix.os}}.tar
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
