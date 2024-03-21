@@ -6,10 +6,15 @@ use snafu::Snafu;
 #[snafu(visibility(pub))]
 pub enum Error {
     #[snafu(display("Git operation failed."))]
-    GitOp {
+    GitError {
         #[snafu(source)]
         source: git2::Error,
-    }
+    },
+    #[snafu(display("Git operation failed."))]
+    JNIError {
+        #[snafu(source)]
+        source: jni::errors::Error,
+    },
 }
 
 impl Error {
@@ -30,7 +35,8 @@ impl Error {
     ) -> jni::errors::Result<JThrowable<'local>> {
         let class = env.find_class("io/korandoru/hawkeye/core/rust/ResultException")?;
         let code = env.new_string(match self {
-            Error::GitOp { .. } => "GitOp",
+            Error::GitError { .. } => "GitError",
+            Error::JNIError { .. } => "JNIError",
         })?;
         let message = env.new_string(format!("{}", self.to_string()))?;
         let exception = env.new_object(
