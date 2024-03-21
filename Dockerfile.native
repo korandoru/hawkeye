@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM public.ecr.aws/docker/library/rust:1.76.0-bookworm as rust-build
+FROM public.ecr.aws/docker/library/rust:1.76.0-alpine as rust-build
 ENV LANG C.utf8
+ENV RUSTFLAGS="-C target-feature=-crt-static"
 WORKDIR /build
 COPY . .
-RUN cd hawkeye-core/native && cargo build --release
+RUN apk fix && apk --no-cache --update add musl-dev gcompat && \
+    cd hawkeye-core/native && cargo build --release
 
 FROM ghcr.io/graalvm/native-image:ol9-java17-22.3.0 as build
 ENV LANG C.utf8
@@ -28,8 +30,9 @@ COPY --from=rust-build \
 RUN ./mvnw -B -ntp clean package -DskipTests -Pnative \
     -Dnative-image.buildArgs='-H:+StaticExecutableWithDynamicLibC'
 
-FROM public.ecr.aws/docker/library/debian:bookworm
+FROM public.ecr.aws/docker/library/alpine:3.19.0
 ENV LANG C.utf8
+RUN apk fix && apk --no-cache --update add gcompat
 COPY --from=build /build/hawkeye-native/target/hawkeye-native /bin/
 WORKDIR /github/workspace/
 ENTRYPOINT ["/bin/hawkeye-native"]
