@@ -12,9 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM public.ecr.aws/docker/library/rust:1.76.0-alpine3.19 as rust-build
+FROM public.ecr.aws/docker/library/rust:1.76.0 as rust-build
 ENV LANG C.utf8
-ENV RUSTFLAGS="-C target-feature=-crt-static"
 WORKDIR /build
 COPY . .
 RUN cd hawkeye-core/native && cargo build --release
@@ -26,7 +25,7 @@ COPY . .
 RUN ./mvnw -B -ntp clean package -DskipTests -Pnative \
     -Dnative-image.buildArgs='-H:+StaticExecutableWithDynamicLibC'
 
-FROM public.ecr.aws/docker/library/alpine:3.19.0
+FROM gcr.io/distroless/base:nonroot
 ENV LANG C.utf8
 ENV JAVA_OPTS="-Djava.library.path=/lib"
 COPY --from=rust-build /build/hawkeye-core/native/target/release/libhawkeyejni.so /lib/
