@@ -2,6 +2,9 @@ use git2::{Error as GitError, Repository};
 use jni::JNIEnv;
 use jni::objects::{JClass, JString};
 use jni::sys::{jboolean, jlong};
+use snafu::ResultExt;
+
+use crate::error::{GitSnafu, JNISnafu};
 
 mod error;
 
@@ -19,11 +22,12 @@ pub extern "system" fn Java_io_korandoru_hawkeye_core_GitHelper_openRepository(
 }
 
 fn intern_open_repository() -> Result<jlong> {
-    let repo = Repository::open_from_env()?;
-    if repo.workdir().is_none() {
-        GitError::from_str("No workdir")?;
+    let repo = Repository::open_from_env().context(GitSnafu)?;
+    if repo.workdir().is_some() {
+        Ok(Box::into_raw(Box::new(repo)) as jlong)
+    } else {
+        Err(GitError::from_str("No workdir")).context(GitSnafu)
     }
-    Ok(Box::into_raw(Box::new(repo)) as jlong)
 }
 
 #[no_mangle]
@@ -42,7 +46,7 @@ pub extern "system" fn Java_io_korandoru_hawkeye_core_GitHelper_isPathIgnored(
 fn intern_is_path_ignored(env: &mut JNIEnv, repo: *mut Repository, path: JString) -> Result<jboolean> {
     let repo = unsafe { &*repo };
     let path = jstring_to_string(env, &path)?;
-    let ignored = repo.is_path_ignored(path)?;
+    let ignored = repo.is_path_ignored(path).context(GitSnafu)?;
     Ok(ignored as jboolean)
 }
 
@@ -52,6 +56,6 @@ fn intern_is_path_ignored(env: &mut JNIEnv, repo: *mut Repository, path: JString
 /// The caller must guarantee that the Object passed in is an instance
 /// of `java.lang.String`, passing in anything else will lead to undefined behavior.
 pub(crate) fn jstring_to_string(env: &mut JNIEnv, s: &JString) -> Result<String> {
-    let res = unsafe { env.get_string_unchecked(s)? };
+    let res = unsafe { env.get_string_unchecked(s) }.context(JNISnafu)?;
     Ok(res.into())
 }
