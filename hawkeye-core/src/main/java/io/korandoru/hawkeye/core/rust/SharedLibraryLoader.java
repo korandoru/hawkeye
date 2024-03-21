@@ -93,6 +93,6 @@ public class SharedLibraryLoader {
     }
 
     private static String bundledLibraryPath() {
-        return System.mapLibraryName("hawkeyejni");
+        return "/" + System.mapLibraryName("hawkeyejni");
     }
 }
