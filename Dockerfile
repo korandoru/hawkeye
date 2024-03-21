@@ -20,12 +20,12 @@ COPY . .
 RUN apk fix && apk --no-cache --update add musl-dev && \
     cd hawkeye-core/native && cargo build --release
 
-FROM public.ecr.aws/docker/library/eclipse-temurin:17-jdk-alpine as build
+FROM public.ecr.aws/docker/library/eclipse-temurin:21-jdk-alpine as build
 WORKDIR /build
 COPY . .
 RUN ./mvnw -B -ntp clean package -DskipTests
 
-FROM public.ecr.aws/docker/library/eclipse-temurin:17-jre-alpine
+FROM public.ecr.aws/docker/library/eclipse-temurin:21-jre-alpine
 ENV JAVA_OPTS="-Djava.library.path=/lib"
 RUN apk fix && apk --no-cache --update add git && \
     git config --global --add safe.directory /github/workspace
