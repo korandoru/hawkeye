@@ -7,6 +7,8 @@ use std::{
 use serde::{de::Error, Deserialize, Deserializer, Serialize};
 use toml::Value;
 
+use crate::default_true;
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct Config {
@@ -93,10 +95,6 @@ impl Mapping {
             }
         }
     }
-}
-
-const fn default_true() -> bool {
-    true
 }
 
 fn default_cwd() -> PathBuf {

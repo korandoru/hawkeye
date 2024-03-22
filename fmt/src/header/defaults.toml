@@ -1,0 +1,395 @@
+[SHARPSTAR_STYLE]
+firstLine = '#*'
+endLine = ' *#'
+beforeEachLine = ' * '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = true
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '(\s|\t)*#\*.*$'
+lastLineDetectionPattern = '.*\*#(\s|\t)*$'
+
+[PERCENT_STYLE]
+firstLine = ''
+endLine = '${eol}'
+beforeEachLine = '% '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = false
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '^% .*$'
+lastLineDetectionPattern = '^% .*$'
+
+[BRACESSTAR_STYLE]
+firstLine = '{*'
+endLine = ' *}'
+beforeEachLine = ' * '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = true
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '(\s|\t)*\{\*.*$'
+lastLineDetectionPattern = '.*\*\}(\s|\t)*$'
+
+[EXCLAMATION_STYLE]
+firstLine = '!'
+endLine = '!${eol}'
+beforeEachLine = '! '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = false
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '!.*$'
+lastLineDetectionPattern = '!.*$'
+
+[MVEL_STYLE]
+firstLine = '@comment{'
+endLine = '}'
+beforeEachLine = '  '
+afterEachLine = ''
+allowBlankLines = true
+multipleLines = true
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '@comment\{$'
+lastLineDetectionPattern = '\}$'
+
+[APOSTROPHE_STYLE]
+firstLine = "'"
+endLine = "'${eol}"
+beforeEachLine = "' "
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = false
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = "'.*$"
+lastLineDetectionPattern = "'.*$"
+
+[TRIPLESLASH_STYLE]
+firstLine = '///'
+endLine = '///${eol}'
+beforeEachLine = '/// '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = false
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '///.*$'
+lastLineDetectionPattern = '///.*$'
+
+[PHP]
+firstLine = '/*'
+endLine = ' */'
+beforeEachLine = ' * '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = true
+padLines = false
+skipLinePattern = '^<\?php.*$'
+firstLineDetectionPattern = '(\s|\t)*/\*.*$'
+lastLineDetectionPattern = '.*\*/(\s|\t)*$'
+
+[LUA]
+firstLine = '--[[${eol}'
+endLine = '${eol}]]'
+beforeEachLine = '    '
+afterEachLine = ''
+allowBlankLines = true
+multipleLines = true
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '--\[\[$'
+lastLineDetectionPattern = '\]\]$'
+
+[SCALA_STYLE]
+firstLine = '/**'
+endLine = '  */'
+beforeEachLine = '  * '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = true
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '(\s|\t)*/\*.*$'
+lastLineDetectionPattern = '.*\*/(\s|\t)*$'
+
+[BATCH]
+firstLine = '@REM'
+endLine = '@REM${eol}'
+beforeEachLine = '@REM '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = false
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '@REM.*$'
+lastLineDetectionPattern = '@REM.*$'
+
+[MUSTACHE_STYLE]
+firstLine = '{{!'
+endLine = '}}'
+beforeEachLine = '    '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = true
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '\{\{\!.*$'
+lastLineDetectionPattern = '\}\}.*$'
+
+[HAML_STYLE]
+firstLine = '-#'
+endLine = '-#${eol}'
+beforeEachLine = '-# '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = false
+padLines = false
+skipLinePattern = '^-#!.*$'
+firstLineDetectionPattern = '-#.*$'
+lastLineDetectionPattern = '-#.*$'
+
+[PERCENT3_STYLE]
+firstLine = '%%%'
+endLine = '%%%${eol}'
+beforeEachLine = '%%% '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = false
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '%%%.*$'
+lastLineDetectionPattern = '%%%.*$'
+
+[EXCLAMATION3_STYLE]
+firstLine = '!!!'
+endLine = '!!!${eol}'
+beforeEachLine = '!!! '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = false
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '!!!.*$'
+lastLineDetectionPattern = '!!!.*$'
+
+[ASP]
+firstLine = '<%'
+endLine = '%>'
+beforeEachLine = "' "
+afterEachLine = ''
+allowBlankLines = true
+multipleLines = true
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '(\s|\t)*<%( .*)?$'
+lastLineDetectionPattern = '.*%>(\s|\t)*$'
+
+[SCRIPT_STYLE]
+firstLine = ''
+endLine = '${eol}'
+beforeEachLine = '# '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = false
+padLines = false
+skipLinePattern = '^#!.*$'
+firstLineDetectionPattern = '#.*$'
+lastLineDetectionPattern = '#.*$'
+
+[JAVAPKG_STYLE]
+firstLine = '${eol}/*-'
+endLine = ' */'
+beforeEachLine = ' * '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = true
+padLines = false
+skipLinePattern = '^package [a-z_]+(\.[a-z_][a-z0-9_]*)*;$'
+firstLineDetectionPattern = '(\s|\t)*/\*.*$'
+lastLineDetectionPattern = '.*\*/(\s|\t)*$'
+
+[DOUBLESLASH_STYLE]
+firstLine = ''
+endLine = '${eol}'
+beforeEachLine = '// '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = false
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '//.*$'
+lastLineDetectionPattern = '//.*$'
+
+[XML_STYLE]
+firstLine = '<!--${eol}'
+endLine = '${eol}-->'
+beforeEachLine = '    '
+afterEachLine = ''
+allowBlankLines = true
+multipleLines = true
+padLines = false
+skipLinePattern = '^<\?xml.*>$'
+firstLineDetectionPattern = '(\s|\t)*<!--.*$'
+lastLineDetectionPattern = '.*-->(\s|\t)*$'
+
+[ASCIIDOC_STYLE]
+firstLine = '////'
+endLine = '////${eol}'
+beforeEachLine = '  // '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = true
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '^////$'
+lastLineDetectionPattern = '^////$'
+
+[SEMICOLON_STYLE]
+firstLine = ';'
+endLine = ';${eol}'
+beforeEachLine = '; '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = false
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = ';.*$'
+lastLineDetectionPattern = ';.*$'
+
+[DOUBLETILDE_STYLE]
+firstLine = '~~'
+endLine = '~~${eol}'
+beforeEachLine = '~~ '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = false
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '~~.*$'
+lastLineDetectionPattern = '~~.*$'
+
+[SLASHSTAR_STYLE]
+firstLine = '/*'
+endLine = ' */${eol}'
+beforeEachLine = ' * '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = true
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '(\s|\t)*/\*.*$'
+lastLineDetectionPattern = '.*\*/(\s|\t)*$'
+
+[FTL_ALT]
+firstLine = '[#--${eol}'
+endLine = '${eol}--]'
+beforeEachLine = '    '
+afterEachLine = ''
+allowBlankLines = true
+multipleLines = true
+padLines = false
+skipLinePattern = '\[#ftl(\s.*)?\]'
+firstLineDetectionPattern = '(\s|\t)*\[#--.*$'
+lastLineDetectionPattern = '.*--\](\s|\t)*$'
+
+[DOUBLEDASHES_STYLE]
+firstLine = '--'
+endLine = '--${eol}'
+beforeEachLine = '-- '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = false
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '--.*$'
+lastLineDetectionPattern = '--.*$'
+
+[DYNASCRIPT3_STYLE]
+firstLine = '<!---${eol}'
+endLine = '${eol}--->'
+beforeEachLine = '    '
+afterEachLine = ''
+allowBlankLines = true
+multipleLines = true
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '(\s|\t)*<!---.*$'
+lastLineDetectionPattern = '.*--->(\s|\t)*$'
+
+[SINGLE_LINE_DOUBLESLASH_STYLE]
+firstLine = ''
+endLine = ''
+beforeEachLine = '// '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = false
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '//.*$'
+lastLineDetectionPattern = '//.*$'
+
+[XML_PER_LINE]
+firstLine = '${eol}'
+endLine = '${eol}'
+beforeEachLine = '<!-- '
+afterEachLine = ' -->'
+allowBlankLines = false
+multipleLines = false
+padLines = true
+skipLinePattern = '^<\?xml.*>$'
+firstLineDetectionPattern = '(\s|\t)*<!--.*$'
+lastLineDetectionPattern = '.*-->(\s|\t)*$'
+
+[UNKNOWN]
+firstLine = ''
+endLine = ''
+beforeEachLine = ''
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = false
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = ''
+lastLineDetectionPattern = ''
+
+[JAVADOC_STYLE]
+firstLine = '/**'
+endLine = ' */'
+beforeEachLine = ' * '
+afterEachLine = ''
+allowBlankLines = false
+multipleLines = true
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '(\s|\t)*/\*.*$'
+lastLineDetectionPattern = '.*\*/(\s|\t)*$'
+
+[DYNASCRIPT_STYLE]
+firstLine = '<%--${eol}'
+endLine = '${eol}--%>'
+beforeEachLine = '    '
+afterEachLine = ''
+allowBlankLines = true
+multipleLines = true
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '(\s|\t)*<%--.*$'
+lastLineDetectionPattern = '.*--%>(\s|\t)*$'
+
+[FTL]
+firstLine = '<#--${eol}'
+endLine = '${eol}-->'
+beforeEachLine = '    '
+afterEachLine = ''
+allowBlankLines = true
+multipleLines = true
+padLines = false
+skipLinePattern = ''
+firstLineDetectionPattern = '(\s|\t)*<#--.*$'
+lastLineDetectionPattern = '.*-->(\s|\t)*$'

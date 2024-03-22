@@ -24,6 +24,7 @@ repository.workspace = true
 [dependencies]
 git2 = "0.18.3"
 ignore = "0.4.22"
+regex = "1.10.3"
 serde = { version = "1.0.197", features = ["derive"] }
 snafu = "0.8.2"
 toml = "0.8.12"
