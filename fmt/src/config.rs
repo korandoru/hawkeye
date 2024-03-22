@@ -38,7 +38,7 @@ pub struct Config {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Git {
-    pub check_ignore: FeatureGate,
+    pub ignore: FeatureGate,
 }
 
 #[derive(Debug, Clone, Default, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
