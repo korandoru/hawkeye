@@ -12,8 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![feature(extract_if)]
+
+use crate::error::Error;
+
 pub mod config;
+pub mod error;
 pub mod header;
+pub mod selection;
+
+pub type Result<T> = std::result::Result<T, Error>;
 
 const fn default_true() -> bool {
     true
