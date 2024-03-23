@@ -12,7 +12,7 @@ lastLineDetectionPattern = '.*\*#(\s|\t)*$'
 
 [PERCENT_STYLE]
 firstLine = ''
-endLine = '${eol}'
+endLine = "\n"
 beforeEachLine = '% '
 afterEachLine = ''
 allowBlankLines = false
@@ -192,7 +192,7 @@ lastLineDetectionPattern = '.*%>(\s|\t)*$'
 
 [SCRIPT_STYLE]
 firstLine = ''
-endLine = '${eol}'
+endLine = "\n"
 beforeEachLine = '# '
 afterEachLine = ''
 allowBlankLines = false
@@ -216,7 +216,7 @@ lastLineDetectionPattern = '.*\*/(\s|\t)*$'
 
 [DOUBLESLASH_STYLE]
 firstLine = ''
-endLine = '${eol}'
+endLine = "\n"
 beforeEachLine = '// '
 afterEachLine = ''
 allowBlankLines = false
@@ -335,8 +335,8 @@ firstLineDetectionPattern = '//.*$'
 lastLineDetectionPattern = '//.*$'
 
 [XML_PER_LINE]
-firstLine = '${eol}'
-endLine = '${eol}'
+firstLine = "\n"
+endLine = "\n"
 beforeEachLine = '<!-- '
 afterEachLine = ' -->'
 allowBlankLines = false

@@ -13,7 +13,7 @@ impl HeaderSource {
             .map(|content| HeaderSource {
                 content: content.clone(),
             })
-            .or_else(|| config.header_path.as_ref().and_then(bundled_headers))
+            .or_else(|| config.header_path.as_deref().and_then(bundled_headers))
     }
 }
 

@@ -4,16 +4,26 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     use hawkeye_fmt::config::Config;
     let config = fs::read_to_string("licenserc.toml")?;
     let config = toml::from_str::<Config>(&config)?;
-    println!(
-        "config {:#?}",
-        hawkeye_fmt::license::HeaderSource::from_config(&config)
-    );
 
-    // let default_headers = hawkeye_fmt::header::model::default_headers();
-    // println!("default_headers {:#?}", default_headers);
+    // let before = "before";
+    // let after = "after";
+    // let line = "line";
+    // let max_length = 10;
+    // println!("{}", format!("{before}{line: <max_length$}{after}"));
 
     // let default_mapping = hawkeye_fmt::document::model::default_mapping();
     // println!("default_mapping {:#?}", default_mapping);
+
+    let default_headers = hawkeye_fmt::header::model::default_headers();
+    println!("default_headers {:#?}", default_headers);
+    let header_source = hawkeye_fmt::license::HeaderSource::from_config(&config).unwrap();
+    let header_matcher =
+        hawkeye_fmt::header::matcher::HeaderMatcher::new(header_source.content);
+    println!(
+        "header_matcher:\n{}",
+        header_matcher.build_for_definition(default_headers.get("script_style").unwrap())
+    );
+    println!("[delimiter]");
 
     // let result = hawkeye_fmt::selection::Selection::new(
     //     config.base_dir,
