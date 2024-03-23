@@ -6,7 +6,6 @@ afterEachLine = ''
 allowBlankLines = false
 multipleLines = true
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '(\s|\t)*#\*.*$'
 lastLineDetectionPattern = '.*\*#(\s|\t)*$'
 
@@ -18,7 +17,6 @@ afterEachLine = ''
 allowBlankLines = false
 multipleLines = false
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '^% .*$'
 lastLineDetectionPattern = '^% .*$'
 
@@ -30,19 +28,17 @@ afterEachLine = ''
 allowBlankLines = false
 multipleLines = true
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '(\s|\t)*\{\*.*$'
 lastLineDetectionPattern = '.*\*\}(\s|\t)*$'
 
 [EXCLAMATION_STYLE]
 firstLine = '!'
-endLine = '!${eol}'
+endLine = "!\n"
 beforeEachLine = '! '
 afterEachLine = ''
 allowBlankLines = false
 multipleLines = false
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '!.*$'
 lastLineDetectionPattern = '!.*$'
 
@@ -54,31 +50,28 @@ afterEachLine = ''
 allowBlankLines = true
 multipleLines = true
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '@comment\{$'
 lastLineDetectionPattern = '\}$'
 
 [APOSTROPHE_STYLE]
 firstLine = "'"
-endLine = "'${eol}"
+endLine = "'\n"
 beforeEachLine = "' "
 afterEachLine = ''
 allowBlankLines = false
 multipleLines = false
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = "'.*$"
 lastLineDetectionPattern = "'.*$"
 
 [TRIPLESLASH_STYLE]
 firstLine = '///'
-endLine = '///${eol}'
+endLine = "///\n"
 beforeEachLine = '/// '
 afterEachLine = ''
 allowBlankLines = false
 multipleLines = false
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '///.*$'
 lastLineDetectionPattern = '///.*$'
 
@@ -95,14 +88,13 @@ firstLineDetectionPattern = '(\s|\t)*/\*.*$'
 lastLineDetectionPattern = '.*\*/(\s|\t)*$'
 
 [LUA]
-firstLine = '--[[${eol}'
-endLine = '${eol}]]'
+firstLine = "--[[\n"
+endLine = "\n]]"
 beforeEachLine = '    '
 afterEachLine = ''
 allowBlankLines = true
 multipleLines = true
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '--\[\[$'
 lastLineDetectionPattern = '\]\]$'
 
@@ -114,19 +106,17 @@ afterEachLine = ''
 allowBlankLines = false
 multipleLines = true
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '(\s|\t)*/\*.*$'
 lastLineDetectionPattern = '.*\*/(\s|\t)*$'
 
 [BATCH]
 firstLine = '@REM'
-endLine = '@REM${eol}'
+endLine = "@REM\n"
 beforeEachLine = '@REM '
 afterEachLine = ''
 allowBlankLines = false
 multipleLines = false
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '@REM.*$'
 lastLineDetectionPattern = '@REM.*$'
 
@@ -138,13 +128,12 @@ afterEachLine = ''
 allowBlankLines = false
 multipleLines = true
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '\{\{\!.*$'
 lastLineDetectionPattern = '\}\}.*$'
 
 [HAML_STYLE]
 firstLine = '-#'
-endLine = '-#${eol}'
+endLine = "-#\n"
 beforeEachLine = '-# '
 afterEachLine = ''
 allowBlankLines = false
@@ -156,25 +145,23 @@ lastLineDetectionPattern = '-#.*$'
 
 [PERCENT3_STYLE]
 firstLine = '%%%'
-endLine = '%%%${eol}'
+endLine = "%%%\n"
 beforeEachLine = '%%% '
 afterEachLine = ''
 allowBlankLines = false
 multipleLines = false
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '%%%.*$'
 lastLineDetectionPattern = '%%%.*$'
 
 [EXCLAMATION3_STYLE]
 firstLine = '!!!'
-endLine = '!!!${eol}'
+endLine = "!!!\n"
 beforeEachLine = '!!! '
 afterEachLine = ''
 allowBlankLines = false
 multipleLines = false
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '!!!.*$'
 lastLineDetectionPattern = '!!!.*$'
 
@@ -186,7 +173,6 @@ afterEachLine = ''
 allowBlankLines = true
 multipleLines = true
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '(\s|\t)*<%( .*)?$'
 lastLineDetectionPattern = '.*%>(\s|\t)*$'
 
@@ -203,7 +189,7 @@ firstLineDetectionPattern = '#.*$'
 lastLineDetectionPattern = '#.*$'
 
 [JAVAPKG_STYLE]
-firstLine = '${eol}/*-'
+firstLine = "\n/*-"
 endLine = ' */'
 beforeEachLine = ' * '
 afterEachLine = ''
@@ -222,13 +208,12 @@ afterEachLine = ''
 allowBlankLines = false
 multipleLines = false
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '//.*$'
 lastLineDetectionPattern = '//.*$'
 
 [XML_STYLE]
-firstLine = '<!--${eol}'
-endLine = '${eol}-->'
+firstLine = "<!--\n"
+endLine = "\n-->"
 beforeEachLine = '    '
 afterEachLine = ''
 allowBlankLines = true
@@ -240,55 +225,51 @@ lastLineDetectionPattern = '.*-->(\s|\t)*$'
 
 [ASCIIDOC_STYLE]
 firstLine = '////'
-endLine = '////${eol}'
+endLine = "////\n"
 beforeEachLine = '  // '
 afterEachLine = ''
 allowBlankLines = false
 multipleLines = true
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '^////$'
 lastLineDetectionPattern = '^////$'
 
 [SEMICOLON_STYLE]
 firstLine = ';'
-endLine = ';${eol}'
+endLine = ";\n"
 beforeEachLine = '; '
 afterEachLine = ''
 allowBlankLines = false
 multipleLines = false
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = ';.*$'
 lastLineDetectionPattern = ';.*$'
 
 [DOUBLETILDE_STYLE]
 firstLine = '~~'
-endLine = '~~${eol}'
+endLine = "~~\n"
 beforeEachLine = '~~ '
 afterEachLine = ''
 allowBlankLines = false
 multipleLines = false
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '~~.*$'
 lastLineDetectionPattern = '~~.*$'
 
 [SLASHSTAR_STYLE]
 firstLine = '/*'
-endLine = ' */${eol}'
+endLine = " */\n"
 beforeEachLine = ' * '
 afterEachLine = ''
 allowBlankLines = false
 multipleLines = true
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '(\s|\t)*/\*.*$'
 lastLineDetectionPattern = '.*\*/(\s|\t)*$'
 
 [FTL_ALT]
-firstLine = '[#--${eol}'
-endLine = '${eol}--]'
+firstLine = "[#--\n"
+endLine = "\n--]"
 beforeEachLine = '    '
 afterEachLine = ''
 allowBlankLines = true
@@ -300,25 +281,23 @@ lastLineDetectionPattern = '.*--\](\s|\t)*$'
 
 [DOUBLEDASHES_STYLE]
 firstLine = '--'
-endLine = '--${eol}'
+endLine = "--\n"
 beforeEachLine = '-- '
 afterEachLine = ''
 allowBlankLines = false
 multipleLines = false
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '--.*$'
 lastLineDetectionPattern = '--.*$'
 
 [DYNASCRIPT3_STYLE]
-firstLine = '<!---${eol}'
-endLine = '${eol}--->'
+firstLine = "<!---\n"
+endLine = "\n--->"
 beforeEachLine = '    '
 afterEachLine = ''
 allowBlankLines = true
 multipleLines = true
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '(\s|\t)*<!---.*$'
 lastLineDetectionPattern = '.*--->(\s|\t)*$'
 
@@ -330,7 +309,6 @@ afterEachLine = ''
 allowBlankLines = false
 multipleLines = false
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '//.*$'
 lastLineDetectionPattern = '//.*$'
 
@@ -354,9 +332,6 @@ afterEachLine = ''
 allowBlankLines = false
 multipleLines = false
 padLines = false
-skipLinePattern = ''
-firstLineDetectionPattern = ''
-lastLineDetectionPattern = ''
 
 [JAVADOC_STYLE]
 firstLine = '/**'
@@ -366,30 +341,27 @@ afterEachLine = ''
 allowBlankLines = false
 multipleLines = true
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '(\s|\t)*/\*.*$'
 lastLineDetectionPattern = '.*\*/(\s|\t)*$'
 
 [DYNASCRIPT_STYLE]
-firstLine = '<%--${eol}'
-endLine = '${eol}--%>'
+firstLine = "<%--\n"
+endLine = "\n--%>"
 beforeEachLine = '    '
 afterEachLine = ''
 allowBlankLines = true
 multipleLines = true
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '(\s|\t)*<%--.*$'
 lastLineDetectionPattern = '.*--%>(\s|\t)*$'
 
 [FTL]
-firstLine = '<#--${eol}'
-endLine = '${eol}-->'
+firstLine = "<#--\n"
+endLine = "\n-->"
 beforeEachLine = '    '
 afterEachLine = ''
 allowBlankLines = true
 multipleLines = true
 padLines = false
-skipLinePattern = ''
 firstLineDetectionPattern = '(\s|\t)*<#--.*$'
 lastLineDetectionPattern = '.*-->(\s|\t)*$'

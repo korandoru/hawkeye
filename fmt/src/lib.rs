@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #![feature(extract_if)]
+#![feature(let_chains)]
 
 use crate::error::Error;
 
