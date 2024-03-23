@@ -79,4 +79,4 @@ jobs:
         uses: ./.github/actions/docker-release
         with:
           name: hawkeye-native
-          digests: ${{needs.build-and-push-hawkeye-native-amd64.outputs.digest}} ${{needs.build-and-push-hawkeye-native-arm64.outputs.digest}}
+          digests: ${{needs.build-and-push-hawkeye-amd64.outputs.digest}} ${{needs.build-and-push-hawkeye-arm64.outputs.digest}}
