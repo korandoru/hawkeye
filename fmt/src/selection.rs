@@ -16,10 +16,12 @@ use std::path::PathBuf;
 
 use ignore::overrides::OverrideBuilder;
 use snafu::{ensure, ResultExt};
-use tracing::debug;
+use tracing::{debug, info};
 
 use crate::{
+    config,
     error::{SelectFilesSnafu, SelectionWalkerSnafu},
+    git::GitHelper,
     Result,
 };
 
@@ -27,6 +29,8 @@ pub struct Selection {
     basedir: PathBuf,
     includes: Vec<String>,
     excludes: Vec<String>,
+
+    git: config::Git,
 }
 
 impl Selection {
@@ -35,6 +39,7 @@ impl Selection {
         includes: &[String],
         excludes: &[String],
         use_default_excludes: bool,
+        git: config::Git,
     ) -> Selection {
         let includes = if includes.is_empty() {
             INCLUDES.iter().map(|s| s.to_string()).collect()
@@ -53,6 +58,7 @@ impl Selection {
             basedir,
             includes,
             excludes,
+            git,
         }
     }
 
@@ -84,11 +90,21 @@ impl Selection {
             },
         );
 
+        let git_helper = GitHelper::create(&self.basedir, self.git)?;
+        let turn_on_ignore = git_helper.is_none() && self.git.ignore.is_auto();
+        if turn_on_ignore {
+            info!("git.ignore=auto is resolved to enable ignore crate's gitignore");
+        }
+
         let mut result = vec![];
         let walker = ignore::WalkBuilder::new(&self.basedir)
-            .standard_filters(false) // [TODO] respect git.ignore option
+            .ignore(false) // do not use .ignore file
             .hidden(false) // check hidden files
             .follow_links(true) // proper path name
+            .parents(turn_on_ignore)
+            .git_exclude(turn_on_ignore)
+            .git_global(turn_on_ignore)
+            .git_ignore(turn_on_ignore)
             .overrides({
                 let mut builder = OverrideBuilder::new(&self.basedir);
                 for pat in includes.iter() {
@@ -108,8 +124,13 @@ impl Selection {
         for mat in walker {
             let mat = mat.context(SelectionWalkerSnafu)?;
             if let Some(filetype) = mat.file_type() {
-                if filetype.is_file() {
-                    result.push(mat.into_path());
+                match git_helper.as_ref() {
+                    Some(helper) if helper.ignored(mat.path())? => continue,
+                    _ => {
+                        if filetype.is_file() {
+                            result.push(mat.into_path())
+                        }
+                    }
                 }
             }
         }

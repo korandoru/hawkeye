@@ -75,4 +75,17 @@ pub enum Error {
 
     #[snafu(display("invalid config: {}", message))]
     InvalidConfig { message: String },
+
+    #[snafu(display("Git operation failed: {}", source))]
+    GitOp {
+        #[snafu(source)]
+        source: git2::Error,
+    },
+
+    #[snafu(display("cannot resolve absolute path {}: {}", path, source))]
+    ResolveAbsolutePath {
+        path: String,
+        #[snafu(source)]
+        source: std::io::Error,
+    },
 }

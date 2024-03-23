@@ -52,12 +52,13 @@ pub struct Config {
     pub git: Git,
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
 pub struct Git {
     pub ignore: FeatureGate,
 }
 
-#[derive(Debug, Clone, Default, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum FeatureGate {
     /// Determinate whether turn on the feature.
     #[default]
@@ -66,6 +67,32 @@ pub enum FeatureGate {
     Enable,
     /// Force disable the feature.
     Disable,
+}
+
+impl FeatureGate {
+    pub fn is_enable(&self) -> bool {
+        match self {
+            FeatureGate::Auto => false,
+            FeatureGate::Enable => true,
+            FeatureGate::Disable => false,
+        }
+    }
+
+    pub fn is_disable(&self) -> bool {
+        match self {
+            FeatureGate::Auto => false,
+            FeatureGate::Enable => false,
+            FeatureGate::Disable => true,
+        }
+    }
+
+    pub fn is_auto(&self) -> bool {
+        match self {
+            FeatureGate::Auto => true,
+            FeatureGate::Enable => false,
+            FeatureGate::Disable => false,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]

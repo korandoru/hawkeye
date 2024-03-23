@@ -152,11 +152,12 @@ inceptionYear = 2023
 # Options to configure Git features.
 [git]
 # If enabled, do not process files that are ignored by Git; possible value: ['auto', 'enable', 'disable']
-# 'auto' means this feature only enabled if both:
-#   * `hawkeyejni` is under 'java.library.path'; this is true if you use the hawkeye-native image.
-#   * `basedir` is in a Git repository.
+# 'auto' means this feature tries to be enabled with:
+#   * libgit2 - if `basedir` is in a Git repository.
+#   * ignore crate's gitignore rules - if `basedir` is not in a Git repository.
+# 'enabled' means always enabled with libgit2; failed if it is impossible.
 # default: 'auto'
-checkIgnore = 'auto'
+ignore = 'auto'
 ```
 
 ### Header style file

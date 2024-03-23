@@ -69,6 +69,7 @@ pub fn check_license_header(
             &config.includes,
             &config.excludes,
             config.use_default_excludes,
+            config.git,
         );
         selection.select()?
     };
