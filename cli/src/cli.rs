@@ -19,6 +19,7 @@ use hawkeye_fmt::{processor::check_license_header, Result};
 use tracing::{error, info, warn};
 
 #[derive(Parser)]
+#[command(version)]
 pub struct Command {
     #[clap(subcommand)]
     sub: SubCommand,
