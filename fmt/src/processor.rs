@@ -38,12 +38,14 @@ pub fn check_license_header(
     // not matched
     Vec<Document>,
 )> {
-    let config = fs::read_to_string(&run_config).with_context(|_| LoadConfigSnafu {
-        name: run_config.display().to_string(),
-    })?;
-    let config = toml::from_str::<Config>(&config).with_context(|_| DeserializeSnafu {
-        name: run_config.display().to_string(),
-    })?;
+    let config = {
+        let name = run_config.display().to_string();
+        let config =
+            fs::read_to_string(&run_config).context(LoadConfigSnafu { name: name.clone() })?;
+        toml::from_str::<Config>(&config)
+            .map_err(Box::new)
+            .context(DeserializeSnafu { name })?
+    };
 
     let basedir = config.base_dir.clone();
     ensure!(

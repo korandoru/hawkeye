@@ -70,8 +70,9 @@ pub fn default_headers() -> Result<HashMap<String, HeaderDef>> {
 }
 
 pub fn deserialize_header_definitions(value: String) -> Result<HashMap<String, HeaderDef>> {
-    let header_styles: HashMap<String, HeaderStyle> =
-        toml::from_str(&value).context(DeserializeSnafu {
+    let header_styles: HashMap<String, HeaderStyle> = toml::from_str(&value)
+        .map_err(Box::new)
+        .context(DeserializeSnafu {
             name: "default headers",
         })?;
 

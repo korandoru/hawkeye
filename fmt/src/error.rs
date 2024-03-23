@@ -78,7 +78,7 @@ pub enum Error {
     Deserialize {
         name: String,
         #[snafu(source)]
-        source: toml::de::Error,
+        source: Box<toml::de::Error>,
         #[snafu(implicit)]
         loc: snafu::Location,
     },
