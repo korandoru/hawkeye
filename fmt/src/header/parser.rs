@@ -1,4 +1,9 @@
-use std::{fs, path::Path};
+use std::{
+    fmt::{Display, Formatter},
+    fs::File,
+    io::BufRead,
+    path::Path,
+};
 
 use crate::header::model::HeaderDef;
 
@@ -209,8 +214,14 @@ pub fn parse_header(
 pub struct FileContent {
     pos: usize,
     old_pos: usize,
-    filepath: String,
     content: String,
+    filepath: String,
+}
+
+impl Display for FileContent {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.filepath)
+    }
 }
 
 impl FileContent {
@@ -218,7 +229,13 @@ impl FileContent {
         Ok(Self {
             pos: 0,
             old_pos: 0,
-            content: fs::read_to_string(file)?,
+            content: {
+                let f = File::open(file)?;
+                std::io::BufReader::new(f)
+                    .lines()
+                    .collect::<std::io::Result<Vec<_>>>()?
+                    .join("\n")
+            },
             filepath: file.to_string_lossy().to_string(),
         })
     }

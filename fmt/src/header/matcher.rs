@@ -62,11 +62,18 @@ impl HeaderMatcher {
 
         result
     }
+
+    pub fn header_content_lines_count(&self) -> usize {
+        self.header_content_lines.len()
+    }
+
+    pub fn header_content_one_line(&self) -> &str {
+        &self.header_content_one_line
+    }
 }
 
 impl Display for HeaderMatcher {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&self.header_content)?;
-        Ok(())
+        f.write_str(&self.header_content)
     }
 }

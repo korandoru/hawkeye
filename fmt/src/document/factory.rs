@@ -5,8 +5,6 @@ use crate::{config::Mapping, header::model::HeaderDef};
 pub struct DocumentFactory {
     mapping: Vec<Mapping>,
     definitions: HashMap<String, HeaderDef>,
-    // [TODO] support dynamic resolving file associated properties
-    // e.g. file created time, file modified time, etc.
     properties: HashMap<String, String>,
 
     basedir: PathBuf,
