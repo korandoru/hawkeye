@@ -22,6 +22,13 @@ pub enum Error {
         source: std::io::Error,
     },
 
+    #[snafu(display("cannot to save document {}: {}", path, source))]
+    SaveDocument {
+        path: String,
+        #[snafu(source)]
+        source: std::io::Error,
+    },
+
     #[snafu(display("cannot try to matching header: {}", source))]
     TryMatchHeader {
         #[snafu(source)]

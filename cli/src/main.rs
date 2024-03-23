@@ -1,7 +1,6 @@
 #![feature(extract_if)]
 
 use clap::Parser;
-use tracing_subscriber::filter::LevelFilter;
 
 use crate::cli::Command;
 

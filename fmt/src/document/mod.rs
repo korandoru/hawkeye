@@ -1,13 +1,19 @@
 use std::{collections::HashMap, fs, fs::File, io::BufRead, path::PathBuf};
+use std::borrow::Cow;
+
+use snafu::ResultExt;
 
 use crate::{
+    error::SaveDocumentSnafu,
     header,
     header::{matcher::HeaderMatcher, model::HeaderDef, parser::HeaderParser},
+    Result,
 };
 
 pub mod factory;
 pub mod model;
 
+#[derive(Debug)]
 pub struct Document {
     pub filepath: PathBuf,
 
@@ -55,13 +61,13 @@ impl Document {
             };
             let expected_header = {
                 let raw_header = header.build_for_definition(&self.header_def);
-                let resolved_header = self.merge_properties(&raw_header)?;
+                let resolved_header = self.merge_properties(&raw_header);
                 resolved_header.replace(" *\r?\n", "\n")
             };
             Ok(file_header.contains(expected_header.as_str()))
         } else {
             let file_header = self.read_file_header_on_one_line(header)?;
-            let expected_header = self.merge_properties(header.header_content_one_line())?;
+            let expected_header = self.merge_properties(header.header_content_one_line());
             Ok(file_header.contains(expected_header.as_str()))
         }
     }
@@ -90,6 +96,7 @@ impl Document {
 
     pub fn update_header(&mut self, header: &HeaderMatcher) {
         let header_str = header.build_for_definition(&self.header_def);
+        let header_str = self.merge_properties(&header_str);
         let begin_pos = self.parser.begin_pos;
         self.parser
             .file_content
@@ -104,23 +111,23 @@ impl Document {
         }
     }
 
-    pub fn save(&mut self, filepath: Option<&PathBuf>) -> std::io::Result<()> {
-        if let Some(filepath) = filepath {
-            fs::write(filepath, self.parser.file_content.content())
-        } else {
-            fs::write(&self.filepath, self.parser.file_content.content())
-        }
+    pub fn save(&mut self, filepath: Option<&PathBuf>) -> Result<()> {
+        let filepath = filepath.unwrap_or(&self.filepath);
+        fs::write(filepath, self.parser.file_content.content()).context(SaveDocumentSnafu {
+            path: filepath.display().to_string(),
+        })
     }
 
-    pub(crate) fn merge_properties(&self, s: &str) -> std::io::Result<String> {
+    pub(crate) fn merge_properties(&self, s: &str) -> String {
         let mut properties = self.properties.clone();
         let filename = self
             .filepath
             .file_name()
-            .map(|s| s.to_string_lossy().to_string())
-            .ok_or_else(|| std::io::Error::other("malformed filename"))?;
+            .map(|s| s.to_string_lossy())
+            .unwrap_or_else(|| Cow::Borrowed("<unknown>"))
+            .to_string();
         properties.insert("hawkeye.core.filename".to_string(), filename);
-        Ok(merge_properties(&properties, s))
+        merge_properties(&properties, s)
     }
 }
 

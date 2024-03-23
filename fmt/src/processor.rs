@@ -4,7 +4,7 @@ use snafu::{ensure, OptionExt, ResultExt};
 
 use crate::{
     config::Config,
-    document::{factory::DocumentFactory, model::default_mapping},
+    document::{factory::DocumentFactory, model::default_mapping, Document},
     error::{DeserializeSnafu, InvalidConfigSnafu, LoadConfigSnafu, TryMatchHeaderSnafu},
     header::{matcher::HeaderMatcher, model::default_headers},
     license::HeaderSource,
@@ -12,24 +12,17 @@ use crate::{
     Result,
 };
 
-#[derive(Debug, Clone)]
-pub enum CheckResult {
-    Matched(PathBuf),
-    NotMatched(PathBuf),
-    Unsupported(PathBuf),
-}
-
-impl CheckResult {
-    pub fn path(&self) -> &PathBuf {
-        match self {
-            CheckResult::Matched(path) => path,
-            CheckResult::NotMatched(path) => path,
-            CheckResult::Unsupported(path) => path,
-        }
-    }
-}
-
-pub fn check_license_header(run_config: PathBuf) -> Result<Vec<CheckResult>> {
+pub fn check_license_header(
+    run_config: PathBuf,
+) -> Result<(
+    HeaderMatcher,
+    // unknown
+    Vec<Document>,
+    // matched
+    Vec<Document>,
+    // not matched
+    Vec<Document>,
+)> {
     let config = fs::read_to_string(&run_config).with_context(|_| LoadConfigSnafu {
         name: run_config.display().to_string(),
     })?;
@@ -79,19 +72,21 @@ pub fn check_license_header(run_config: PathBuf) -> Result<Vec<CheckResult>> {
     let document_factory =
         DocumentFactory::new(mapping, definitions, config.properties, config.keywords);
 
-    let mut result = vec![];
+    let mut unknown = vec![];
+    let mut matched = vec![];
+    let mut not_matched = vec![];
     for file in selected_files {
         let document = document_factory.create_document(&file)?;
         if document.is_unsupported() {
-            result.push(CheckResult::Unsupported(file));
+            unknown.push(document);
         } else if document
             .header_matched(&header_matcher, config.strict_check)
             .context(TryMatchHeaderSnafu)?
         {
-            result.push(CheckResult::Matched(file));
+            matched.push(document);
         } else {
-            result.push(CheckResult::NotMatched(file));
+            not_matched.push(document);
         }
     }
-    Ok(result)
+    Ok((header_matcher, unknown, matched, not_matched))
 }
