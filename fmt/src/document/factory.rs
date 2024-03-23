@@ -1,4 +1,7 @@
-use std::{collections::HashMap, path::PathBuf};
+use std::{
+    collections::{HashMap, HashSet},
+    path::PathBuf,
+};
 
 use snafu::{OptionExt, ResultExt};
 
@@ -11,7 +14,7 @@ use crate::{
 };
 
 pub struct DocumentFactory {
-    mapping: Vec<Mapping>,
+    mapping: HashSet<Mapping>,
     definitions: HashMap<String, HeaderDef>,
     properties: HashMap<String, String>,
 
@@ -21,7 +24,7 @@ pub struct DocumentFactory {
 
 impl DocumentFactory {
     pub fn new(
-        mapping: Vec<Mapping>,
+        mapping: HashSet<Mapping>,
         definitions: HashMap<String, HeaderDef>,
         properties: HashMap<String, String>,
         basedir: PathBuf,
@@ -36,7 +39,7 @@ impl DocumentFactory {
         }
     }
 
-    pub fn create_document(&self, filepath: PathBuf) -> Result<Document> {
+    pub fn create_document(&self, filepath: &PathBuf) -> Result<Document> {
         let lower_file_name = filepath
             .file_name()
             .map(|n| n.to_string_lossy().to_lowercase())

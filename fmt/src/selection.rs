@@ -18,14 +18,14 @@ pub struct Selection {
 impl Selection {
     pub fn new(
         basedir: PathBuf,
-        includes: Vec<String>,
-        excludes: Vec<String>,
+        includes: &[String],
+        excludes: &[String],
         use_default_excludes: bool,
     ) -> Selection {
         let includes = if includes.is_empty() {
             INCLUDES.iter().map(|s| s.to_string()).collect()
         } else {
-            includes
+            includes.to_vec()
         };
 
         let used_default_excludes = if use_default_excludes {
@@ -33,7 +33,7 @@ impl Selection {
         } else {
             vec![]
         };
-        let excludes = [used_default_excludes, excludes].concat();
+        let excludes = [used_default_excludes, excludes.to_vec()].concat();
 
         Selection {
             basedir,
@@ -66,7 +66,7 @@ impl Selection {
         ensure!(
             includes.iter().all(|pat| !pat.starts_with("!")),
             SelectionSnafu {
-                msg: format!("reverse pattern is not allowed for includes: {includes:?}"),
+                message: format!("reverse pattern is not allowed for includes: {includes:?}"),
             },
         );
 
