@@ -48,7 +48,8 @@ impl DocumentFactory {
             .mapping
             .iter()
             .find_map(|m| m.header_type(&lower_file_name))
-            .unwrap_or_else(|| "unknown".to_string());
+            .unwrap_or_else(|| "unknown".to_string())
+            .to_lowercase();
         let header_def = self
             .definitions
             .get(&header_type)

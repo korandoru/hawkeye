@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use snafu::{ensure, OptionExt, ResultExt};
 
 use crate::{
@@ -10,7 +12,14 @@ use crate::{
     Result,
 };
 
-pub fn check_license_header(config: Config) -> Result<()> {
+#[derive(Debug, Clone)]
+pub enum CheckResult {
+    Matched(PathBuf),
+    NotMatched(PathBuf),
+    Unsupported(PathBuf),
+}
+
+pub fn check_license_header(config: Config) -> Result<Vec<CheckResult>> {
     let basedir = config.base_dir.clone();
     ensure!(
         basedir.is_dir(),
@@ -58,19 +67,19 @@ pub fn check_license_header(config: Config) -> Result<()> {
         config.keywords,
     );
 
+    let mut result = vec![];
     for file in selected_files {
         let document = document_factory.create_document(&file)?;
         if document.is_unsupported() {
-            println!("unknown file: {}", file.display());
+            result.push(CheckResult::Unsupported(file));
         } else if document
             .header_matched(&header_matcher, config.strict_check)
             .context(TryMatchHeaderSnafu)?
         {
-            println!("license header matched: {}", file.display());
+            result.push(CheckResult::Matched(file));
         } else {
-            println!("license header not matched: {}", file.display());
+            result.push(CheckResult::NotMatched(file));
         }
     }
-
-    Ok(())
+    Ok(result)
 }

@@ -262,7 +262,7 @@ impl FileContent {
             return None;
         }
 
-        let lf = self.content[self.pos..].find('\n');
+        let lf = self.content[self.pos..].find("\n").map(|i| i + self.pos);
         let eol = match lf {
             None | Some(0) => self.content.len(),
             Some(lf) => lf - (self.content.as_bytes()[lf - 1] == b'\r') as usize,

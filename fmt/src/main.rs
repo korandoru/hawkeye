@@ -7,7 +7,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = fs::read_to_string("licenserc.toml")?;
     let config = toml::from_str::<Config>(&config)?;
 
-    check_license_header(config).unwrap();
+    println!("{:#?}", check_license_header(config).unwrap());
+
+    // use hawkeye_fmt::document::model::default_mapping;
+    // let mapping = default_mapping();
+    // println!("{:?}", mapping);
+    // println!("{:?}", mapping.iter().find_map(|m| m.header_type("licenserc.toml")));
 
     //
     // // let before = "before";

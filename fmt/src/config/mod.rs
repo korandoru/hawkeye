@@ -90,7 +90,7 @@ impl Mapping {
                 header_type,
                 pattern,
             } => {
-                let pattern = pattern.to_lowercase();
+                let pattern = format!(".{pattern}").to_lowercase();
                 filename.ends_with(&pattern).then(|| header_type.clone())
             }
         }

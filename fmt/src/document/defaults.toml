@@ -454,12 +454,6 @@ headerType = "SLASHSTAR_STYLE"
 extension = true
 filename = false
 
-[UNKNOWN]
-pattern = ""
-headerType = "UNKNOWN"
-extension = true
-filename = true
-
 [VB]
 pattern = "bas"
 headerType = "HAML_STYLE"
