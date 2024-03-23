@@ -5,7 +5,7 @@ use snafu::{ensure, ResultExt};
 use tracing::debug;
 
 use crate::{
-    error::{SelectionSnafu, SelectionWalkerSnafu},
+    error::{SelectFilesSnafu, SelectionWalkerSnafu},
     Result,
 };
 
@@ -65,7 +65,7 @@ impl Selection {
         let includes = self.includes;
         ensure!(
             includes.iter().all(|pat| !pat.starts_with("!")),
-            SelectionSnafu {
+            SelectFilesSnafu {
                 message: format!("reverse pattern is not allowed for includes: {includes:?}"),
             },
         );

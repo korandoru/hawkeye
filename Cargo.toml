@@ -14,6 +14,7 @@
 
 [workspace]
 members = [
+    "cli",
     "fmt",
 ]
 resolver = "2"
@@ -25,3 +26,8 @@ authors = ["tison <wander4096@gmail.com>"]
 readme = "README.md"
 license = "Apache-2.0"
 repository = "https://github.com/korandoru/hawkeye/"
+
+[workspace.dependencies]
+hawkeye-fmt = { path = "fmt" }
+snafu = "0.8.2"
+toml = "0.8.12"

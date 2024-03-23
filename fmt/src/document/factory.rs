@@ -8,10 +8,11 @@ use snafu::{OptionExt, ResultExt};
 use crate::{
     config::Mapping,
     document::Document,
-    error::{DocumentCreationSnafu, HeaderDefinitionNotFoundSnafu},
+    error::{HeaderDefinitionNotFoundSnafu},
     header::model::HeaderDef,
     Result,
 };
+use crate::error::CreateDocumentSnafu;
 
 pub struct DocumentFactory {
     mapping: HashSet<Mapping>,
@@ -60,6 +61,6 @@ impl DocumentFactory {
             &self.keywords,
             self.properties.clone(),
         );
-        document.context(DocumentCreationSnafu)
+        document.context(CreateDocumentSnafu)
     }
 }

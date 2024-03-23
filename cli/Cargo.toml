@@ -1,0 +1,14 @@
+[package]
+name = "hawkeye"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+readme.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+clap = { version = "4.5.3", features = ["derive", "string"] }
+hawkeye-fmt.workspace = true
+snafu.workspace = true
+tracing-subscriber = "0.3.18"
