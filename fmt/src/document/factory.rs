@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-    collections::{HashMap, HashSet},
-    path::PathBuf,
-};
+use std::collections::{HashMap, HashSet};
+use std::path::Path;
 
 use snafu::{OptionExt, ResultExt};
 
@@ -50,7 +48,7 @@ impl DocumentFactory {
         }
     }
 
-    pub fn create_document(&self, filepath: &PathBuf) -> Result<Document> {
+    pub fn create_document(&self, filepath: &Path) -> Result<Document> {
         let lower_file_name = filepath
             .file_name()
             .map(|n| n.to_string_lossy().to_lowercase())
@@ -66,7 +64,7 @@ impl DocumentFactory {
             .get(&header_type)
             .context(HeaderDefinitionNotFoundSnafu { header_type })?;
         let document = Document::new(
-            filepath.clone(),
+            filepath.to_path_buf(),
             header_def.clone(),
             &self.keywords,
             self.properties.clone(),

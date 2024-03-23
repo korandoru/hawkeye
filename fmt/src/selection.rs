@@ -67,7 +67,7 @@ impl Selection {
         let (excludes, reverse_excludes) = {
             let mut excludes = self.excludes;
             let reverse_excludes = excludes
-                .extract_if(|pat| pat.starts_with("!"))
+                .extract_if(|pat| pat.starts_with('!'))
                 .map(|mut pat| {
                     pat.remove(0);
                     pat
@@ -78,7 +78,7 @@ impl Selection {
 
         let includes = self.includes;
         ensure!(
-            includes.iter().all(|pat| !pat.starts_with("!")),
+            includes.iter().all(|pat| !pat.starts_with('!')),
             SelectFilesSnafu {
                 message: format!("reverse pattern is not allowed for includes: {includes:?}"),
             },

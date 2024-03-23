@@ -81,7 +81,7 @@ pub fn deserialize_header_definitions(value: String) -> Result<HashMap<String, H
             let name = name.to_lowercase();
 
             assert!(
-                !(style.allow_blank_lines && !style.multiple_lines),
+                !style.allow_blank_lines || style.multiple_lines,
                 "Header style {name} is configured to allow blank lines, so it should be set as a multi-line header style"
             );
 

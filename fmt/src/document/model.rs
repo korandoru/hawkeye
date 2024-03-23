@@ -30,7 +30,7 @@ pub struct DocumentType {
 pub fn default_mapping() -> Vec<Mapping> {
     let defaults = include_str!("defaults.toml");
     let mapping: HashMap<String, DocumentType> =
-        toml::from_str(&defaults).expect("default mapping must be valid");
+        toml::from_str(defaults).expect("default mapping must be valid");
 
     mapping
         .into_iter()

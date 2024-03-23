@@ -113,9 +113,9 @@ pub fn parse_header(
 
                 let found_end = {
                     let mut found_end = false;
-                    if header_def.multiple_lines && header_def.is_last_header_line(l) {
-                        found_end = true;
-                    } else if l.trim().is_empty() {
+                    if (header_def.multiple_lines && header_def.is_last_header_line(l))
+                        || l.trim().is_empty()
+                    {
                         found_end = true;
                     } else {
                         loop {
@@ -206,7 +206,7 @@ pub fn parse_header(
                 line = file_content.next_line();
             }
         }
-        if header_def.end_line.ends_with("\n")
+        if header_def.end_line.ends_with('\n')
             && line.as_ref().map(|l| l.trim().is_empty()).unwrap_or(false)
         {
             end = file_content.pos;
@@ -276,7 +276,7 @@ impl FileContent {
             return None;
         }
 
-        let lf = self.content[self.pos..].find("\n").map(|i| i + self.pos);
+        let lf = self.content[self.pos..].find('\n').map(|i| i + self.pos);
         let eol = match lf {
             None | Some(0) => self.content.len(),
             Some(lf) => lf - (self.content.as_bytes()[lf - 1] == b'\r') as usize,
