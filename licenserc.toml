@@ -14,15 +14,6 @@
 
 headerPath = "Apache-2.0.txt"
 
-includes = [
-    '**/*.proto',
-    '**/*.rs',
-    '**/*.yml',
-    '**/*.yaml',
-    '**/Cargo.toml',
-    '**/licenserc.toml',
-]
-
 [properties]
 inceptionYear = 2024
 copyrightOwner = "tison <wander4096@gmail.com>"
