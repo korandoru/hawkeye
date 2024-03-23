@@ -332,6 +332,8 @@ afterEachLine = ''
 allowBlankLines = false
 multipleLines = false
 padLines = false
+firstLineDetectionPattern = ''
+lastLineDetectionPattern = ''
 
 [JAVADOC_STYLE]
 firstLine = '/**'

@@ -16,15 +16,15 @@ use std::collections::HashMap;
 
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use snafu::ResultExt;
+use snafu::{OptionExt, ResultExt};
 
 use crate::{
     default_true,
-    error::{DeserializeSnafu, MalformedRegexSnafu},
+    error::{DeserializeSnafu, EmptyRegexSnafu, MalformedRegexSnafu},
     Result,
 };
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct HeaderDef {
     pub name: String,
     pub first_line: String,
@@ -37,8 +37,8 @@ pub struct HeaderDef {
     pub pad_lines: bool,
 
     pub skip_line_pattern: Option<Regex>,
-    pub first_line_detection_pattern: Option<Regex>,
-    pub last_line_detection_pattern: Option<Regex>,
+    pub first_line_detection_pattern: Regex,
+    pub last_line_detection_pattern: Regex,
 }
 
 impl HeaderDef {
@@ -54,17 +54,13 @@ impl HeaderDef {
     /// Tells if the given content line is the first line of a possible header of this definition
     /// kind.
     pub fn is_first_header_line(&self, line: &str) -> bool {
-        self.first_line_detection_pattern
-            .as_ref()
-            .map_or(false, |pattern| pattern.is_match(line))
+        self.first_line_detection_pattern.is_match(line)
     }
 
     /// Tells if the given content line is the last line of a possible header of this definition
     /// kind.
     pub fn is_last_header_line(&self, line: &str) -> bool {
-        self.last_line_detection_pattern
-            .as_ref()
-            .map_or(false, |pattern| pattern.is_match(line))
+        self.last_line_detection_pattern.is_match(line)
     }
 }
 
@@ -105,10 +101,14 @@ pub fn deserialize_header_definitions(value: String) -> Result<HashMap<String, H
                     })).transpose()?,
                 first_line_detection_pattern: style
                     .first_line_detection_pattern
-                    .map(|pattern| Regex::new(&pattern).expect("malformed regex")),
+                    .map(|pattern| Regex::new(&pattern).context(MalformedRegexSnafu {
+                        payload: pattern,
+                    })).transpose()?.context(EmptyRegexSnafu { header: name.clone() })?,
                 last_line_detection_pattern: style
                     .last_line_detection_pattern
-                    .map(|pattern| Regex::new(&pattern).expect("malformed regex")),
+                    .map(|pattern| Regex::new(&pattern).context(MalformedRegexSnafu {
+                        payload: pattern,
+                    })).transpose()?.context(EmptyRegexSnafu { header: name.clone() })?,
             };
 
             Ok((name, def))

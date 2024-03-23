@@ -70,6 +70,9 @@ pub enum Error {
         source: regex::Error,
     },
 
+    #[snafu(display("empty regex in header {}", header))]
+    EmptyRegex { header: String },
+
     #[snafu(display("invalid config: {}", message))]
     InvalidConfig { message: String },
 }
