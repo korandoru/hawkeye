@@ -15,8 +15,9 @@ pub enum Error {
     #[snafu(display("header type {} not found", header_type))]
     HeaderDefinitionNotFound { header_type: String },
 
-    #[snafu(display("cannot to create document: {}", source))]
+    #[snafu(display("cannot to create document {}: {}", path, source))]
     CreateDocument {
+        path: String,
         #[snafu(source)]
         source: std::io::Error,
     },

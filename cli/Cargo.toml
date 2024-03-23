@@ -11,4 +11,5 @@ repository.workspace = true
 clap = { version = "4.5.3", features = ["derive", "string"] }
 hawkeye-fmt.workspace = true
 snafu.workspace = true
+tracing.workspace = true
 tracing-subscriber = "0.3.18"

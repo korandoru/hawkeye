@@ -99,6 +99,8 @@ impl Selection {
                 }
             }
         }
+
+        debug!("selected files: {:?} (count: {})", result, result.len());
         Ok(result)
     }
 }

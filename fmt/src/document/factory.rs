@@ -8,18 +8,16 @@ use snafu::{OptionExt, ResultExt};
 use crate::{
     config::Mapping,
     document::Document,
-    error::{HeaderDefinitionNotFoundSnafu},
+    error::{CreateDocumentSnafu, HeaderDefinitionNotFoundSnafu},
     header::model::HeaderDef,
     Result,
 };
-use crate::error::CreateDocumentSnafu;
 
 pub struct DocumentFactory {
     mapping: HashSet<Mapping>,
     definitions: HashMap<String, HeaderDef>,
     properties: HashMap<String, String>,
 
-    basedir: PathBuf,
     keywords: Vec<String>,
 }
 
@@ -28,14 +26,12 @@ impl DocumentFactory {
         mapping: HashSet<Mapping>,
         definitions: HashMap<String, HeaderDef>,
         properties: HashMap<String, String>,
-        basedir: PathBuf,
         keywords: Vec<String>,
     ) -> Self {
         Self {
             mapping,
             definitions,
             properties,
-            basedir,
             keywords,
         }
     }
@@ -56,11 +52,13 @@ impl DocumentFactory {
             .get(&header_type)
             .context(HeaderDefinitionNotFoundSnafu { header_type })?;
         let document = Document::new(
-            self.basedir.join(filepath),
+            filepath.clone(),
             header_def.clone(),
             &self.keywords,
             self.properties.clone(),
         );
-        document.context(CreateDocumentSnafu)
+        document.context(CreateDocumentSnafu {
+            path: filepath.display().to_string(),
+        })
     }
 }

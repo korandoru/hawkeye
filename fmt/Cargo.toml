@@ -28,5 +28,5 @@ regex = "1.10.3"
 serde = { version = "1.0.197", features = ["derive"] }
 snafu.workspace = true
 toml.workspace = true
-tracing = "0.1.40"
+tracing.workspace = true
 

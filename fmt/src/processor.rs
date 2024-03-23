@@ -19,21 +19,24 @@ pub enum CheckResult {
     Unsupported(PathBuf),
 }
 
-pub fn do_check(run_config: PathBuf) -> Result<()> {
+impl CheckResult {
+    pub fn path(&self) -> &PathBuf {
+        match self {
+            CheckResult::Matched(path) => path,
+            CheckResult::NotMatched(path) => path,
+            CheckResult::Unsupported(path) => path,
+        }
+    }
+}
+
+pub fn check_license_header(run_config: PathBuf) -> Result<Vec<CheckResult>> {
     let config = fs::read_to_string(&run_config).with_context(|_| LoadConfigSnafu {
         name: run_config.display().to_string(),
     })?;
-
     let config = toml::from_str::<Config>(&config).with_context(|_| DeserializeSnafu {
         name: run_config.display().to_string(),
     })?;
 
-    println!("{:#?}", check_license_header(config).unwrap());
-
-    Ok(())
-}
-
-pub fn check_license_header(config: Config) -> Result<Vec<CheckResult>> {
     let basedir = config.base_dir.clone();
     ensure!(
         basedir.is_dir(),
@@ -54,7 +57,7 @@ pub fn check_license_header(config: Config) -> Result<Vec<CheckResult>> {
 
     let selected_files = {
         let selection = Selection::new(
-            basedir.clone(),
+            basedir,
             &config.includes,
             &config.excludes,
             config.use_default_excludes,
@@ -73,13 +76,8 @@ pub fn check_license_header(config: Config) -> Result<Vec<CheckResult>> {
 
     let definitions = default_headers()?;
 
-    let document_factory = DocumentFactory::new(
-        mapping,
-        definitions,
-        config.properties,
-        basedir,
-        config.keywords,
-    );
+    let document_factory =
+        DocumentFactory::new(mapping, definitions, config.properties, config.keywords);
 
     let mut result = vec![];
     for file in selected_files {
