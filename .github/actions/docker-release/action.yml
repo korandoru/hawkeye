@@ -43,14 +43,6 @@ runs:
           type=semver,pattern=v{{major}}
           type=sha,format=long
           type=edge,branch=main
-    - name: Build and push
-      if: ${{ inputs.push }}
-      uses: docker/build-push-action@v3
-      with:
-        context: .
-        file: ${{ inputs.file }}
-        labels: ${{ steps.meta.outputs.labels }}
-        outputs: type=image,push=true,push-by-digest=true
     - name: Push manifest
       shell: bash
       run: |

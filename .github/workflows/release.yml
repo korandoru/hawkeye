@@ -64,7 +64,9 @@ jobs:
         uses: ./.github/actions/docker-release
         with:
           name: hawkeye
-          digests: ${{needs.build-and-push-hawkeye-amd64.outputs.digest}} ${{needs.build-and-push-hawkeye-arm64.outputs.digest}}
+          digests: |
+            ${{needs.build-and-push-hawkeye-amd64.outputs.digest}}
+            ${{needs.build-and-push-hawkeye-arm64.outputs.digest}}
 
   release-native:
     runs-on: ubuntu-latest
@@ -79,4 +81,6 @@ jobs:
         uses: ./.github/actions/docker-release
         with:
           name: hawkeye-native
-          digests: ${{needs.build-and-push-hawkeye-amd64.outputs.digest}} ${{needs.build-and-push-hawkeye-arm64.outputs.digest}}
+          digests: |
+            ghcr.io/${{ github.repository_owner }}/hawkeye@${{needs.build-and-push-hawkeye-amd64.outputs.digest}}
+            ghcr.io/${{ github.repository_owner }}/hawkeye@${{needs.build-and-push-hawkeye-arm64.outputs.digest}}
