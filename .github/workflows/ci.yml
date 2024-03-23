@@ -57,12 +57,44 @@ jobs:
       - name: Run benches
         run: cargo bench --workspace -- --test
 
+  docker:
+    if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, buildjet-4vcpu-ubuntu-2204-arm ]
+    runs-on: ${{matrix.os}}
+    name: Build and test ${{matrix.name}} ${{matrix.os}}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and load
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: Dockerfile
+          tags: hawkeye:ci
+          outputs: type=docker
+      - name: Save image
+        run: docker save hawkeye:ci -o /tmp/hawkeye-${{matrix.os}}.tar
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hawkeye-${{matrix.os}}
+          path: /tmp/hawkeye-${{matrix.os}}.tar
+      - name: Sanity check
+        run: |
+          cp action.yml action.yml.bak
+          docker image inspect hawkeye:ci --format='{{.Size}}'
+          docker run --rm -v $(pwd):/github/workspace hawkeye:ci -V
+          docker run --rm -v $(pwd):/github/workspace hawkeye:ci check
+
   required:
     name: Required
     runs-on: ubuntu-latest
     if: ${{ always() }}
     needs:
       - check
+      - docker
       - test
     steps:
       - name: Guardian
@@ -70,6 +102,7 @@ jobs:
           if [[ ! ( \
                  "${{ needs.check.result }}" == "success" \
               && "${{ needs.test.result }}" == "success" \
+              && "${{ needs.docker.result }}" == "success" \
               ) ]]; then
             echo "Required jobs haven't been completed successfully."
             exit -1
