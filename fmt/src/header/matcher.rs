@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use std::fmt::{Display, Formatter};
+
 use crate::header::model::HeaderDef;
 
 #[derive(Debug)]

@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::HashMap, fs, fs::File, io::BufRead, path::PathBuf};
-use std::borrow::Cow;
+use std::{borrow::Cow, collections::HashMap, fs, fs::File, io::BufRead, path::PathBuf};
 
 use snafu::ResultExt;
 

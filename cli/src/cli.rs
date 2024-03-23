@@ -29,6 +29,7 @@ impl Command {
         match self.sub {
             SubCommand::Check(cmd) => cmd.run(),
             SubCommand::Format(cmd) => cmd.run(),
+            SubCommand::Remove(cmd) => cmd.run(),
         }
     }
 }
@@ -39,6 +40,8 @@ enum SubCommand {
     Check(CommandCheck),
     #[clap(about = "format license header")]
     Format(CommandFormat),
+    #[clap(about = "remove license header")]
+    Remove(CommandRemove),
 }
 
 #[derive(Parser)]
@@ -118,6 +121,56 @@ impl CommandFormat {
             std::process::exit(1);
         }
         info!("All files have proper header.");
+        Ok(())
+    }
+}
+
+#[derive(Parser)]
+pub struct CommandRemove {
+    #[arg(long, help = "path to the config file")]
+    pub config: Option<PathBuf>,
+
+    #[arg(long, help = "whether update file in place", default_value_t = false)]
+    pub dry_run: bool,
+}
+
+impl CommandRemove {
+    fn run(self) -> Result<()> {
+        let config = self.config.unwrap_or_else(default_config);
+        let (_, unknown, matches, missing) = check_license_header(config)?;
+
+        if !unknown.is_empty() {
+            warn!(
+                "Processing unknown files: {:?}",
+                unknown.iter().map(|r| &r.filepath).collect::<Vec<_>>()
+            );
+        }
+
+        let mut removed_results = vec![];
+        for mut doc in matches.into_iter().chain(missing.into_iter()) {
+            if !doc.header_detected() {
+                continue;
+            }
+            doc.remove_header();
+            removed_results.push(format!("{}=removed", doc.filepath.display()));
+            if self.dry_run {
+                let mut extension = doc.filepath.extension().unwrap_or_default().to_os_string();
+                extension.push(".removed");
+                let copied = doc.filepath.with_extension(extension);
+                doc.save(Some(&copied))?;
+            } else {
+                doc.save(None)?
+            }
+        }
+
+        if !removed_results.is_empty() {
+            error!(
+                "Removed header for files (dryRun={}): {removed_results:?}",
+                self.dry_run,
+            );
+            std::process::exit(1);
+        }
+        info!("No file has been removed header.");
         Ok(())
     }
 }
