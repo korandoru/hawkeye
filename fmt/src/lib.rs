@@ -17,6 +17,7 @@
 use crate::error::Error;
 
 pub mod config;
+pub mod document;
 pub mod error;
 pub mod header;
 pub mod selection;

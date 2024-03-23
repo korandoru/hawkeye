@@ -49,13 +49,14 @@ impl HeaderDef {
     }
 }
 
-pub fn default_headers() -> Vec<HeaderDef> {
+pub fn default_headers() -> HashMap<String, HeaderDef> {
     let defaults = include_str!("defaults.toml");
     deserialize_header_definitions(defaults.to_string())
 }
 
-pub fn deserialize_header_definitions(value: String) -> Vec<HeaderDef> {
-    let header_styles: HashMap<String, HeaderStyle> = toml::from_str(&value).unwrap();
+pub fn deserialize_header_definitions(value: String) -> HashMap<String, HeaderDef> {
+    let header_styles: HashMap<String, HeaderStyle> =
+        toml::from_str(&value).expect("default headers must be valid");
     header_styles
         .into_iter()
         .map(|(name, style)| {
@@ -66,8 +67,8 @@ pub fn deserialize_header_definitions(value: String) -> Vec<HeaderDef> {
                 "Header style {name} is configured to allow blank lines, so it should be set as a multi-line header style"
             );
 
-            HeaderDef {
-                name,
+            let def = HeaderDef {
+                name: name.clone(),
                 first_line: style.first_line,
                 end_line: style.end_line,
                 before_each_line: style.before_each_line,
@@ -77,14 +78,16 @@ pub fn deserialize_header_definitions(value: String) -> Vec<HeaderDef> {
                 pad_lines: style.pad_lines,
                 skip_line_pattern: style
                     .skip_line_pattern
-                    .map(|pattern| Regex::new(&pattern).unwrap()),
+                    .map(|pattern| Regex::new(&pattern).expect("malformed regex")),
                 first_line_detection_pattern: style
                     .first_line_detection_pattern
-                    .map(|pattern| Regex::new(&pattern).unwrap()),
+                    .map(|pattern| Regex::new(&pattern).expect("malformed regex")),
                 last_line_detection_pattern: style
                     .last_line_detection_pattern
-                    .map(|pattern| Regex::new(&pattern).unwrap()),
-            }
+                    .map(|pattern| Regex::new(&pattern).expect("malformed regex")),
+            };
+
+            (name, def)
         })
         .collect()
 }
