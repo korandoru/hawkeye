@@ -20,7 +20,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "5.0.0-alpha.2"
+version = "5.0.0-alpha.3"
 edition = "2021"
 authors = ["tison <wander4096@gmail.com>"]
 readme = "README.md"
@@ -28,7 +28,7 @@ license = "Apache-2.0"
 repository = "https://github.com/korandoru/hawkeye/"
 
 [workspace.dependencies]
-hawkeye-fmt = { version = "5.0.0-alpha.2", path = "fmt" }
+hawkeye-fmt = { version = "5.0.0-alpha.3", path = "fmt" }
 snafu = "0.8.2"
 toml = "0.8.12"
 tracing = "0.1.40"
