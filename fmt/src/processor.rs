@@ -26,7 +26,6 @@ use crate::{
     Result,
 };
 
-
 #[allow(clippy::type_complexity)]
 pub fn check_license_header(
     run_config: PathBuf,
