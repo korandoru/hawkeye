@@ -20,6 +20,7 @@ pub mod config;
 pub mod document;
 pub mod error;
 pub mod header;
+pub mod license;
 pub mod selection;
 
 pub type Result<T> = std::result::Result<T, Error>;
