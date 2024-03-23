@@ -46,16 +46,12 @@ To check license headers in GitHub Actions, add a step in your GitHub workflow:
 
 ### Docker
 
-[Native Image](https://www.graalvm.org/22.3/reference-manual/native-image/) powered image (~45MB):
-
-```shell
-docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye-native check
-```
-
-[Eclipse Temurin](https://projects.eclipse.org/projects/adoptium.temurin) JRE based image (~400MB):
+Alpine image (~27MB):
 
 ```shell
 docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye check
+# or (for historical reason, duplicate a "hawkeye-native" image)
+docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye-native check
 ```
 
 ## Build
@@ -129,6 +125,7 @@ useDefaultMapping = true
 
 # Paths to additional header style files. The model of user-defined header style can be found below.
 # default: empty
+# WARNING: not yet re-supported.
 additionalHeaders = ["..."]
 
 # Mapping rules (repeated).
@@ -218,6 +215,8 @@ lastLineDetectionPattern = "..."
 
 [Apache License 2.0](LICENSE)
 
-## Acknowledgment
+## History
 
-This software is derived from [license-maven-plugin](https://github.com/mathieucarbou/license-maven-plugin), with an initial motivation to bring it beyond a Maven plugin. The core abstractions like `Document`, `Header`, and `HeaderResource` are originally copied from the license-maven-plugin sources under the terms of Apache License 2.0.
+This software is originally from [license-maven-plugin](https://github.com/mathieucarbou/license-maven-plugin),with an initial motivation to bring it beyond a Maven plugin. The core abstractions like `Document`, `Header`, and `HeaderParser` are originally copied from the license-maven-plugin sources under the terms of Apache License 2.0.
+
+Later, when I started focusing on the Docker image's size and integrate with Git, I found that Rust is better than Java (GraalVM Native Image) for this purpose. So I rewrote the core logic in Rust and keep ship a slim image.
