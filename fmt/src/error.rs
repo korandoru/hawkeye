@@ -21,19 +21,31 @@ pub enum Error {
     SelectionWalker {
         #[snafu(source)]
         source: ignore::Error,
+        #[snafu(implicit)]
+        loc: snafu::Location,
     },
 
     #[snafu(display("select files failed: {}", message))]
-    SelectFiles { message: String },
+    SelectFiles {
+        message: String,
+        #[snafu(implicit)]
+        loc: snafu::Location,
+    },
 
     #[snafu(display("header type {} not found", header_type))]
-    HeaderDefinitionNotFound { header_type: String },
+    HeaderDefinitionNotFound {
+        header_type: String,
+        #[snafu(implicit)]
+        loc: snafu::Location,
+    },
 
     #[snafu(display("cannot to create document {}: {}", path, source))]
     CreateDocument {
         path: String,
         #[snafu(source)]
         source: std::io::Error,
+        #[snafu(implicit)]
+        loc: snafu::Location,
     },
 
     #[snafu(display("cannot to save document {}: {}", path, source))]
@@ -41,12 +53,16 @@ pub enum Error {
         path: String,
         #[snafu(source)]
         source: std::io::Error,
+        #[snafu(implicit)]
+        loc: snafu::Location,
     },
 
     #[snafu(display("cannot try to matching header: {}", source))]
     TryMatchHeader {
         #[snafu(source)]
         source: std::io::Error,
+        #[snafu(implicit)]
+        loc: snafu::Location,
     },
 
     #[snafu(display("cannot load config {}: {}", name, source))]
@@ -54,6 +70,8 @@ pub enum Error {
         name: String,
         #[snafu(source)]
         source: std::io::Error,
+        #[snafu(implicit)]
+        loc: snafu::Location,
     },
 
     #[snafu(display("cannot parse {}: {}", name, source))]
@@ -61,6 +79,8 @@ pub enum Error {
         name: String,
         #[snafu(source)]
         source: toml::de::Error,
+        #[snafu(implicit)]
+        loc: snafu::Location,
     },
 
     #[snafu(display("malformed regex {}: {}", payload, source))]
@@ -68,18 +88,30 @@ pub enum Error {
         payload: String,
         #[snafu(source)]
         source: regex::Error,
+        #[snafu(implicit)]
+        loc: snafu::Location,
     },
 
     #[snafu(display("empty regex in header {}", header))]
-    EmptyRegex { header: String },
+    EmptyRegex {
+        header: String,
+        #[snafu(implicit)]
+        loc: snafu::Location,
+    },
 
     #[snafu(display("invalid config: {}", message))]
-    InvalidConfig { message: String },
+    InvalidConfig {
+        message: String,
+        #[snafu(implicit)]
+        loc: snafu::Location,
+    },
 
     #[snafu(display("Git operation failed: {}", source))]
     GitOp {
         #[snafu(source)]
         source: git2::Error,
+        #[snafu(implicit)]
+        loc: snafu::Location,
     },
 
     #[snafu(display("cannot resolve absolute path {}: {}", path, source))]
@@ -87,5 +119,7 @@ pub enum Error {
         path: String,
         #[snafu(source)]
         source: std::io::Error,
+        #[snafu(implicit)]
+        loc: snafu::Location,
     },
 }
