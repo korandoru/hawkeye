@@ -2,8 +2,13 @@ use std::collections::HashMap;
 
 use regex::Regex;
 use serde::{Deserialize, Serialize};
+use snafu::ResultExt;
 
-use crate::default_true;
+use crate::{
+    default_true,
+    error::{DeserializeSnafu, MalformedRegexSnafu},
+    Result,
+};
 
 #[derive(Debug, Clone, Default)]
 pub struct HeaderDef {
@@ -49,15 +54,18 @@ impl HeaderDef {
     }
 }
 
-pub fn default_headers() -> HashMap<String, HeaderDef> {
+pub fn default_headers() -> Result<HashMap<String, HeaderDef>> {
     let defaults = include_str!("defaults.toml");
     deserialize_header_definitions(defaults.to_string())
 }
 
-pub fn deserialize_header_definitions(value: String) -> HashMap<String, HeaderDef> {
+pub fn deserialize_header_definitions(value: String) -> Result<HashMap<String, HeaderDef>> {
     let header_styles: HashMap<String, HeaderStyle> =
-        toml::from_str(&value).expect("default headers must be valid");
-    header_styles
+        toml::from_str(&value).context(DeserializeSnafu {
+            name: "default headers",
+        })?;
+
+    let headers = header_styles
         .into_iter()
         .map(|(name, style)| {
             let name = name.to_lowercase();
@@ -78,7 +86,9 @@ pub fn deserialize_header_definitions(value: String) -> HashMap<String, HeaderDe
                 pad_lines: style.pad_lines,
                 skip_line_pattern: style
                     .skip_line_pattern
-                    .map(|pattern| Regex::new(&pattern).expect("malformed regex")),
+                    .map(|pattern| Regex::new(&pattern).context(MalformedRegexSnafu {
+                        payload: pattern,
+                    })).transpose()?,
                 first_line_detection_pattern: style
                     .first_line_detection_pattern
                     .map(|pattern| Regex::new(&pattern).expect("malformed regex")),
@@ -87,9 +97,10 @@ pub fn deserialize_header_definitions(value: String) -> HashMap<String, HeaderDe
                     .map(|pattern| Regex::new(&pattern).expect("malformed regex")),
             };
 
-            (name, def)
+            Ok((name, def))
         })
-        .collect()
+        .collect::<Result<HashMap<String, HeaderDef>>>()?;
+    Ok(headers)
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

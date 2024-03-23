@@ -42,28 +42,27 @@ impl Document {
     }
 
     /// Detected and valid header
-    pub fn header_matched(&self, header: &HeaderMatcher, strict_check: bool) -> bool {
+    pub fn header_matched(
+        &self,
+        header: &HeaderMatcher,
+        strict_check: bool,
+    ) -> std::io::Result<bool> {
         if strict_check {
             let file_header = {
-                let mut lines = self
-                    .read_file_first_lines(header)
-                    .expect("read file first lines")
-                    .join("\n");
+                let mut lines = self.read_file_first_lines(header)?.join("\n");
                 lines.push_str("\n\n");
                 lines.replace(" *\r?\n", "\n")
             };
             let expected_header = {
                 let raw_header = header.build_for_definition(&self.header_def);
-                let resolved_header = self.merge_properties(&raw_header);
+                let resolved_header = self.merge_properties(&raw_header)?;
                 resolved_header.replace(" *\r?\n", "\n")
             };
-            file_header.contains(expected_header.as_str())
+            Ok(file_header.contains(expected_header.as_str()))
         } else {
-            let file_header = self
-                .read_file_header_on_one_line(header)
-                .expect("read file header");
-            let expected_header = self.merge_properties(header.header_content_one_line());
-            file_header.contains(expected_header.as_str())
+            let file_header = self.read_file_header_on_one_line(header)?;
+            let expected_header = self.merge_properties(header.header_content_one_line())?;
+            Ok(file_header.contains(expected_header.as_str()))
         }
     }
 
@@ -113,16 +112,15 @@ impl Document {
         }
     }
 
-    pub(crate) fn merge_properties(&self, s: &str) -> String {
+    pub(crate) fn merge_properties(&self, s: &str) -> std::io::Result<String> {
         let mut properties = self.properties.clone();
-        properties.insert(
-            "hawkeye.core.filename".to_string(),
-            self.filepath
-                .file_name()
-                .map(|s| s.to_string_lossy().to_string())
-                .expect("malformed filename"),
-        );
-        merge_properties(&properties, s)
+        let filename = self
+            .filepath
+            .file_name()
+            .map(|s| s.to_string_lossy().to_string())
+            .ok_or_else(|| std::io::Error::other("malformed filename"))?;
+        properties.insert("hawkeye.core.filename".to_string(), filename);
+        Ok(merge_properties(&properties, s))
     }
 }
 
