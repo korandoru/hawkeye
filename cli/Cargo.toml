@@ -14,6 +14,7 @@
 
 [package]
 name = "hawkeye"
+description = "Simple license header checker and formatter, in multiple distribution forms."
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
