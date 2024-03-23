@@ -32,3 +32,8 @@ hawkeye-fmt = { version = "5.0.0-alpha.2", path = "fmt" }
 snafu = "0.8.2"
 toml = "0.8.12"
 tracing = "0.1.40"
+
+[workspace.metadata.release]
+sign-tag = true
+shared-version = true
+tag-name = "v{{version}}"
