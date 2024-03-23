@@ -37,3 +37,9 @@ tracing = "0.1.40"
 sign-tag = true
 shared-version = true
 tag-name = "v{{version}}"
+pre-release-commit-message = "chore(release): {{version}}"
+
+[[workspace.metadata.release.pre-release-replacements]]
+file = "action.yml"
+search = 'docker://ghcr.io/korandoru/hawkeye-native:[a-z0-9\\.-]+'
+replace = 'docker://ghcr.io/korandoru/hawkeye-native:{{version}}'
