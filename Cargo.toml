@@ -28,7 +28,7 @@ license = "Apache-2.0"
 repository = "https://github.com/korandoru/hawkeye/"
 
 [workspace.dependencies]
-hawkeye-fmt = { path = "fmt" }
+hawkeye-fmt = { version = "5.0.0-alpha.1", path = "fmt" }
 snafu = "0.8.2"
 toml = "0.8.12"
 tracing = "0.1.40"
