@@ -21,6 +21,7 @@ use crate::cli::Command;
 pub mod cli;
 
 fn main() -> hawkeye_fmt::Result<()> {
+    // use tracing::level_filters::LevelFilter;
     tracing_subscriber::fmt()
         // .with_max_level(LevelFilter::DEBUG)
         .init();
