@@ -15,5 +15,5 @@
 
 echo <<END >> "$HOME/.gitconfig"
 [safe]
-  directory = *
+  directory = /github/workspace
 END
