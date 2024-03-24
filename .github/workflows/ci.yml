@@ -51,20 +51,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
-      - run: cargo build --workspace --all-features --tests --examples --benches
+      - run: cargo build --workspace --all-features --bins --tests --examples --benches
       - name: Run tests
         run: cargo test --workspace -- --nocapture
       - name: Run benches
         run: cargo bench --workspace -- --test
 
   docker:
-    if: (github.event_name != 'schedule') || (github.repository == 'korandoru/hawkeye')
     strategy:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, buildjet-4vcpu-ubuntu-2204-arm ]
     runs-on: ${{matrix.os}}
-    name: Build and test ${{matrix.name}} ${{matrix.os}}
     steps:
       - uses: actions/checkout@v4
       - name: Build and load
@@ -88,6 +86,20 @@ jobs:
           docker run --rm -v $(pwd):/github/workspace hawkeye:ci -V
           docker run --rm -v $(pwd):/github/workspace hawkeye:ci check
 
+  smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - shell: bash
+        run: |
+          cargo run --bin hawkeye -- -V
+          cargo run --bin hawkeye -- check
+
   required:
     name: Required
     runs-on: ubuntu-latest
@@ -95,14 +107,16 @@ jobs:
     needs:
       - check
       - docker
+      - smoke
       - test
     steps:
       - name: Guardian
         run: |
           if [[ ! ( \
                  "${{ needs.check.result }}" == "success" \
-              && "${{ needs.test.result }}" == "success" \
               && "${{ needs.docker.result }}" == "success" \
+              && "${{ needs.smoke.result }}" == "success" \
+              && "${{ needs.test.result }}" == "success" \
               ) ]]; then
             echo "Required jobs haven't been completed successfully."
             exit -1
