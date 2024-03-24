@@ -99,10 +99,33 @@ pub enum Error {
         loc: snafu::Location,
     },
 
-    #[snafu(display("Git operation failed: {}", source))]
-    GitOp {
+    #[snafu(display("cannot discover git repository with gix: {}", source))]
+    GixDiscoverOp {
         #[snafu(source)]
-        source: git2::Error,
+        source: Box<gix::discover::Error>,
+        #[snafu(implicit)]
+        loc: snafu::Location,
+    },
+
+    #[snafu(display("cannot create gix exclude stack: {}", source))]
+    GixExcludeOp {
+        #[snafu(source)]
+        source: Box<gix::worktree::excludes::Error>,
+        #[snafu(implicit)]
+        loc: snafu::Location,
+    },
+
+    #[snafu(display("cannot check gix exclude: {}", source))]
+    GixCheckExcludeOp {
+        #[snafu(source)]
+        source: std::io::Error,
+        #[snafu(implicit)]
+        loc: snafu::Location,
+    },
+
+    #[snafu(display("path not found {}", path))]
+    GixPathNotFount {
+        path: String,
         #[snafu(implicit)]
         loc: snafu::Location,
     },

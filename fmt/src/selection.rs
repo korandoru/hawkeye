@@ -16,7 +16,7 @@ use std::path::PathBuf;
 
 use ignore::overrides::OverrideBuilder;
 use snafu::{ensure, ResultExt};
-use tracing::{debug, info};
+use tracing::debug;
 use walkdir::WalkDir;
 
 use crate::{
@@ -92,16 +92,13 @@ impl Selection {
         );
 
         let result = match GitHelper::create(&self.basedir, self.git)? {
-            None => {
-                select_files_with_ignore(&self.basedir, &includes, &excludes, &reverse_excludes, {
-                    if self.git.ignore.is_auto() {
-                        info!("git.ignore=auto is resolved to enable ignore crate's gitignore");
-                        true
-                    } else {
-                        false
-                    }
-                })?
-            }
+            None => select_files_with_ignore(
+                &self.basedir,
+                &includes,
+                &excludes,
+                &reverse_excludes,
+                self.git.ignore.is_auto(),
+            )?,
             Some(git_helper) => select_files_with_git(
                 &self.basedir,
                 &includes,
@@ -193,7 +190,7 @@ fn select_files_with_git(
         if file_type.is_symlink() {
             debug!("skip symlink: {:?}", path);
         } else if file_type.is_dir() {
-            if git_helper.ignored(path)? {
+            if git_helper.ignored(path, true)? {
                 debug!("skip git ignored directory: {:?}", path);
                 it.skip_current_dir();
                 continue;
@@ -204,7 +201,7 @@ fn select_files_with_git(
                 continue;
             }
         } else if file_type.is_file() {
-            if git_helper.ignored(path)? {
+            if git_helper.ignored(path, false)? {
                 debug!("skip git ignored file: {:?}", path);
                 continue;
             }

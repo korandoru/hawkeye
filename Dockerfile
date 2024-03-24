@@ -17,11 +17,11 @@ ENV RUSTFLAGS="-C target-feature=-crt-static"
 WORKDIR /build
 COPY . .
 RUN apk fix && \
-    apk --no-cache --update add libssh2-dev musl-dev pkgconfig && \
+    apk --no-cache --update add musl-dev && \
     cargo build --release --bin hawkeye
 
 FROM public.ecr.aws/docker/library/alpine:3.19.0
-RUN apk fix && apk --no-cache --update add gcompat libgcc && mkdir -p /github/workspace
+RUN apk fix && apk --no-cache --update add libgcc && mkdir -p /github/workspace
 COPY --from=build /build/target/release/hawkeye /bin/
 WORKDIR /github/workspace/
 ENTRYPOINT ["/bin/hawkeye"]
