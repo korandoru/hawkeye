@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, BooleanOptionalAction
 import fileinput
 from pathlib import Path
@@ -59,7 +58,7 @@ else:
     cmd = ["cargo", "release"]
 subprocess.run(cmd, cwd=basedir, check=args.execute)
 
-# 4. Check back action.yml
+# 4. Change back action.yml
 shutil.copy2(basedir / 'action.yml.bak', basedir / 'action.yml')
 subprocess.run(["git", "--no-pager", "diff", "."], cwd=basedir, check=True)
 if args.execute:
