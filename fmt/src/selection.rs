@@ -16,7 +16,7 @@ use std::path::PathBuf;
 
 use ignore::overrides::OverrideBuilder;
 use snafu::{ensure, ResultExt};
-use tracing::{debug, info};
+use tracing::{debug};
 use walkdir::WalkDir;
 
 use crate::{
@@ -190,7 +190,7 @@ fn select_files_with_git(
         if file_type.is_symlink() {
             debug!("skip symlink: {:?}", path);
         } else if file_type.is_dir() {
-            if git_helper.ignored(path)? {
+            if git_helper.ignored(path, true)? {
                 debug!("skip git ignored directory: {:?}", path);
                 it.skip_current_dir();
                 continue;
@@ -201,7 +201,7 @@ fn select_files_with_git(
                 continue;
             }
         } else if file_type.is_file() {
-            if git_helper.ignored(path)? {
+            if git_helper.ignored(path, false)? {
                 debug!("skip git ignored file: {:?}", path);
                 continue;
             }

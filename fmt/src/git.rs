@@ -14,17 +14,22 @@
 
 use std::path::Path;
 
-use snafu::ResultExt;
+use gix::{hash::Kind, index::State, worktree::stack::state::ignore::Source, Repository};
+use snafu::{IntoError, ResultExt};
 use tracing::info;
 
 use crate::{
     config,
-    error::{GixOpenOpSnafu, InvalidConfigSnafu, ResolveAbsolutePathSnafu},
+    error::{
+        GixCheckExcludeOpSnafu, GixExcludeOpSnafu, GixOpenOpSnafu, InvalidConfigSnafu,
+        ResolveAbsolutePathSnafu,
+    },
     Result,
 };
 
 pub struct GitHelper {
-    repo: gix::Repository,
+    repo: Repository,
+    state: State,
 }
 
 impl GitHelper {
@@ -45,7 +50,8 @@ impl GitHelper {
                     }
                 } else {
                     info!("git.ignore=auto is resolved to enabled");
-                    Ok(Some(GitHelper { repo }))
+                    let state = State::new(Kind::Sha1);
+                    Ok(Some(GitHelper { repo, state }))
                 }
             }
             Err(err) => {
@@ -53,16 +59,24 @@ impl GitHelper {
                     info!(?err, "git.ignore=auto is resolved to disabled");
                     Ok(None)
                 } else {
-                    Err(err).context(GixOpenOpSnafu)
+                    Err(GixOpenOpSnafu {}.into_error(Box::new(err)))
                 }
             }
         }
     }
 
-    pub fn ignored(&self, path: &Path) -> Result<bool> {
+    pub fn ignored(&self, path: &Path, is_dir: bool) -> Result<bool> {
         let path = path.canonicalize().context(ResolveAbsolutePathSnafu {
             path: path.display().to_string(),
         })?;
-        todo!("how to get attributes and check ignore")
+        let mut stack = self
+            .repo
+            .excludes(&self.state, None, Source::default())
+            .map_err(Box::new)
+            .context(GixExcludeOpSnafu)?;
+        let result = stack
+            .at_path(&path, Some(is_dir))
+            .context(GixCheckExcludeOpSnafu)?;
+        Ok(result.is_excluded())
     }
 }

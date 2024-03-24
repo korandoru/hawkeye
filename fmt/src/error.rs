@@ -102,7 +102,23 @@ pub enum Error {
     #[snafu(display("cannot open git repository with gix: {}", source))]
     GixOpenOp {
         #[snafu(source)]
-        source: gix::open::Error,
+        source: Box<gix::open::Error>,
+        #[snafu(implicit)]
+        loc: snafu::Location,
+    },
+
+    #[snafu(display("cannot create gix exclude stack: {}", source))]
+    GixExcludeOp {
+        #[snafu(source)]
+        source: Box<gix::config::exclude_stack::Error>,
+        #[snafu(implicit)]
+        loc: snafu::Location,
+    },
+
+    #[snafu(display("cannot check gix exclude: {}", source))]
+    GixCheckExcludeOp {
+        #[snafu(source)]
+        source: std::io::Error,
         #[snafu(implicit)]
         loc: snafu::Location,
     },
