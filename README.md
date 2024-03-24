@@ -54,7 +54,7 @@ cargo install hawkeye
 
 ### Docker
 
-Alpine image (~8MB):
+Alpine image (~18MB):
 
 ```shell
 docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye check
@@ -65,10 +65,7 @@ docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye check
 This steps requires Rust toolchain.
 
 ```shell
-# Build
-cargo build --workspace --all-features --tests --examples --benches
-# Run
-cargo run
+cargo build --workspace --all-features --bin --tests --examples --benches
 ```
 
 Build Docker image:
