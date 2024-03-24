@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 # Copyright 2024 tison <wander4096@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,14 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# See also https://github.com/rust-lang/rust/issues/44991
-
-[target.x86_64-unknown-linux-musl]
-rustflags = [
-    "-C", "target-feature=-crt-static",
-]
-
-[target.aarch64-unknown-linux-musl]
-rustflags = [
-    "-C", "target-feature=-crt-static",
-]
+echo <<END >> "$HOME/.gitconfig"
+[safe]
+  directory = *
+END

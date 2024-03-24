@@ -13,7 +13,6 @@
 # limitations under the License.
 
 FROM public.ecr.aws/docker/library/rust:1.76.0-alpine3.19 as build
-ENV RUSTFLAGS="-C target-feature=-crt-static"
 WORKDIR /build
 COPY . .
 RUN apk fix && \
@@ -21,7 +20,8 @@ RUN apk fix && \
     cargo build --release --bin hawkeye
 
 FROM public.ecr.aws/docker/library/alpine:3.19.0
-RUN apk fix && apk --no-cache --update add gcompat libgcc && mkdir -p /github/workspace
 COPY --from=build /build/target/release/hawkeye /bin/
+COPY hack.sh /bin/hack.sh
+RUN apk fix && apk --no-cache --update add gcompat libgcc && /bin/hack.sh
 WORKDIR /github/workspace/
 ENTRYPOINT ["/bin/hawkeye"]
