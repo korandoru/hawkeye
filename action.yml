@@ -33,7 +33,7 @@ inputs:
 
 runs:
   using: docker
-  image: docker://ghcr.io/korandoru/hawkeye:v5.1.1
+  image: docker://ghcr.io/korandoru/hawkeye:edge
   args:
     - ${{ inputs.mode }}
     - --config
