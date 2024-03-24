@@ -123,15 +123,15 @@ impl Selection {
 
         for mat in walker {
             let mat = mat.context(SelectionWalkerSnafu)?;
-            if let Some(filetype) = mat.file_type() {
-                match git_helper.as_ref() {
-                    Some(helper) if helper.ignored(mat.path())? => continue,
-                    _ => {
-                        if filetype.is_file() {
-                            result.push(mat.into_path())
-                        }
-                    }
+            if let Some(filetype) = mat.file_type()
+                && filetype.is_file()
+            {
+                if let Some(helper) = git_helper.as_ref()
+                    && helper.ignored(mat.path())?
+                {
+                    continue;
                 }
+                result.push(mat.into_path())
             }
         }
 
