@@ -32,13 +32,6 @@ pub enum Error {
         loc: snafu::Location,
     },
 
-    #[snafu(display("header type {} not found", header_type))]
-    HeaderDefinitionNotFound {
-        header_type: String,
-        #[snafu(implicit)]
-        loc: snafu::Location,
-    },
-
     #[snafu(display("cannot to create document {}: {}", path, source))]
     CreateDocument {
         path: String,

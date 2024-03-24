@@ -15,11 +15,15 @@
 use std::{fs, path::PathBuf};
 
 use snafu::{ensure, OptionExt, ResultExt};
+use tracing::debug;
 
 use crate::{
     config::Config,
     document::{factory::DocumentFactory, model::default_mapping, Document},
-    error::{DeserializeSnafu, InvalidConfigSnafu, LoadConfigSnafu, TryMatchHeaderSnafu},
+    error::{
+        CreateDocumentSnafu, DeserializeSnafu, InvalidConfigSnafu, LoadConfigSnafu,
+        TryMatchHeaderSnafu,
+    },
     header::{
         matcher::HeaderMatcher,
         model::{default_headers, deserialize_header_definitions},
@@ -108,7 +112,21 @@ pub fn check_license_header(
     let mut matched = vec![];
     let mut not_matched = vec![];
     for file in selected_files {
-        let document = document_factory.create_document(&file)?;
+        let document = document_factory.create_document(&file);
+        let document = match document {
+            Ok(document) => document,
+            Err(e) => {
+                if matches!(e.kind(), std::io::ErrorKind::InvalidData) {
+                    debug!("skip non-textual file: {}", file.display());
+                    continue;
+                } else {
+                    return Err(e).context(CreateDocumentSnafu {
+                        path: file.display().to_string(),
+                    });
+                }
+            }
+        };
+
         if document.is_unsupported() {
             unknown.push(document);
         } else if document

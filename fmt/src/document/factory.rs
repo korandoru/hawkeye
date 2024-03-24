@@ -17,15 +17,7 @@ use std::{
     path::Path,
 };
 
-use snafu::{OptionExt, ResultExt};
-
-use crate::{
-    config::Mapping,
-    document::Document,
-    error::{CreateDocumentSnafu, HeaderDefinitionNotFoundSnafu},
-    header::model::HeaderDef,
-    Result,
-};
+use crate::{config::Mapping, document::Document, header::model::HeaderDef};
 
 pub struct DocumentFactory {
     mapping: HashSet<Mapping>,
@@ -50,7 +42,7 @@ impl DocumentFactory {
         }
     }
 
-    pub fn create_document(&self, filepath: &Path) -> Result<Document> {
+    pub fn create_document(&self, filepath: &Path) -> std::io::Result<Document> {
         let lower_file_name = filepath
             .file_name()
             .map(|n| n.to_string_lossy().to_lowercase())
@@ -64,15 +56,13 @@ impl DocumentFactory {
         let header_def = self
             .definitions
             .get(&header_type)
-            .context(HeaderDefinitionNotFoundSnafu { header_type })?;
-        let document = Document::new(
+            .ok_or_else(|| std::io::Error::other(format!("header type {header_type} not found")))?;
+
+        Document::new(
             filepath.to_path_buf(),
             header_def.clone(),
             &self.keywords,
             self.properties.clone(),
-        );
-        document.context(CreateDocumentSnafu {
-            path: filepath.display().to_string(),
-        })
+        )
     }
 }
