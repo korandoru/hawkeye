@@ -239,7 +239,7 @@ checksum = "290f1a1d9242c78d09ce40a5e87e7554ee637af1351968159f4952f028f75604"
 
 [[package]]
 name = "hawkeye"
-version = "5.1.0"
+version = "5.1.1"
 dependencies = [
  "build-data",
  "clap",
@@ -251,7 +251,7 @@ dependencies = [
 
 [[package]]
 name = "hawkeye-fmt"
-version = "5.1.0"
+version = "5.1.1"
 dependencies = [
  "git2",
  "ignore",
