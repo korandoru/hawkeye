@@ -158,9 +158,9 @@ inceptionYear = 2023
 [git]
 # If enabled, do not process files that are ignored by Git; possible value: ['auto', 'enable', 'disable']
 # 'auto' means this feature tries to be enabled with:
-#   * libgit2 - if `basedir` is in a Git repository.
+#   * gix - if `basedir` is in a Git repository.
 #   * ignore crate's gitignore rules - if `basedir` is not in a Git repository.
-# 'enabled' means always enabled with libgit2; failed if it is impossible.
+# 'enabled' means always enabled with gix; failed if it is impossible.
 # default: 'auto'
 ignore = 'auto'
 ```

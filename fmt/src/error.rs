@@ -99,10 +99,10 @@ pub enum Error {
         loc: snafu::Location,
     },
 
-    #[snafu(display("Git operation failed: {}", source))]
-    GitOp {
+    #[snafu(display("cannot open git repository with gix: {}", source))]
+    GixOpenOp {
         #[snafu(source)]
-        source: git2::Error,
+        source: gix::open::Error,
         #[snafu(implicit)]
         loc: snafu::Location,
     },

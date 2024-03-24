@@ -14,18 +14,17 @@
 
 use std::path::Path;
 
-use git2::Repository;
 use snafu::ResultExt;
 use tracing::info;
 
 use crate::{
     config,
-    error::{GitOpSnafu, InvalidConfigSnafu, ResolveAbsolutePathSnafu},
+    error::{GixOpenOpSnafu, InvalidConfigSnafu, ResolveAbsolutePathSnafu},
     Result,
 };
 
 pub struct GitHelper {
-    repo: Repository,
+    repo: gix::Repository,
 }
 
 impl GitHelper {
@@ -34,17 +33,15 @@ impl GitHelper {
             return Ok(None);
         }
 
-        match Repository::discover(basedir) {
+        match gix::open(basedir) {
             Ok(repo) => {
-                if repo.workdir().is_none() {
+                if repo.worktree().is_none() {
+                    let message = "bare repository detected";
                     if config.ignore.is_auto() {
-                        info!("git.ignore=auto is resolved to disabled; bare repository detected");
+                        info!("git.ignore=auto is resolved to fallback; {message}");
                         Ok(None)
                     } else {
-                        InvalidConfigSnafu {
-                            message: "Git repository is bare".to_string(),
-                        }
-                        .fail()
+                        InvalidConfigSnafu { message }.fail()
                     }
                 } else {
                     info!("git.ignore=auto is resolved to enabled");
@@ -56,7 +53,7 @@ impl GitHelper {
                     info!(?err, "git.ignore=auto is resolved to disabled");
                     Ok(None)
                 } else {
-                    Err(err).context(GitOpSnafu)
+                    Err(err).context(GixOpenOpSnafu)
                 }
             }
         }
@@ -66,6 +63,6 @@ impl GitHelper {
         let path = path.canonicalize().context(ResolveAbsolutePathSnafu {
             path: path.display().to_string(),
         })?;
-        self.repo.is_path_ignored(path).context(GitOpSnafu)
+        todo!("how to get attributes and check ignore")
     }
 }
