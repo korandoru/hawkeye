@@ -54,7 +54,7 @@ cargo install hawkeye
 
 ### Docker
 
-Alpine image (~8MB):
+Alpine image (~18MB):
 
 ```shell
 docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye check
