@@ -306,6 +306,12 @@ headerType = "LUA"
 extension = true
 filename = false
 
+[MOONBIT]
+pattert = "mbt"
+headerType = "DOUBLESLASH_STYLE"
+extension = true
+filename = false
+
 [MUSTACHE]
 pattern = "mustache"
 headerType = "MUSTACHE_STYLE"
