@@ -188,7 +188,7 @@ filename = false
 
 [GO_MOD]
 pattern = "go.mod"
-headerType = "SLASHSTAR_STYLE"
+headerType = "DOUBLESLASH_STYLE"
 extension = false
 filename = true
 
