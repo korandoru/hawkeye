@@ -14,13 +14,30 @@
 
 #![feature(extract_if)]
 
-use clap::Parser;
+use clap::{crate_description, FromArgMatches, Subcommand};
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
-use crate::cli::Command;
+use crate::cli::SubCommand;
 
 pub mod cli;
+
+fn version() -> &'static str {
+    concat!(
+        "\nbranch: ",
+        env!("GIT_BRANCH"),
+        "\ncommit: ",
+        env!("GIT_COMMIT"),
+        "\ndirty: ",
+        env!("GIT_DIRTY"),
+        "\nversion: v",
+        env!("CARGO_PKG_VERSION"),
+        "\ntoolchain: ",
+        env!("RUSTC_VERSION"),
+        "\nbuild: ",
+        env!("SOURCE_TIMESTAMP"),
+    )
+}
 
 fn main() -> hawkeye_fmt::Result<()> {
     tracing_subscriber::registry()
@@ -31,6 +48,15 @@ fn main() -> hawkeye_fmt::Result<()> {
                 .from_env_lossy(),
         )
         .init();
-    let cmd = Command::parse();
-    cmd.run()
+
+    let cli = clap::Command::new("hawkeye")
+        .subcommand_required(true)
+        .version(version())
+        .about(crate_description!());
+    let cli = SubCommand::augment_subcommands(cli);
+    let args = cli.get_matches();
+    match SubCommand::from_arg_matches(&args) {
+        Ok(cmd) => cmd.run(),
+        Err(e) => e.exit(),
+    }
 }

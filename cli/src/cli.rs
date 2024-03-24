@@ -14,7 +14,7 @@
 
 use std::path::{Path, PathBuf};
 
-use clap::{Parser, Subcommand};
+use clap::Parser;
 use hawkeye_fmt::{
     document::Document,
     header::matcher::HeaderMatcher,
@@ -24,30 +24,23 @@ use hawkeye_fmt::{
 use tracing::{error, info, warn};
 
 #[derive(Parser)]
-#[command(version)]
-pub struct Command {
-    #[clap(subcommand)]
-    sub: SubCommand,
+pub enum SubCommand {
+    #[clap(name = "check", about = "check license header")]
+    Check(CommandCheck),
+    #[clap(name = "format", about = "format license header")]
+    Format(CommandFormat),
+    #[clap(name = "remove", about = "remove license header")]
+    Remove(CommandRemove),
 }
 
-impl Command {
+impl SubCommand {
     pub fn run(self) -> Result<()> {
-        match self.sub {
+        match self {
             SubCommand::Check(cmd) => cmd.run(),
             SubCommand::Format(cmd) => cmd.run(),
             SubCommand::Remove(cmd) => cmd.run(),
         }
     }
-}
-
-#[derive(Subcommand)]
-enum SubCommand {
-    #[clap(about = "check license header")]
-    Check(CommandCheck),
-    #[clap(about = "format license header")]
-    Format(CommandFormat),
-    #[clap(about = "remove license header")]
-    Remove(CommandRemove),
 }
 
 #[derive(Parser)]

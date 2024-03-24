@@ -23,8 +23,11 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-clap = { version = "4.5.3", features = ["derive", "string"] }
+clap = { version = "4.5.3", features = ["derive", "string", "cargo"] }
 hawkeye-fmt.workspace = true
 snafu.workspace = true
 tracing.workspace = true
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+
+[build-dependencies]
+build-data = "0.1.5"
