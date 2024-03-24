@@ -12,13 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-    borrow::Cow,
-    collections::HashMap,
-    fs::File,
-    io::{BufRead, Write},
-    path::PathBuf,
-};
+use std::{borrow::Cow, collections::HashMap, fs, fs::File, io::BufRead, path::PathBuf};
 
 use snafu::ResultExt;
 
@@ -132,16 +126,9 @@ impl Document {
 
     pub fn save(&mut self, filepath: Option<&PathBuf>) -> Result<()> {
         let filepath = filepath.unwrap_or(&self.filepath);
-        let mut file = File::create(filepath).context(SaveDocumentSnafu {
+        fs::write(filepath, self.parser.file_content.content()).context(SaveDocumentSnafu {
             path: filepath.display().to_string(),
-        })?;
-        let content = self.parser.file_content.content();
-        for line in content.lines() {
-            writeln!(file, "{line}").context(SaveDocumentSnafu {
-                path: filepath.display().to_string(),
-            })?;
-        }
-        Ok(())
+        })
     }
 
     pub(crate) fn merge_properties(&self, s: &str) -> String {

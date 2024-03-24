@@ -15,7 +15,7 @@
 use std::{
     fmt::{Display, Formatter},
     fs::File,
-    io::BufRead,
+    io::{BufRead, BufReader},
     path::Path,
 };
 
@@ -244,11 +244,25 @@ impl FileContent {
             pos: 0,
             old_pos: 0,
             content: {
-                let f = File::open(file)?;
-                std::io::BufReader::new(f)
-                    .lines()
-                    .collect::<std::io::Result<Vec<_>>>()?
-                    .join("\n")
+                let mut content = String::new();
+                let mut reader = File::open(file).map(BufReader::new)?;
+                let mut buf = String::new();
+                while let n = reader.read_line(&mut buf)?
+                    && n > 0
+                {
+                    if buf.ends_with('\n') {
+                        buf.pop();
+                        if buf.ends_with('\r') {
+                            buf.pop();
+                        }
+                        content.push_str(&buf);
+                        content.push('\n');
+                    } else {
+                        content.push_str(&buf);
+                    }
+                    buf.clear();
+                }
+                content
             },
             filepath: file.to_string_lossy().to_string(),
         })
@@ -277,10 +291,7 @@ impl FileContent {
         }
 
         let lf = self.content[self.pos..].find('\n').map(|i| i + self.pos);
-        let eol = match lf {
-            None | Some(0) => self.content.len(),
-            Some(lf) => lf - (self.content.as_bytes()[lf - 1] == b'\r') as usize,
-        };
+        let eol = lf.unwrap_or(self.content.len());
         let result = self.content[self.pos..eol].to_string();
 
         self.old_pos = self.pos;
