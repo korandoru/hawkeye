@@ -41,7 +41,15 @@ To check license headers in GitHub Actions, add a step in your GitHub workflow:
 
 ```yaml
 - name: Check License Header
-  uses: korandoru/hawkeye@v4
+  uses: korandoru/hawkeye@v5
+```
+
+### Cargo Install
+
+The `hawkeye` executable can be installed by:
+
+```shell
+cargo install hawkeye
 ```
 
 ### Docker
@@ -50,8 +58,6 @@ Alpine image (~27MB):
 
 ```shell
 docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye check
-# or (for historical reason, duplicate a "hawkeye-native" image)
-docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye-native check
 ```
 
 ## Build

@@ -19,6 +19,7 @@ from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, BooleanOptio
 import fileinput
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import tomllib
 
@@ -37,13 +38,15 @@ else:
 subprocess.run(cmd, cwd=basedir, check=True)
 info = tomllib.loads((basedir / 'Cargo.toml').read_text())
 version = info['workspace']['package']['version']
+version = f'v{version}'
 
 # 2. Update action.yml
-pattern = re.compile(r'docker://ghcr.io/korandoru/hawkeye-native.*')
-with fileinput.FileInput(basedir / 'action.yml', inplace=args.execute, backup='.bak') as content:
+pattern = re.compile(r'docker://ghcr.io/korandoru/hawkeye.*')
+with fileinput.FileInput(basedir / 'action.yml', inplace=True, backup='.bak') as content:
     for line in content:
-        print(pattern.sub(f'docker://ghcr.io/korandoru/hawkeye-native:{version}', line), end='')
+        print(pattern.sub(f'docker://ghcr.io/korandoru/hawkeye:{version}', line), end='')
 
+subprocess.run(["git", "--no-pager", "diff", "."], cwd=basedir, check=True)
 if args.execute:
     subprocess.run(["git", "add", "-A", "."], cwd=basedir, check=True)
     subprocess.run(["git", "status"], cwd=basedir, check=True)
@@ -54,4 +57,12 @@ if args.execute:
     cmd = ["cargo", "release", "-x"]
 else:
     cmd = ["cargo", "release"]
-subprocess.run(cmd, cwd=basedir, check=True)
+subprocess.run(cmd, cwd=basedir, check=args.execute)
+
+# 4. Check back action.yml
+shutil.copy2(basedir / 'action.yml.bak', basedir / 'action.yml')
+subprocess.run(["git", "--no-pager", "diff", "."], cwd=basedir, check=True)
+if args.execute:
+    subprocess.run(["git", "add", "-A", "."], cwd=basedir, check=True)
+    subprocess.run(["git", "status"], cwd=basedir, check=True)
+    subprocess.run(["git", "commit", "-s", "-m", f"chore: post-release {version}"], cwd=basedir, check=True)
