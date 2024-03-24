@@ -12,18 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use ignore::overrides::OverrideBuilder;
-use snafu::{ensure, ResultExt};
+use snafu::{ensure, OptionExt, ResultExt};
 use tracing::debug;
 use walkdir::WalkDir;
 
 use crate::{
     config,
-    error::{SelectFilesSnafu, SelectWithIgnoreSnafu, TraverseDirSnafu},
-    git::GitHelper,
-    Result,
+    error::{
+        GixCheckExcludeOpSnafu, GixExcludeOpSnafu, GixPathNotFountSnafu, ResolveAbsolutePathSnafu,
+        SelectFilesSnafu, SelectWithIgnoreSnafu, TraverseDirSnafu,
+    },
+    git, Result,
 };
 
 pub struct Selection {
@@ -91,7 +93,7 @@ impl Selection {
             },
         );
 
-        let result = match GitHelper::create(&self.basedir, self.git)? {
+        let result = match git::discover(&self.basedir, self.git)? {
             None => select_files_with_ignore(
                 &self.basedir,
                 &includes,
@@ -99,13 +101,9 @@ impl Selection {
                 &reverse_excludes,
                 self.git.ignore.is_auto(),
             )?,
-            Some(git_helper) => select_files_with_git(
-                &self.basedir,
-                &includes,
-                &excludes,
-                &reverse_excludes,
-                git_helper,
-            )?,
+            Some(repo) => {
+                select_files_with_git(&self.basedir, &includes, &excludes, &reverse_excludes, repo)?
+            }
         };
 
         debug!("selected files: {:?} (count: {})", result, result.len());
@@ -158,11 +156,11 @@ fn select_files_with_ignore(
 }
 
 fn select_files_with_git(
-    basedir: &PathBuf,
+    basedir: &Path,
     includes: &[String],
     excludes: &[String],
     reverse_excludes: &[String],
-    git_helper: GitHelper,
+    repo: gix::Repository,
 ) -> Result<Vec<PathBuf>> {
     debug!("Selecting files with git helper");
     let mut result = vec![];
@@ -182,15 +180,45 @@ fn select_files_with_git(
         builder.build().context(SelectWithIgnoreSnafu)?
     };
 
-    let mut it = WalkDir::new(basedir).into_iter();
+    let basedir = basedir
+        .canonicalize()
+        .with_context(|_| ResolveAbsolutePathSnafu {
+            path: basedir.display().to_string(),
+        })?;
+    let mut it = WalkDir::new(basedir).follow_links(false).into_iter();
+
+    let workdir = repo
+        .work_dir()
+        .context(GixPathNotFountSnafu { path: "workdir" })?;
+    let workdir = workdir
+        .canonicalize()
+        .with_context(|_| ResolveAbsolutePathSnafu {
+            path: workdir.display().to_string(),
+        })?;
+    let worktree = repo
+        .worktree()
+        .context(GixPathNotFountSnafu { path: "worktree" })?;
+    let mut excludes = worktree
+        .excludes(None)
+        .map_err(Box::new)
+        .context(GixExcludeOpSnafu)?;
+
     while let Some(entry) = it.next() {
         let entry = entry.context(TraverseDirSnafu)?;
         let path = entry.path();
         let file_type = entry.file_type();
+
+        let rela_path = path
+            .strip_prefix(&workdir)
+            .expect("git repository encloses iteration");
+        let platform = excludes
+            .at_path(rela_path, Some(file_type.is_dir()))
+            .context(GixCheckExcludeOpSnafu)?;
+
         if file_type.is_symlink() {
             debug!("skip symlink: {:?}", path);
         } else if file_type.is_dir() {
-            if git_helper.ignored(path, true)? {
+            if platform.is_excluded() {
                 debug!("skip git ignored directory: {:?}", path);
                 it.skip_current_dir();
                 continue;
@@ -201,7 +229,7 @@ fn select_files_with_git(
                 continue;
             }
         } else if file_type.is_file() {
-            if git_helper.ignored(path, false)? {
+            if platform.is_excluded() {
                 debug!("skip git ignored file: {:?}", path);
                 continue;
             }
