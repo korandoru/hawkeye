@@ -21,8 +21,7 @@ RUN apk fix && \
     cargo build --release --bin hawkeye
 
 FROM public.ecr.aws/docker/library/alpine:3.19.0
-RUN apk fix && apk --no-cache --update add gcompat libgcc git && \
-    git config --global --add safe.directory /github/workspace/
+RUN apk fix && apk --no-cache --update add gcompat libgcc && mkdir -p /github/workspace
 COPY --from=build /build/target/release/hawkeye /bin/
 WORKDIR /github/workspace/
 ENTRYPOINT ["/bin/hawkeye"]
