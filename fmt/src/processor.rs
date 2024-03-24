@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fs, path::PathBuf};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use snafu::{ensure, OptionExt, ResultExt};
 use tracing::debug;
@@ -33,18 +36,20 @@ use crate::{
     Result,
 };
 
+/// Callback for processing the result of checking license headers.
+pub trait Callback {
+    /// Called when the header is unknown.
+    fn on_unknown(&mut self, path: &Path) -> Result<()>;
+
+    /// Called when the header is matched.
+    fn on_matched(&mut self, header: &HeaderMatcher, document: Document) -> Result<()>;
+
+    /// Called when the header is not matched.
+    fn on_not_matched(&mut self, header: &HeaderMatcher, document: Document) -> Result<()>;
+}
+
 #[allow(clippy::type_complexity)]
-pub fn check_license_header(
-    run_config: PathBuf,
-) -> Result<(
-    HeaderMatcher,
-    // unknown
-    Vec<Document>,
-    // matched
-    Vec<Document>,
-    // not matched
-    Vec<Document>,
-)> {
+pub fn check_license_header<C: Callback>(run_config: PathBuf, callback: &mut C) -> Result<()> {
     let config = {
         let name = run_config.display().to_string();
         let config =
@@ -108,9 +113,6 @@ pub fn check_license_header(
     let document_factory =
         DocumentFactory::new(mapping, definitions, config.properties, config.keywords);
 
-    let mut unknown = vec![];
-    let mut matched = vec![];
-    let mut not_matched = vec![];
     for file in selected_files {
         let document = document_factory.create_document(&file);
         let document = match document {
@@ -118,6 +120,7 @@ pub fn check_license_header(
             Err(e) => {
                 if matches!(e.kind(), std::io::ErrorKind::InvalidData) {
                     debug!("skip non-textual file: {}", file.display());
+                    callback.on_unknown(&file)?;
                     continue;
                 } else {
                     return Err(e).context(CreateDocumentSnafu {
@@ -128,15 +131,16 @@ pub fn check_license_header(
         };
 
         if document.is_unsupported() {
-            unknown.push(document);
+            callback.on_unknown(&file)?;
         } else if document
             .header_matched(&header_matcher, config.strict_check)
             .context(TryMatchHeaderSnafu)?
         {
-            matched.push(document);
+            callback.on_matched(&header_matcher, document)?;
         } else {
-            not_matched.push(document);
+            callback.on_not_matched(&header_matcher, document)?;
         }
     }
-    Ok((header_matcher, unknown, matched, not_matched))
+
+    Ok(())
 }
