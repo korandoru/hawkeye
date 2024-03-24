@@ -131,7 +131,6 @@ useDefaultMapping = true
 
 # Paths to additional header style files. The model of user-defined header style can be found below.
 # default: empty
-# WARNING: not yet re-supported.
 additionalHeaders = ["..."]
 
 # Mapping rules (repeated).

@@ -20,7 +20,10 @@ use crate::{
     config::Config,
     document::{factory::DocumentFactory, model::default_mapping, Document},
     error::{DeserializeSnafu, InvalidConfigSnafu, LoadConfigSnafu, TryMatchHeaderSnafu},
-    header::{matcher::HeaderMatcher, model::default_headers},
+    header::{
+        matcher::HeaderMatcher,
+        model::{default_headers, deserialize_header_definitions},
+    },
     license::HeaderSource,
     selection::Selection,
     Result,
@@ -85,7 +88,18 @@ pub fn check_license_header(
         mapping
     };
 
-    let definitions = default_headers()?;
+    let definitions = {
+        let mut defs = default_headers()?;
+        for additional_header in &config.additional_headers {
+            let additional_defs = fs::read_to_string(additional_header)
+                .context(LoadConfigSnafu {
+                    name: additional_header.clone(),
+                })
+                .and_then(deserialize_header_definitions)?;
+            defs.extend(additional_defs);
+        }
+        defs
+    };
 
     let document_factory =
         DocumentFactory::new(mapping, definitions, config.properties, config.keywords);

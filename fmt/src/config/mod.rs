@@ -50,6 +50,8 @@ pub struct Config {
     pub mapping: HashSet<Mapping>,
 
     pub git: Git,
+
+    pub additional_headers: Vec<String>,
 }
 
 #[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
