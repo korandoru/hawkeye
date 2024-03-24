@@ -97,6 +97,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
+      - uses: ./
       - shell: bash
         run: |
           cargo run --bin hawkeye -- -V

@@ -37,3 +37,4 @@ tracing = "0.1.40"
 sign-tag = true
 shared-version = true
 tag-name = "v{{version}}"
+pre-release-commit-message = "chore: release v{{version}}"
