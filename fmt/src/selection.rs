@@ -198,7 +198,7 @@ fn select_files_with_git(
                 it.skip_current_dir();
                 continue;
             }
-            if !matcher.matched(path, file_type.is_dir()).is_whitelist() {
+            if matcher.matched(path, file_type.is_dir()).is_ignore() {
                 debug!("skip glob ignored directory: {:?}", path);
                 it.skip_current_dir();
                 continue;
