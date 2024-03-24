@@ -307,7 +307,7 @@ extension = true
 filename = false
 
 [MOONBIT]
-pattert = "mbt"
+pattern = "mbt"
 headerType = "DOUBLESLASH_STYLE"
 extension = true
 filename = false
