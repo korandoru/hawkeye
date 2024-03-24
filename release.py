@@ -28,12 +28,16 @@ parser.add_argument('--execute', '-x', action=BooleanOptionalAction, help='wheth
 args = parser.parse_args()
 
 basedir = Path(__file__).parent.absolute()
+
+# 0. Pull latest
+subprocess.run(["git", "pull", "--rebase=true", "--autostash"], cwd=basedir, check=True)
+
+# 1. Bump version
 if args.execute:
     cmd = ["cargo", "release", "version", args.version, "-x"]
 else:
     cmd = ["cargo", "release", "version", args.version]
 
-# 1. Bump version
 subprocess.run(cmd, cwd=basedir, check=True)
 info = tomllib.loads((basedir / 'Cargo.toml').read_text())
 version = info['workspace']['package']['version']
@@ -65,3 +69,4 @@ if args.execute:
     subprocess.run(["git", "add", "-A", "."], cwd=basedir, check=True)
     subprocess.run(["git", "status"], cwd=basedir, check=True)
     subprocess.run(["git", "commit", "-s", "-m", f"chore: post-release {version}"], cwd=basedir, check=True)
+    subprocess.run(["git", "push"], cwd=basedir, check=True)
