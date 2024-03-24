@@ -32,9 +32,11 @@ inputs:
     default: check
 
 runs:
-  using: docker
-  image: Dockerfile
-  args:
-    - ${{ inputs.mode }}
-    - --config
-    - ${{ inputs.config }}
+  using: composite
+  steps:
+    - name: Build hawkeye binary
+      shell: bash
+      run: cd "$GITHUB_ACTION_PATH" && cargo install --path cli
+    - name: Execute command
+      shell: bash
+      run: hawkeye ${{ inputs.mode }} --config ${{ inputs.config }}
