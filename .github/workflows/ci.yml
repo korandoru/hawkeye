@@ -97,11 +97,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
-      - uses: ./
       - shell: bash
         run: |
           cargo run --bin hawkeye -- -V
           cargo run --bin hawkeye -- check
+  gha:
+    # GitHub Actions with Docker is only supported on Linux runners now.
+    runs-on: ubuntu-latest
+    name: Smoke test for GitHub Actions
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
 
   required:
     name: Required
@@ -110,6 +116,7 @@ jobs:
     needs:
       - check
       - docker
+      - gha
       - smoke
       - test
     steps:
@@ -118,6 +125,7 @@ jobs:
           if [[ ! ( \
                  "${{ needs.check.result }}" == "success" \
               && "${{ needs.docker.result }}" == "success" \
+              && "${{ needs.gha.result }}" == "success" \
               && "${{ needs.smoke.result }}" == "success" \
               && "${{ needs.test.result }}" == "success" \
               ) ]]; then
