@@ -99,10 +99,10 @@ pub enum Error {
         loc: snafu::Location,
     },
 
-    #[snafu(display("cannot open git repository with gix: {}", source))]
-    GixOpenOp {
+    #[snafu(display("cannot discover git repository with gix: {}", source))]
+    GixDiscoverOp {
         #[snafu(source)]
-        source: Box<gix::open::Error>,
+        source: Box<gix::discover::Error>,
         #[snafu(implicit)]
         loc: snafu::Location,
     },

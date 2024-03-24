@@ -21,7 +21,7 @@ use tracing::info;
 use crate::{
     config,
     error::{
-        GixCheckExcludeOpSnafu, GixExcludeOpSnafu, GixOpenOpSnafu, GixPathNotFountSnafu,
+        GixCheckExcludeOpSnafu, GixDiscoverOpSnafu, GixExcludeOpSnafu, GixPathNotFountSnafu,
         InvalidConfigSnafu, ResolveAbsolutePathSnafu,
     },
     Result,
@@ -38,7 +38,7 @@ impl GitHelper {
         }
 
         let is_auto = config.ignore.is_auto();
-        match gix::open(basedir) {
+        match gix::discover(basedir) {
             Ok(repo) => match repo.worktree() {
                 None => {
                     let message = "bare repository detected";
@@ -59,7 +59,7 @@ impl GitHelper {
                     info!(?err, "git.ignore=auto is resolved to disabled");
                     Ok(None)
                 } else {
-                    Err(GixOpenOpSnafu {}.into_error(Box::new(err)))
+                    Err(GixDiscoverOpSnafu {}.into_error(Box::new(err)))
                 }
             }
         }
