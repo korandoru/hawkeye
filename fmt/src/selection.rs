@@ -16,7 +16,7 @@ use std::path::PathBuf;
 
 use ignore::overrides::OverrideBuilder;
 use snafu::{ensure, ResultExt};
-use tracing::{debug};
+use tracing::debug;
 use walkdir::WalkDir;
 
 use crate::{

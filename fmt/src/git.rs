@@ -14,22 +14,21 @@
 
 use std::path::Path;
 
-use gix::{hash::Kind, index::State, worktree::stack::state::ignore::Source, Repository};
-use snafu::{IntoError, ResultExt};
+use gix::Repository;
+use snafu::{IntoError, OptionExt, ResultExt};
 use tracing::info;
 
 use crate::{
     config,
     error::{
-        GixCheckExcludeOpSnafu, GixExcludeOpSnafu, GixOpenOpSnafu, InvalidConfigSnafu,
-        ResolveAbsolutePathSnafu,
+        GixCheckExcludeOpSnafu, GixExcludeOpSnafu, GixOpenOpSnafu, GixPathNotFountSnafu,
+        InvalidConfigSnafu, ResolveAbsolutePathSnafu,
     },
     Result,
 };
 
 pub struct GitHelper {
     repo: Repository,
-    state: State,
 }
 
 impl GitHelper {
@@ -38,24 +37,25 @@ impl GitHelper {
             return Ok(None);
         }
 
+        let is_auto = config.ignore.is_auto();
         match gix::open(basedir) {
-            Ok(repo) => {
-                if repo.worktree().is_none() {
+            Ok(repo) => match repo.worktree() {
+                None => {
                     let message = "bare repository detected";
-                    if config.ignore.is_auto() {
+                    if is_auto {
                         info!("git.ignore=auto is resolved to fallback; {message}");
                         Ok(None)
                     } else {
                         InvalidConfigSnafu { message }.fail()
                     }
-                } else {
-                    info!("git.ignore=auto is resolved to enabled");
-                    let state = State::new(Kind::Sha1);
-                    Ok(Some(GitHelper { repo, state }))
                 }
-            }
+                Some(_) => {
+                    info!("git.ignore=auto is resolved to enabled");
+                    Ok(Some(GitHelper { repo }))
+                }
+            },
             Err(err) => {
-                if config.ignore.is_auto() {
+                if is_auto {
                     info!(?err, "git.ignore=auto is resolved to disabled");
                     Ok(None)
                 } else {
@@ -69,14 +69,26 @@ impl GitHelper {
         let path = path.canonicalize().context(ResolveAbsolutePathSnafu {
             path: path.display().to_string(),
         })?;
-        let mut stack = self
+        let workdir = self
             .repo
-            .excludes(&self.state, None, Source::default())
+            .work_dir()
+            .context(GixPathNotFountSnafu { path: "workdir" })?;
+        let workdir = workdir.canonicalize().context(ResolveAbsolutePathSnafu {
+            path: workdir.display().to_string(),
+        })?;
+        let at_path = pathdiff::diff_paths(path, workdir)
+            .context(GixPathNotFountSnafu { path: "<relative>" })?;
+        let worktree = self
+            .repo
+            .worktree()
+            .context(GixPathNotFountSnafu { path: "worktree" })?;
+        let mut attrs = worktree
+            .excludes(None)
             .map_err(Box::new)
             .context(GixExcludeOpSnafu)?;
-        let result = stack
-            .at_path(&path, Some(is_dir))
+        let platform = attrs
+            .at_path(at_path, Some(is_dir))
             .context(GixCheckExcludeOpSnafu)?;
-        Ok(result.is_excluded())
+        Ok(platform.is_excluded())
     }
 }

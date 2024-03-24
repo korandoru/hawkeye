@@ -110,7 +110,7 @@ pub enum Error {
     #[snafu(display("cannot create gix exclude stack: {}", source))]
     GixExcludeOp {
         #[snafu(source)]
-        source: Box<gix::config::exclude_stack::Error>,
+        source: Box<gix::worktree::excludes::Error>,
         #[snafu(implicit)]
         loc: snafu::Location,
     },
@@ -119,6 +119,13 @@ pub enum Error {
     GixCheckExcludeOp {
         #[snafu(source)]
         source: std::io::Error,
+        #[snafu(implicit)]
+        loc: snafu::Location,
+    },
+
+    #[snafu(display("path not found {}", path))]
+    GixPathNotFount {
+        path: String,
         #[snafu(implicit)]
         loc: snafu::Location,
     },
