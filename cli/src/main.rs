@@ -15,15 +15,16 @@
 #![feature(extract_if)]
 
 use clap::Parser;
+use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 use crate::cli::Command;
 
 pub mod cli;
 
 fn main() -> hawkeye_fmt::Result<()> {
-    // use tracing::level_filters::LevelFilter;
-    tracing_subscriber::fmt()
-        // .with_max_level(LevelFilter::DEBUG)
+    tracing_subscriber::registry()
+        .with(fmt::layer())
+        .with(EnvFilter::from_default_env())
         .init();
     let cmd = Command::parse();
     cmd.run()
