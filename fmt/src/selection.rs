@@ -17,13 +17,15 @@ use std::path::PathBuf;
 use ignore::overrides::OverrideBuilder;
 use snafu::{ensure, ResultExt};
 use tracing::{debug, info};
+use walkdir::WalkDir;
 
 use crate::{
     config,
-    error::{SelectFilesSnafu, SelectionWalkerSnafu},
+    error::{SelectFilesSnafu, SelectWithIgnoreSnafu},
     git::GitHelper,
     Result,
 };
+use crate::error::TraverseDirSnafu;
 
 pub struct Selection {
     basedir: PathBuf,
@@ -90,54 +92,138 @@ impl Selection {
             },
         );
 
-        let git_helper = GitHelper::create(&self.basedir, self.git)?;
-        let turn_on_ignore = git_helper.is_none() && self.git.ignore.is_auto();
-        if turn_on_ignore {
-            info!("git.ignore=auto is resolved to enable ignore crate's gitignore");
-        }
-
-        let mut result = vec![];
-        let walker = ignore::WalkBuilder::new(&self.basedir)
-            .ignore(false) // do not use .ignore file
-            .hidden(false) // check hidden files
-            .follow_links(true) // proper path name
-            .parents(turn_on_ignore)
-            .git_exclude(turn_on_ignore)
-            .git_global(turn_on_ignore)
-            .git_ignore(turn_on_ignore)
-            .overrides({
-                let mut builder = OverrideBuilder::new(&self.basedir);
-                for pat in includes.iter() {
-                    builder.add(pat).context(SelectionWalkerSnafu)?;
-                }
-                for pat in excludes.iter() {
-                    let pat = format!("!{pat}");
-                    builder.add(pat.as_str()).context(SelectionWalkerSnafu)?;
-                }
-                for pat in reverse_excludes.iter() {
-                    builder.add(pat).context(SelectionWalkerSnafu)?;
-                }
-                builder.build().context(SelectionWalkerSnafu)?
-            })
-            .build();
-
-        for mat in walker {
-            let mat = mat.context(SelectionWalkerSnafu)?;
-            if let Some(filetype) = mat.file_type()
-                && filetype.is_file()
-            {
-                if let Some(helper) = git_helper.as_ref()
-                    && helper.ignored(mat.path())?
+        let result = match GitHelper::create(&self.basedir, self.git)? {
+            None => select_files_with_ignore(
+                &self.basedir,
+                &includes,
+                &excludes,
+                &reverse_excludes,
                 {
-                    continue;
-                }
-                result.push(mat.into_path())
-            }
-        }
+                    if self.git.ignore.is_auto() {
+                        info!("git.ignore=auto is resolved to enable ignore crate's gitignore");
+                        true
+                    } else {
+                        false
+                    }
+                },
+            )?,
+            Some(git_helper) => select_files_with_git(
+                &self.basedir,
+                &includes,
+                &excludes,
+                &reverse_excludes,
+                git_helper,
+            )?,
+        };
 
         debug!("selected files: {:?} (count: {})", result, result.len());
         Ok(result)
     }
+}
+
+fn select_files_with_ignore(
+    basedir: &PathBuf,
+    includes: &[String],
+    excludes: &[String],
+    reverse_excludes: &[String],
+    turn_on_git_ignore: bool,
+) -> Result<Vec<PathBuf>> {
+    debug!("Selecting files with ignore crate");
+    let mut result = vec![];
+
+    let walker = ignore::WalkBuilder::new(basedir)
+        .ignore(false) // do not use .ignore file
+        .hidden(false) // check hidden files
+        .follow_links(true) // proper path name
+        .parents(turn_on_git_ignore)
+        .git_exclude(turn_on_git_ignore)
+        .git_global(turn_on_git_ignore)
+        .git_ignore(turn_on_git_ignore)
+        .overrides({
+            let mut builder = OverrideBuilder::new(basedir);
+            for pat in includes.iter() {
+                builder.add(pat).context(SelectWithIgnoreSnafu)?;
+            }
+            for pat in excludes.iter() {
+                let pat = format!("!{pat}");
+                builder.add(pat.as_str()).context(SelectWithIgnoreSnafu)?;
+            }
+            for pat in reverse_excludes.iter() {
+                builder.add(pat).context(SelectWithIgnoreSnafu)?;
+            }
+            builder.build().context(SelectWithIgnoreSnafu)?
+        })
+        .build();
+
+    for mat in walker {
+        let mat = mat.context(SelectWithIgnoreSnafu)?;
+        if mat.file_type().map(|ft| ft.is_file()).unwrap_or(false) {
+            result.push(mat.into_path())
+        }
+    }
+
+    Ok(result)
+}
+
+fn select_files_with_git(
+    basedir: &PathBuf,
+    includes: &[String],
+    excludes: &[String],
+    reverse_excludes: &[String],
+    git_helper: GitHelper,
+) -> Result<Vec<PathBuf>> {
+    debug!("Selecting files with git helper");
+    let mut result = vec![];
+
+    let matcher = {
+        let mut builder = OverrideBuilder::new(basedir);
+        for pat in includes.iter() {
+            builder.add(pat).context(SelectWithIgnoreSnafu)?;
+        }
+        for pat in excludes.iter() {
+            let pat = format!("!{pat}");
+            builder.add(pat.as_str()).context(SelectWithIgnoreSnafu)?;
+        }
+        for pat in reverse_excludes.iter() {
+            builder.add(pat).context(SelectWithIgnoreSnafu)?;
+        }
+        builder.build().context(SelectWithIgnoreSnafu)?
+    };
+
+    let mut it = WalkDir::new(basedir).into_iter();
+    while let Some(entry) = it.next() {
+        let entry = entry.context(TraverseDirSnafu)?;
+        let path = entry.path();
+        let file_type = entry.file_type();
+        if file_type.is_symlink() {
+            debug!("skip symlink: {:?}", path);
+        } else if file_type.is_dir() {
+            if git_helper.ignored(path)? {
+                debug!("skip git ignored directory: {:?}", path);
+                it.skip_current_dir();
+                continue;
+            }
+            if !matcher.matched(path, file_type.is_dir()).is_whitelist() {
+                debug!("skip glob ignored directory: {:?}", path);
+                it.skip_current_dir();
+                continue;
+            }
+        } else if file_type.is_file() {
+            if git_helper.ignored(path)? {
+                debug!("skip git ignored file: {:?}", path);
+                continue;
+            }
+            if !matcher.matched(path, file_type.is_dir()).is_whitelist() {
+                debug!("skip glob ignored file: {:?}", path);
+                continue;
+            }
+            result.push(path.to_path_buf());
+        } else {
+            debug!("skip unknown file type ({:?}): {:?}", file_type, path);
+        }
+    }
+
+    Ok(result)
 }
 
 pub const INCLUDES: [&str; 1] = ["**"];

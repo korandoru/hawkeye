@@ -233,6 +233,7 @@ dependencies = [
  "snafu",
  "toml",
  "tracing",
+ "walkdir",
 ]
 
 [[package]]

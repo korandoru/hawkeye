@@ -17,8 +17,8 @@ use snafu::Snafu;
 #[derive(Snafu, Debug)]
 #[snafu(visibility(pub))]
 pub enum Error {
-    #[snafu(display("selection walker failed: {}", source))]
-    SelectionWalker {
+    #[snafu(display("select with ignore failed: {}", source))]
+    SelectWithIgnore {
         #[snafu(source)]
         source: ignore::Error,
         #[snafu(implicit)]
@@ -119,6 +119,14 @@ pub enum Error {
         path: String,
         #[snafu(source)]
         source: std::io::Error,
+        #[snafu(implicit)]
+        loc: snafu::Location,
+    },
+
+    #[snafu(display("cannot traverse directory: {}", source))]
+    TraverseDir {
+        #[snafu(source)]
+        source: walkdir::Error,
         #[snafu(implicit)]
         loc: snafu::Location,
     },
