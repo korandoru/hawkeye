@@ -12,13 +12,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-headerPath = "Apache-2.0.txt"
-
-excludes = [
-    "*.txt",
-    "**/tests/content/**",
-]
-
-[properties]
-inceptionYear = 2024
-copyrightOwner = "tison <wander4096@gmail.com>"
