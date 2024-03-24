@@ -22,6 +22,6 @@ RUN apk fix && \
 FROM public.ecr.aws/docker/library/alpine:3.19.0
 COPY --from=build /build/target/release/hawkeye /bin/
 COPY hack.sh /bin/hack.sh
-RUN apk fix && apk --no-cache --update add gcompat libgcc && /bin/hack.sh
+RUN apk fix && apk --no-cache --update add gcompat libgcc git && /bin/hack.sh && git config --global safe.directory
 WORKDIR /github/workspace/
 ENTRYPOINT ["/bin/hawkeye"]
