@@ -63,6 +63,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest, buildjet-4vcpu-ubuntu-2204-arm ]
     runs-on: ${{matrix.os}}
+    name: Docker sanity check on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - name: Build and load
@@ -92,6 +93,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
+    name: Smoke test on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
