@@ -86,6 +86,7 @@ jobs:
           docker image inspect hawkeye:ci --format='{{.Size}}'
           docker run --rm -v $(pwd):/github/workspace hawkeye:ci -V
           docker run --rm -v $(pwd):/github/workspace hawkeye:ci check
+          docker run --rm --entrypoint sh -v $(pwd):/github/workspace hawkeye:ci -c "ls -l /github/"
 
   smoke:
     strategy:
