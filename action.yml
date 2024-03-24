@@ -39,4 +39,6 @@ runs:
       run: cd "$GITHUB_ACTION_PATH" && cargo install --path cli
     - name: Execute command
       shell: bash
-      run: hawkeye ${{ inputs.mode }} --config ${{ inputs.config }}
+      run: |
+        hawkeye -V
+        hawkeye ${{ inputs.mode }} --config ${{ inputs.config }}
