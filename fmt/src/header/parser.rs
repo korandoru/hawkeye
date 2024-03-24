@@ -132,6 +132,10 @@ pub fn parse_header(
                                 break;
                             }
                         }
+
+                        if line.as_ref().map(|l| l.trim().is_empty()).unwrap_or(true) {
+                            found_end = true;
+                        }
                     }
                     found_end
                 };
