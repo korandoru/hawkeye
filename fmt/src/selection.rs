@@ -75,13 +75,14 @@ impl Selection {
 
         let (excludes, reverse_excludes) = {
             let mut excludes = self.excludes;
-            let reverse_excludes = excludes
-                .extract_if(|pat| pat.starts_with('!'))
-                .map(|mut pat| {
-                    pat.remove(0);
-                    pat
-                })
-                .collect::<Vec<_>>();
+            let mut reverse_excludes = Vec::new();
+            excludes.retain(|pat| {
+                let keep_pat = pat.starts_with('!');
+                if !keep_pat {
+                    reverse_excludes.push(pat[1..].to_string());
+                }
+                keep_pat
+            });
             (excludes, reverse_excludes)
         };
 
