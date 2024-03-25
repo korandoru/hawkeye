@@ -60,6 +60,14 @@ Alpine image (~18MB):
 docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye check
 ```
 
+### Arch Linux
+
+`hawkeye` can be installed with [pacman](https://wiki.archlinux.org/title/Pacman):
+
+```shell
+pacman -S hawkeye
+```
+
 ## Build
 
 This steps requires Rust toolchain.
