@@ -25,7 +25,8 @@ The HawkEye GitHub Action enables users to run license header check by HawkEye w
 
 First of all, add a `licenserc.toml` file in the root of your project. The simplest config for projects licensed under Apache License 2.0 is as below:
 
-> **Note** The full configurations can be found in [the configuration section](#configurations).
+> [!NOTE]
+> The full configurations can be found in [the configuration section](#configurations).
 
 ```toml
 headerPath = "Apache-2.0.txt"
@@ -62,14 +63,14 @@ docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye check
 
 ### Arch Linux
 
+> [!NOTE]
+> Reach out to the maintainer ([@orhun](https://github.com/orhun)) of the [package](https://archlinux.org/packages/extra/x86_64/hawkeye/) or report issues on [Arch Linux GitLab](https://gitlab.archlinux.org/archlinux/packaging/packages/hawkeye) in the case of packaging-related problems.
+
 `hawkeye` can be installed with [pacman](https://wiki.archlinux.org/title/Pacman):
 
 ```shell
 pacman -S hawkeye
 ```
-
-> [!NOTE]
-> Reach out to the maintainer ([@orhun](https://github.com/orhun)) of the [package](https://archlinux.org/packages/extra/x86_64/hawkeye/) or report issues on [Arch Linux GitLab](https://gitlab.archlinux.org/archlinux/packaging/packages/hawkeye) in the case of packaging-related problems.
 
 ## Build
 
