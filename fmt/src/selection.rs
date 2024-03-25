@@ -15,15 +15,15 @@
 use std::path::{Path, PathBuf};
 
 use ignore::overrides::OverrideBuilder;
-use snafu::{ensure, OptionExt, ResultExt};
+use snafu::{ensure, ResultExt};
 use tracing::debug;
 use walkdir::WalkDir;
 
 use crate::{
     config,
     error::{
-        GixCheckExcludeOpSnafu, GixExcludeOpSnafu, GixPathNotFountSnafu, ResolveAbsolutePathSnafu,
-        SelectFilesSnafu, SelectWithIgnoreSnafu, TraverseDirSnafu,
+        GixCheckExcludeOpSnafu, GixExcludeOpSnafu, ResolveAbsolutePathSnafu, SelectFilesSnafu,
+        SelectWithIgnoreSnafu, TraverseDirSnafu,
     },
     git, Result,
 };
@@ -118,7 +118,7 @@ fn select_files_with_ignore(
     reverse_excludes: &[String],
     turn_on_git_ignore: bool,
 ) -> Result<Vec<PathBuf>> {
-    debug!("Selecting files with ignore crate");
+    debug!(turn_on_git_ignore, "Selecting files with ignore crate");
     let mut result = vec![];
 
     let walker = ignore::WalkBuilder::new(basedir)
@@ -187,17 +187,13 @@ fn select_files_with_git(
         })?;
     let mut it = WalkDir::new(basedir).follow_links(false).into_iter();
 
-    let workdir = repo
-        .work_dir()
-        .context(GixPathNotFountSnafu { path: "workdir" })?;
+    let workdir = repo.work_dir().expect("workdir cannot be absent");
     let workdir = workdir
         .canonicalize()
         .with_context(|_| ResolveAbsolutePathSnafu {
             path: workdir.display().to_string(),
         })?;
-    let worktree = repo
-        .worktree()
-        .context(GixPathNotFountSnafu { path: "worktree" })?;
+    let worktree = repo.worktree().expect("worktree cannot be absent");
     let mut excludes = worktree
         .excludes(None)
         .map_err(Box::new)

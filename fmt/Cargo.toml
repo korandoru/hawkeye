@@ -25,7 +25,6 @@ repository.workspace = true
 [dependencies]
 gix = { version = "0.61", default-features = false, features = ["excludes"] }
 ignore = "0.4.22"
-pathdiff = "0.2.1"
 regex = "1.10.3"
 serde = { version = "1.0.197", features = ["derive"] }
 snafu.workspace = true
