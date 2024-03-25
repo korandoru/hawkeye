@@ -203,6 +203,10 @@ fn select_files_with_git(
         let entry = entry.context(TraverseDirSnafu)?;
         let path = entry.path();
         let file_type = entry.file_type();
+        if !file_type.is_file() && !file_type.is_dir() {
+            debug!(?file_type, "skip file: {path:?}");
+            continue;
+        }
 
         let rela_path = path
             .strip_prefix(&workdir)
@@ -211,9 +215,7 @@ fn select_files_with_git(
             .at_path(rela_path, Some(file_type.is_dir()))
             .context(GixCheckExcludeOpSnafu)?;
 
-        if file_type.is_symlink() {
-            debug!("skip symlink: {:?}", path);
-        } else if file_type.is_dir() {
+        if file_type.is_dir() {
             if platform.is_excluded() {
                 debug!("skip git ignored directory: {:?}", path);
                 it.skip_current_dir();
@@ -234,8 +236,6 @@ fn select_files_with_git(
                 continue;
             }
             result.push(path.to_path_buf());
-        } else {
-            debug!("skip unknown file type ({:?}): {:?}", file_type, path);
         }
     }
 
