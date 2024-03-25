@@ -68,6 +68,9 @@ docker run -it --rm -v $(pwd):/github/workspace ghcr.io/korandoru/hawkeye check
 pacman -S hawkeye
 ```
 
+> [!NOTE]
+> Reach out to the maintainer ([@orhun](https://github.com/orhun)) of the [package](https://archlinux.org/packages/extra/x86_64/hawkeye/) or report issues on [Arch Linux GitLab](https://gitlab.archlinux.org/archlinux/packaging/packages/hawkeye) in the case of packaging-related problems.
+
 ## Build
 
 This steps requires Rust toolchain.
