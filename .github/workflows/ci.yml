@@ -107,6 +107,8 @@ jobs:
     name: Smoke test for GitHub Actions
     steps:
       - uses: actions/checkout@v4
+      - name: Use Local Docker Image
+        run: perl -p -i -e 's/image: (?:.*)$/image: Dockerfile/g' action.yml
       - uses: ./
 
   required:
