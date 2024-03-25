@@ -15,80 +15,44 @@
 use std::path::Path;
 
 use gix::Repository;
-use snafu::{IntoError, OptionExt, ResultExt};
+use snafu::IntoError;
 use tracing::info;
 
 use crate::{
     config,
-    error::{
-        GixCheckExcludeOpSnafu, GixDiscoverOpSnafu, GixExcludeOpSnafu, GixPathNotFountSnafu,
-        InvalidConfigSnafu, ResolveAbsolutePathSnafu,
-    },
+    error::{GixDiscoverOpSnafu, InvalidConfigSnafu},
     Result,
 };
 
-pub struct GitHelper {
-    repo: Repository,
-}
-
-impl GitHelper {
-    pub fn create(basedir: &Path, config: config::Git) -> Result<Option<GitHelper>> {
-        if config.ignore.is_disable() {
-            return Ok(None);
-        }
-
-        let is_auto = config.ignore.is_auto();
-        match gix::discover(basedir) {
-            Ok(repo) => match repo.worktree() {
-                None => {
-                    let message = "bare repository detected";
-                    if is_auto {
-                        info!("git.ignore=auto is resolved to fallback; {message}");
-                        Ok(None)
-                    } else {
-                        InvalidConfigSnafu { message }.fail()
-                    }
-                }
-                Some(_) => {
-                    info!("git.ignore=auto is resolved to enabled");
-                    Ok(Some(GitHelper { repo }))
-                }
-            },
-            Err(err) => {
-                if is_auto {
-                    info!(?err, "git.ignore=auto is resolved to disabled");
-                    Ok(None)
-                } else {
-                    Err(GixDiscoverOpSnafu {}.into_error(Box::new(err)))
-                }
-            }
-        }
+pub fn discover(basedir: &Path, config: config::Git) -> Result<Option<Repository>> {
+    if config.ignore.is_disable() {
+        return Ok(None);
     }
 
-    pub fn ignored(&self, path: &Path, is_dir: bool) -> Result<bool> {
-        let path = path.canonicalize().context(ResolveAbsolutePathSnafu {
-            path: path.display().to_string(),
-        })?;
-        let workdir = self
-            .repo
-            .work_dir()
-            .context(GixPathNotFountSnafu { path: "workdir" })?;
-        let workdir = workdir.canonicalize().context(ResolveAbsolutePathSnafu {
-            path: workdir.display().to_string(),
-        })?;
-        let at_path = pathdiff::diff_paths(path, workdir)
-            .context(GixPathNotFountSnafu { path: "<relative>" })?;
-        let worktree = self
-            .repo
-            .worktree()
-            .context(GixPathNotFountSnafu { path: "worktree" })?;
-        let mut attrs = worktree
-            .excludes(None)
-            .map_err(Box::new)
-            .context(GixExcludeOpSnafu)?;
-        let platform = attrs
-            .at_path(at_path, Some(is_dir))
-            .context(GixCheckExcludeOpSnafu)?;
-        Ok(platform.is_excluded())
+    let is_auto = config.ignore.is_auto();
+    match gix::discover(basedir) {
+        Ok(repo) => match repo.worktree() {
+            None => {
+                let message = "bare repository detected";
+                if is_auto {
+                    info!("git.ignore=auto is resolved to fallback; {message}");
+                    Ok(None)
+                } else {
+                    InvalidConfigSnafu { message }.fail()
+                }
+            }
+            Some(_) => {
+                info!("git.ignore=auto is resolved to enabled");
+                Ok(Some(repo))
+            }
+        },
+        Err(err) => {
+            if is_auto {
+                info!(?err, "git.ignore=auto is resolved to disabled");
+                Ok(None)
+            } else {
+                Err(GixDiscoverOpSnafu {}.into_error(Box::new(err)))
+            }
+        }
     }
 }

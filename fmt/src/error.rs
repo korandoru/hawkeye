@@ -123,13 +123,6 @@ pub enum Error {
         loc: snafu::Location,
     },
 
-    #[snafu(display("path not found {}", path))]
-    GixPathNotFount {
-        path: String,
-        #[snafu(implicit)]
-        loc: snafu::Location,
-    },
-
     #[snafu(display("cannot resolve absolute path {}: {}", path, source))]
     ResolveAbsolutePath {
         path: String,
