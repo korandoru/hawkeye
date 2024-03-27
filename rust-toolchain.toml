@@ -13,5 +13,5 @@
 # limitations under the License.
 
 [toolchain]
-channel = "nightly-2024-03-05"
+channel = "stable"
 components = ["cargo", "rustfmt", "clippy", "rust-analyzer"]

@@ -26,6 +26,7 @@ authors = ["tison <wander4096@gmail.com>"]
 readme = "README.md"
 license = "Apache-2.0"
 repository = "https://github.com/korandoru/hawkeye/"
+rust-version = "1.76.0"
 
 [workspace.dependencies]
 hawkeye-fmt = { version = "5.2.1", path = "fmt" }
