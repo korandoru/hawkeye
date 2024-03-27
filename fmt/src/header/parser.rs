@@ -43,20 +43,18 @@ pub fn parse_header(
         let mut begin_pos = 0;
         if header_def.skip_line_pattern.is_some() {
             // the format expect to find lines to be skipped
-            while let Some(l) = line.as_ref() {
-                if header_def.is_skip_line(l) {
-                    break;
-                }
+            while let Some(l) = line.as_ref()
+                && !header_def.is_skip_line(l)
+            {
                 begin_pos = file_content.pos;
                 line = file_content.next_line();
             }
 
             // at least we have found the line to skip, or we are the end of the file
             // this time we are going to skip next lines if they match the skip pattern
-            while let Some(l) = line.as_ref() {
-                if !header_def.is_skip_line(l) {
-                    break;
-                }
+            while let Some(l) = line.as_ref()
+                && header_def.is_skip_line(l)
+            {
                 begin_pos = file_content.pos;
                 line = file_content.next_line();
             }
@@ -73,22 +71,19 @@ pub fn parse_header(
     };
 
     // 2. has header
-    let mut existing_header = || -> bool {
+    let existing_header = {
         // skip blank lines
-        while let Some(l) = line.as_ref() {
-            if !l.trim().is_empty() {
-                break;
-            }
+        while let Some(l) = line.as_ref()
+            && l.trim().is_empty()
+        {
             line = file_content.next_line();
         }
 
         // check if there is already a header
         let mut got_header = false;
-        if let Some(l) = line.as_ref() {
-            if header_def.is_first_header_line(l) {
-                return false;
-            }
-
+        if let Some(l) = line.as_ref()
+            && header_def.is_first_header_line(l)
+        {
             let mut in_place_header = String::new();
             in_place_header.push_str(&l.to_lowercase());
 
@@ -96,10 +91,9 @@ pub fn parse_header(
 
             // skip blank lines before header text
             if header_def.allow_blank_lines {
-                while let Some(l) = line.as_ref() {
-                    if !l.trim().is_empty() {
-                        break;
-                    }
+                while let Some(l) = line.as_ref()
+                    && l.trim().is_empty()
+                {
                     line = file_content.next_line();
                 }
             }
@@ -126,15 +120,13 @@ pub fn parse_header(
                     } else {
                         loop {
                             line = file_content.next_line();
-                            if let Some(l) = line.as_ref() {
-                                if l.starts_with(before) {
-                                    in_place_header.push_str(&l.to_lowercase());
-                                    if header_def.multiple_lines
-                                        && header_def.is_last_header_line(l)
-                                    {
-                                        found_end = true;
-                                        break;
-                                    }
+                            if let Some(l) = line.as_ref()
+                                && l.starts_with(before)
+                            {
+                                in_place_header.push_str(&l.to_lowercase());
+                                if header_def.multiple_lines && header_def.is_last_header_line(l) {
+                                    found_end = true;
+                                    break;
                                 }
                             } else {
                                 break;
@@ -166,13 +158,11 @@ pub fn parse_header(
                     // before each line
                     let pos = file_content.pos;
                     // check if the line is the end line
-                    while let Some(l) = line.as_ref() {
-                        if header_def.is_last_header_line(l)
-                            || (!header_def.allow_blank_lines && l.trim().is_empty())
-                            || !l.starts_with(before)
-                        {
-                            break;
-                        }
+                    while let Some(l) = line.as_ref()
+                        && !header_def.is_last_header_line(l)
+                        && (header_def.allow_blank_lines || !l.trim().is_empty())
+                        && l.starts_with(before)
+                    {
                         line = file_content.next_line();
                     }
                     if line.is_none() {
@@ -208,15 +198,14 @@ pub fn parse_header(
     };
 
     // 3. find end position
-    let end_pos = if existing_header() {
+    let end_pos = if existing_header {
         // we check if there is a header, if the next line is the blank line of the header
         let mut end = file_content.pos;
         line = file_content.next_line();
         if begin_pos == 0 {
-            while let Some(l) = line.as_ref() {
-                if !l.trim().is_empty() {
-                    break;
-                }
+            while let Some(l) = line.as_ref()
+                && l.trim().is_empty()
+            {
                 end = file_content.pos;
                 line = file_content.next_line();
             }
@@ -262,8 +251,9 @@ impl FileContent {
                 let mut content = String::new();
                 let mut reader = File::open(file).map(BufReader::new)?;
                 let mut buf = String::new();
-                let mut n = reader.read_line(&mut buf)?;
-                while n > 0 {
+                while let n = reader.read_line(&mut buf)?
+                    && n > 0
+                {
                     if buf.ends_with('\n') {
                         buf.pop();
                         if buf.ends_with('\r') {
@@ -275,7 +265,6 @@ impl FileContent {
                         content.push_str(&buf);
                     }
                     buf.clear();
-                    n = reader.read_line(&mut buf)?;
                 }
                 content
             },

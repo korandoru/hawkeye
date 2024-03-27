@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![feature(extract_if)]
+#![feature(let_chains)]
+
 use crate::error::Error;
 
 pub mod config;
