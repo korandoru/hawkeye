@@ -26,176 +26,22 @@ pub struct HeaderParser {
     pub begin_pos: usize,
     /// Some if header exists; None if header does not exist.
     pub end_pos: Option<usize>,
-    pub header_def: HeaderDef,
     pub file_content: FileContent,
 }
 
 pub fn parse_header(
     file: &Path,
-    header_def: HeaderDef,
+    header_def: &HeaderDef,
     keywords: &[String],
 ) -> std::io::Result<HeaderParser> {
     let mut file_content = FileContent::new(file)?;
     let mut line = file_content.next_line();
 
     // 1. find begin position
-    let begin_pos = {
-        let mut begin_pos = 0;
-        if header_def.skip_line_pattern.is_some() {
-            // the format expect to find lines to be skipped
-            while let Some(l) = line.as_ref()
-                && !header_def.is_skip_line(l)
-            {
-                begin_pos = file_content.pos;
-                line = file_content.next_line();
-            }
-
-            // at least we have found the line to skip, or we are the end of the file
-            // this time we are going to skip next lines if they match the skip pattern
-            while let Some(l) = line.as_ref()
-                && header_def.is_skip_line(l)
-            {
-                begin_pos = file_content.pos;
-                line = file_content.next_line();
-            }
-
-            // After skipping everything we are at the end of the file
-            // Header has to be at the file beginning
-            if line.is_none() {
-                begin_pos = 0;
-                file_content.reset();
-                line = file_content.next_line();
-            }
-        }
-        begin_pos
-    };
+    let begin_pos = find_first_position(&mut line, &mut file_content, header_def);
 
     // 2. has header
-    let existing_header = {
-        // skip blank lines
-        while let Some(l) = line.as_ref()
-            && l.trim().is_empty()
-        {
-            line = file_content.next_line();
-        }
-
-        // check if there is already a header
-        let mut got_header = false;
-        if let Some(l) = line.as_ref()
-            && header_def.is_first_header_line(l)
-        {
-            let mut in_place_header = String::new();
-            in_place_header.push_str(&l.to_lowercase());
-
-            line = file_content.next_line();
-
-            // skip blank lines before header text
-            if header_def.allow_blank_lines {
-                while let Some(l) = line.as_ref()
-                    && l.trim().is_empty()
-                {
-                    line = file_content.next_line();
-                }
-            }
-
-            // first header detected line & potential blank lines have been detected
-            // following lines should be header lines
-            if let Some(l) = line.as_ref() {
-                in_place_header.push_str(&l.to_lowercase());
-
-                let before = {
-                    let mut before = header_def.before_each_line.trim_end();
-                    if before.is_empty() && !header_def.multiple_lines {
-                        before = header_def.before_each_line.as_str();
-                    }
-                    before
-                };
-
-                let found_end = {
-                    let mut found_end = false;
-                    if (header_def.multiple_lines && header_def.is_last_header_line(l))
-                        || l.trim().is_empty()
-                    {
-                        found_end = true;
-                    } else {
-                        loop {
-                            line = file_content.next_line();
-                            if let Some(l) = line.as_ref()
-                                && l.starts_with(before)
-                            {
-                                in_place_header.push_str(&l.to_lowercase());
-                                if header_def.multiple_lines && header_def.is_last_header_line(l) {
-                                    found_end = true;
-                                    break;
-                                }
-                            } else {
-                                break;
-                            }
-                        }
-
-                        if line.as_ref().map(|l| l.trim().is_empty()).unwrap_or(true) {
-                            found_end = true;
-                        }
-                    }
-                    found_end
-                };
-
-                // skip blank lines after header text
-                if header_def.multiple_lines && header_def.allow_blank_lines && !found_end {
-                    loop {
-                        line = file_content.next_line();
-                        if !line.as_ref().map(|l| l.trim().is_empty()).unwrap_or(false) {
-                            break;
-                        }
-                    }
-                    file_content.rewind();
-                } else if !header_def.multiple_lines && !found_end {
-                    file_content.rewind();
-                }
-
-                if !header_def.multiple_lines {
-                    // keep track of the position for headers where the end line is the same as the
-                    // before each line
-                    let pos = file_content.pos;
-                    // check if the line is the end line
-                    while let Some(l) = line.as_ref()
-                        && !header_def.is_last_header_line(l)
-                        && (header_def.allow_blank_lines || !l.trim().is_empty())
-                        && l.starts_with(before)
-                    {
-                        line = file_content.next_line();
-                    }
-                    if line.is_none() {
-                        file_content.reset_to(pos);
-                    }
-                } else if line.is_some() {
-                    // we could end up there if we still have some lines, but not matching "before".
-                    // This can be the last line in a multi line header
-                    let pos = file_content.pos;
-                    line = file_content.next_line();
-                    if line
-                        .as_ref()
-                        .map(|l| !header_def.is_last_header_line(l))
-                        .unwrap_or(true)
-                    {
-                        file_content.reset_to(pos);
-                    }
-                }
-
-                got_header = true;
-                for keyword in keywords {
-                    if !in_place_header.contains(keyword) {
-                        got_header = false;
-                        break;
-                    }
-                }
-            }
-            // else - we detected previously a one line comment block that matches the header
-            // detection it is not a header it is a comment
-        }
-
-        got_header
-    };
+    let existing_header = existing_header(&mut line, &mut file_content, header_def, keywords);
 
     // 3. find end position
     let end_pos = if existing_header {
@@ -203,9 +49,7 @@ pub fn parse_header(
         let mut end = file_content.pos;
         line = file_content.next_line();
         if begin_pos == 0 {
-            while let Some(l) = line.as_ref()
-                && l.trim().is_empty()
-            {
+            while line.as_ref().map(|l| l.trim().is_empty()).unwrap_or(false) {
                 end = file_content.pos;
                 line = file_content.next_line();
             }
@@ -223,9 +67,177 @@ pub fn parse_header(
     Ok(HeaderParser {
         begin_pos,
         end_pos,
-        header_def,
         file_content,
     })
+}
+
+fn find_first_position(
+    line: &mut Option<String>,
+    file_content: &mut FileContent,
+    header_def: &HeaderDef,
+) -> usize {
+    let mut begin_pos = 0;
+    if header_def.skip_line_pattern.is_some() {
+        // the format expect to find lines to be skipped
+        while line
+            .as_ref()
+            .map(|l| !header_def.is_skip_line(l))
+            .unwrap_or(false)
+        {
+            begin_pos = file_content.pos;
+            *line = file_content.next_line();
+        }
+
+        // at least we have found the line to skip, or we are the end of the file
+        // this time we are going to skip next lines if they match the skip pattern
+        while line
+            .as_ref()
+            .map(|l| header_def.is_skip_line(l))
+            .unwrap_or(false)
+        {
+            begin_pos = file_content.pos;
+            *line = file_content.next_line();
+        }
+
+        // After skipping everything we are at the end of the file
+        // Header has to be at the file beginning
+        if line.is_none() {
+            begin_pos = 0;
+            file_content.reset();
+            *line = file_content.next_line();
+        }
+    }
+    begin_pos
+}
+
+fn existing_header(
+    line: &mut Option<String>,
+    file_content: &mut FileContent,
+    header_def: &HeaderDef,
+    keywords: &[String],
+) -> bool {
+    // skip blank lines
+    while line.as_ref().map(|l| l.trim().is_empty()).unwrap_or(false) {
+        *line = file_content.next_line();
+    }
+
+    // check if there is already a header
+    let l = match line.as_ref() {
+        Some(l) if header_def.is_first_header_line(l) => l,
+        _ => return false,
+    };
+
+    let mut got_header = false;
+    let mut in_place_header = String::new();
+    in_place_header.push_str(&l.to_lowercase());
+
+    *line = file_content.next_line();
+
+    // skip blank lines before header text
+    if header_def.allow_blank_lines {
+        while line.as_ref().map(|l| l.trim().is_empty()).unwrap_or(false) {
+            *line = file_content.next_line();
+        }
+    }
+
+    // first header detected line & potential blank lines have been detected
+    // following lines should be header lines
+    if let Some(l) = line.as_ref() {
+        in_place_header.push_str(&l.to_lowercase());
+
+        let before = {
+            let mut before = header_def.before_each_line.trim_end();
+            if before.is_empty() && !header_def.multiple_lines {
+                before = header_def.before_each_line.as_str();
+            }
+            before
+        };
+
+        let found_end = {
+            let mut found_end = false;
+            if (header_def.multiple_lines && header_def.is_last_header_line(l))
+                || l.trim().is_empty()
+            {
+                found_end = true;
+            } else {
+                loop {
+                    *line = file_content.next_line();
+                    match line.as_ref() {
+                        Some(l) if l.starts_with(before) => {
+                            in_place_header.push_str(&l.to_lowercase());
+                            if header_def.multiple_lines && header_def.is_last_header_line(l) {
+                                found_end = true;
+                                break;
+                            }
+                        }
+                        _ => break,
+                    }
+                }
+
+                if line.as_ref().map(|l| l.trim().is_empty()).unwrap_or(true) {
+                    found_end = true;
+                }
+            }
+            found_end
+        };
+
+        // skip blank lines after header text
+        if header_def.multiple_lines && header_def.allow_blank_lines && !found_end {
+            loop {
+                *line = file_content.next_line();
+                if !line.as_ref().map(|l| l.trim().is_empty()).unwrap_or(false) {
+                    break;
+                }
+            }
+            file_content.rewind();
+        } else if !header_def.multiple_lines && !found_end {
+            file_content.rewind();
+        }
+
+        if !header_def.multiple_lines {
+            // keep track of the position for headers where the end line is the same as the
+            // before each line
+            let pos = file_content.pos;
+            // check if the line is the end line
+            while line
+                .as_ref()
+                .map(|l| {
+                    !header_def.is_last_header_line(l)
+                        && (header_def.allow_blank_lines || !l.trim().is_empty())
+                        && l.starts_with(before)
+                })
+                .unwrap_or(false)
+            {
+                *line = file_content.next_line();
+            }
+            if line.is_none() {
+                file_content.reset_to(pos);
+            }
+        } else if line.is_some() {
+            // we could end up there if we still have some lines, but not matching "before".
+            // This can be the last line in a multi line header
+            let pos = file_content.pos;
+            *line = file_content.next_line();
+            if line
+                .as_ref()
+                .map(|l| !header_def.is_last_header_line(l))
+                .unwrap_or(true)
+            {
+                file_content.reset_to(pos);
+            }
+        }
+
+        got_header = true;
+        for keyword in keywords {
+            if !in_place_header.contains(keyword) {
+                got_header = false;
+                break;
+            }
+        }
+    }
+    // else - we detected previously a one line comment block that matches the header
+    // detection it is not a header it is a comment
+    got_header
 }
 
 #[derive(Debug)]
@@ -251,9 +263,8 @@ impl FileContent {
                 let mut content = String::new();
                 let mut reader = File::open(file).map(BufReader::new)?;
                 let mut buf = String::new();
-                while let n = reader.read_line(&mut buf)?
-                    && n > 0
-                {
+                let mut n = reader.read_line(&mut buf)?;
+                while n > 0 {
                     if buf.ends_with('\n') {
                         buf.pop();
                         if buf.ends_with('\r') {
@@ -265,6 +276,7 @@ impl FileContent {
                         content.push_str(&buf);
                     }
                     buf.clear();
+                    n = reader.read_line(&mut buf)?;
                 }
                 content
             },
