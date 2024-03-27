@@ -42,7 +42,7 @@ impl Document {
         keywords: &[String],
         properties: HashMap<String, String>,
     ) -> std::io::Result<Self> {
-        let parser = header::parser::parse_header(&filepath, header_def.clone(), keywords)?;
+        let parser = header::parser::parse_header(&filepath, &header_def, keywords)?;
         Ok(Self {
             filepath,
             header_def,

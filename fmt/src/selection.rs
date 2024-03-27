@@ -75,13 +75,17 @@ impl Selection {
 
         let (excludes, reverse_excludes) = {
             let mut excludes = self.excludes;
-            let reverse_excludes = excludes
-                .extract_if(|pat| pat.starts_with('!'))
-                .map(|mut pat| {
+            let mut reverse_excludes = vec![];
+            // [TODO] can be simplified and no clone when extract_if stable
+            excludes.retain_mut(|pat| {
+                if pat.starts_with('!') {
                     pat.remove(0);
-                    pat
-                })
-                .collect::<Vec<_>>();
+                    reverse_excludes.push(pat.clone());
+                    false
+                } else {
+                    true
+                }
+            });
             (excludes, reverse_excludes)
         };
 
