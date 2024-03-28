@@ -15,8 +15,12 @@
 headerPath = "Apache-2.0.txt"
 
 excludes = [
+    # Plain text files AS IS
     "*.txt",
     "**/tests/content/**",
+
+    # Generated files
+    ".github/workflows/release.yml",
 ]
 
 [properties]
