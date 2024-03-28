@@ -221,22 +221,25 @@ fn select_files_with_git(
 
         if file_type.is_dir() {
             if platform.is_excluded() {
-                debug!("skip git ignored directory: {:?}", path);
+                debug!(?path, ?rela_path, "skip git ignored directory");
                 it.skip_current_dir();
                 continue;
             }
-            if matcher.matched(path, file_type.is_dir()).is_ignore() {
-                debug!("skip glob ignored directory: {:?}", path);
+            if matcher.matched(rela_path, file_type.is_dir()).is_ignore() {
+                debug!(?path, ?rela_path, "skip glob ignored directory");
                 it.skip_current_dir();
                 continue;
             }
         } else if file_type.is_file() {
             if platform.is_excluded() {
-                debug!("skip git ignored file: {:?}", path);
+                debug!(?path, ?rela_path, "skip git ignored file");
                 continue;
             }
-            if !matcher.matched(path, file_type.is_dir()).is_whitelist() {
-                debug!("skip glob ignored file: {:?}", path);
+            if !matcher
+                .matched(rela_path, file_type.is_dir())
+                .is_whitelist()
+            {
+                debug!(?path, ?rela_path, "skip glob ignored file");
                 continue;
             }
             result.push(path.to_path_buf());
