@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use snafu::ResultExt;
+
 use crate::config::Config;
+use crate::error::{InvalidConfigSnafu, LoadConfigSnafu};
+use crate::Result;
 
 #[derive(Debug, Clone)]
 pub struct HeaderSource {
@@ -20,14 +24,29 @@ pub struct HeaderSource {
 }
 
 impl HeaderSource {
-    pub fn from_config(config: &Config) -> Option<Self> {
-        config
-            .inline_header
-            .as_ref()
-            .map(|content| HeaderSource {
-                content: content.clone(),
-            })
-            .or_else(|| config.header_path.as_deref().and_then(bundled_headers))
+    pub fn from_config(config: &Config) -> Result<Self> {
+        if let Some(inline_header) = &config.inline_header {
+            return Ok(HeaderSource {
+                content: inline_header.clone(),
+            });
+        }
+
+        if let Some(header_path) = &config.header_path {
+            if let Some(content) = bundled_headers(header_path) {
+                return Ok(content);
+            }
+
+            let mut path = config.base_dir.clone();
+            path.push(header_path);
+            let content = std::fs::read_to_string(header_path)
+                .context(LoadConfigSnafu { name: header_path })?;
+            return Ok(HeaderSource { content });
+        }
+
+        InvalidConfigSnafu {
+            message: "no header source found in config",
+        }
+        .fail()
     }
 }
 

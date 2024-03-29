@@ -71,9 +71,7 @@ pub fn check_license_header<C: Callback>(run_config: PathBuf, callback: &mut C) 
     );
 
     let header_matcher = {
-        let header_source = HeaderSource::from_config(&config).context(InvalidConfigSnafu {
-            message: "no header source found in config",
-        })?;
+        let header_source = HeaderSource::from_config(&config)?;
         HeaderMatcher::new(header_source.content)
     };
 
