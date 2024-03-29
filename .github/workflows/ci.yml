@@ -98,10 +98,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
-      - shell: bash
+      - name: Dog feed license check
+        shell: bash
         run: |
           cargo run --bin hawkeye -- -V
           cargo run --bin hawkeye -- check
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run integration tests
+        shell: bash
+        run: ./tests/it.py
+
   gha:
     # GitHub Actions with Docker is only supported on Linux runners now.
     runs-on: ubuntu-latest
