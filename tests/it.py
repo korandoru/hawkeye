@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Copyright 2024 tison <wander4096@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,20 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-headerPath = "Apache-2.0.txt"
+from pathlib import Path
+import subprocess
 
-excludes = [
-    # Plain text files AS IS
-    "*.txt",
+basedir = Path(__file__).parent.absolute()
+rootdir = basedir.parent
 
-    # Test files
-    "fmt/tests/content/**",
-    "tests/load_header_path/**",
-
-    # Generated files
-    ".github/workflows/release.yml",
-]
-
-[properties]
-inceptionYear = 2024
-copyrightOwner = "tison <wander4096@gmail.com>"
+subprocess.run(["cargo", "build", "--bin", "hawkeye"], cwd=rootdir, check=True)
+hawkeye = rootdir / "target" / "debug" / "hawkeye"
+subprocess.run([hawkeye, "check"], cwd=(basedir / "load_header_path"), check=True)

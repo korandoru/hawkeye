@@ -14,9 +14,11 @@
 
 use snafu::ResultExt;
 
-use crate::config::Config;
-use crate::error::{InvalidConfigSnafu, LoadConfigSnafu};
-use crate::Result;
+use crate::{
+    config::Config,
+    error::{InvalidConfigSnafu, LoadConfigSnafu},
+    Result,
+};
 
 #[derive(Debug, Clone)]
 pub struct HeaderSource {

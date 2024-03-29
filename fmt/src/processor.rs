@@ -17,7 +17,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use snafu::{ensure, OptionExt, ResultExt};
+use snafu::{ensure, ResultExt};
 use tracing::debug;
 
 use crate::{
