@@ -14,7 +14,7 @@
 
 use std::path::{Path, PathBuf};
 
-use clap::Parser;
+use clap::{Args, Parser};
 use hawkeye_fmt::{
     document::Document,
     header::matcher::HeaderMatcher,
@@ -33,6 +33,14 @@ pub enum SubCommand {
     Remove(CommandRemove),
 }
 
+#[derive(Args)]
+struct SharedOptions {
+    #[arg(long, help = "path to the config file")]
+    config: Option<PathBuf>,
+    #[arg(long, help = "fail if process unknown files", default_value_t = false)]
+    fail_if_unknown: bool,
+}
+
 impl SubCommand {
     pub fn run(self) -> Result<()> {
         match self {
@@ -45,8 +53,8 @@ impl SubCommand {
 
 #[derive(Parser)]
 pub struct CommandCheck {
-    #[arg(long, help = "path to the config file")]
-    pub config: Option<PathBuf>,
+    #[command(flatten)]
+    shared: SharedOptions,
 }
 
 struct CheckContext {
@@ -72,18 +80,19 @@ impl Callback for CheckContext {
 
 impl CommandCheck {
     fn run(self) -> Result<()> {
-        let config = self.config.unwrap_or_else(default_config);
+        let config = self.shared.config.unwrap_or_else(default_config);
         let mut context = CheckContext {
             unknown: vec![],
             missing: vec![],
         };
         check_license_header(config, &mut context)?;
-        if !context.unknown.is_empty() {
-            warn!("Processing unknown files: {:?}", context.unknown);
-        }
+        let mut exit_code = check_unknown_files(context.unknown, self.shared.fail_if_unknown);
         if !context.missing.is_empty() {
             error!("Found missing header files: {:?}", context.missing);
-            std::process::exit(1);
+            exit_code = 1;
+        }
+        if exit_code != 0 {
+            std::process::exit(exit_code);
         }
         info!("No missing header file has been found.");
         Ok(())
@@ -92,8 +101,8 @@ impl CommandCheck {
 
 #[derive(Parser)]
 pub struct CommandFormat {
-    #[arg(long, help = "path to the config file")]
-    pub config: Option<PathBuf>,
+    #[command(flatten)]
+    shared: SharedOptions,
 
     #[arg(long, help = "whether update file in place", default_value_t = false)]
     pub dry_run: bool,
@@ -139,22 +148,23 @@ impl Callback for FormatContext {
 
 impl CommandFormat {
     fn run(self) -> Result<()> {
-        let config = self.config.unwrap_or_else(default_config);
+        let config = self.shared.config.unwrap_or_else(default_config);
         let mut context = FormatContext {
             dry_run: self.dry_run,
             unknown: vec![],
             updated: vec![],
         };
         check_license_header(config, &mut context)?;
-        if !context.unknown.is_empty() {
-            warn!("Processing unknown files: {:?}", context.unknown);
-        }
+        let mut exit_code = check_unknown_files(context.unknown, self.shared.fail_if_unknown);
         if !context.updated.is_empty() {
             error!(
                 "Updated header for files (dryRun={}): {:?}",
                 self.dry_run, context.updated
             );
-            std::process::exit(1);
+            exit_code = 1;
+        }
+        if exit_code != 0 {
+            std::process::exit(exit_code);
         }
         info!("All files have proper header.");
         Ok(())
@@ -163,8 +173,8 @@ impl CommandFormat {
 
 #[derive(Parser)]
 pub struct CommandRemove {
-    #[arg(long, help = "path to the config file")]
-    pub config: Option<PathBuf>,
+    #[command(flatten)]
+    shared: SharedOptions,
 
     #[arg(long, help = "whether update file in place", default_value_t = false)]
     pub dry_run: bool,
@@ -212,26 +222,39 @@ impl Callback for RemoveContext {
 
 impl CommandRemove {
     fn run(self) -> Result<()> {
-        let config = self.config.unwrap_or_else(default_config);
+        let config = self.shared.config.unwrap_or_else(default_config);
         let mut context = RemoveContext {
             dry_run: self.dry_run,
             unknown: vec![],
             removed: vec![],
         };
         check_license_header(config, &mut context)?;
-        if !context.unknown.is_empty() {
-            warn!("Processing unknown files: {:?}", context.unknown);
-        }
+        let mut exit_code = check_unknown_files(context.unknown, self.shared.fail_if_unknown);
         if !context.removed.is_empty() {
             error!(
                 "Removed header for files (dryRun={}): {:?}",
                 self.dry_run, context.removed
             );
-            std::process::exit(1);
+            exit_code = 1;
+        }
+        if exit_code != 0 {
+            std::process::exit(exit_code);
         }
         info!("No file has been removed header.");
         Ok(())
     }
+}
+
+fn check_unknown_files(unknown: Vec<String>, fail_if_unknown: bool) -> i32 {
+    if !unknown.is_empty() {
+        if fail_if_unknown {
+            error!("Processing unknown files: {:?}", unknown);
+            return 1;
+        } else {
+            warn!("Processing unknown files: {:?}", unknown);
+        }
+    }
+    0
 }
 
 fn default_config() -> PathBuf {
