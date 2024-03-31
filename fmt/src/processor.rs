@@ -78,6 +78,7 @@ pub fn check_license_header<C: Callback>(run_config: PathBuf, callback: &mut C) 
     let selected_files = {
         let selection = Selection::new(
             basedir,
+            config.header_path.as_ref(),
             &config.includes,
             &config.excludes,
             config.use_default_excludes,
