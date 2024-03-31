@@ -21,4 +21,4 @@ rootdir = basedir.parent
 
 subprocess.run(["cargo", "build", "--bin", "hawkeye"], cwd=rootdir, check=True)
 hawkeye = rootdir / "target" / "debug" / "hawkeye"
-subprocess.run([hawkeye, "check"], cwd=(basedir / "load_header_path"), check=True)
+subprocess.run([hawkeye, "check", "--fail-if-unknown"], cwd=(basedir / "load_header_path"), check=True)

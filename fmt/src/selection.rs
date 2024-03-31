@@ -39,6 +39,7 @@ pub struct Selection {
 impl Selection {
     pub fn new(
         basedir: PathBuf,
+        header_path: Option<&String>,
         includes: &[String],
         excludes: &[String],
         use_default_excludes: bool,
@@ -50,12 +51,15 @@ impl Selection {
             includes.to_vec()
         };
 
-        let used_default_excludes = if use_default_excludes {
-            EXCLUDES.iter().map(|s| s.to_string()).collect()
-        } else {
-            vec![]
-        };
-        let excludes = [used_default_excludes, excludes.to_vec()].concat();
+        let input_excludes = excludes;
+        let mut excludes = vec![];
+        if let Some(path) = header_path.cloned() {
+            excludes.push(path);
+        }
+        if use_default_excludes {
+            excludes.extend(EXCLUDES.iter().map(ToString::to_string));
+        }
+        excludes.extend(input_excludes.to_vec());
 
         Selection {
             basedir,
