@@ -157,7 +157,7 @@ impl CommandFormat {
         check_license_header(config, &mut context)?;
         let mut exit_code = check_unknown_files(context.unknown, self.shared.fail_if_unknown);
         if !context.updated.is_empty() {
-            error!(
+            warn!(
                 "Updated header for files (dryRun={}): {:?}",
                 self.dry_run, context.updated
             );
@@ -231,7 +231,7 @@ impl CommandRemove {
         check_license_header(config, &mut context)?;
         let mut exit_code = check_unknown_files(context.unknown, self.shared.fail_if_unknown);
         if !context.removed.is_empty() {
-            error!(
+            warn!(
                 "Removed header for files (dryRun={}): {:?}",
                 self.dry_run, context.removed
             );
