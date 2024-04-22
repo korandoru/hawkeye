@@ -26,7 +26,7 @@ inputs:
     default: licenserc.toml
   mode:
     description: |
-      Which mode License Eye should be run in. Choices are `check` or `fix`. The
+      Which mode License Eye should be run in. Choices are `check`, `format`, or `remove`. The
       default value is `check`.
     required: false
     default: check
