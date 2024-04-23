@@ -86,7 +86,7 @@ jobs:
           cp action.yml action.yml.bak
           docker image inspect hawkeye:ci --format='{{.Size}}'
           docker run --rm -v $(pwd):/github/workspace hawkeye:ci -V
-          docker run --rm -v $(pwd):/github/workspace hawkeye:ci check
+          docker run --rm -v $(pwd):/github/workspace hawkeye:ci check --fail-if-unknown
 
   smoke:
     strategy:
@@ -102,7 +102,7 @@ jobs:
         shell: bash
         run: |
           cargo run --bin hawkeye -- -V
-          cargo run --bin hawkeye -- check
+          cargo run --bin hawkeye -- check --fail-if-unknown
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -120,6 +120,8 @@ jobs:
         run: >
           perl -p -i -e 's/image: (?:.*)$/image: Dockerfile/g' action.yml
       - uses: ./
+        with:
+          args: --fail-if-unknown
 
   required:
     name: Required

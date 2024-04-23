@@ -30,6 +30,12 @@ inputs:
       default value is `check`.
     required: false
     default: check
+  args:
+    description: |
+      Other arguments to be passed to the command, such as `--dry-run`, `--fail-if-unknown`,
+      `--fail-if-updated`, etc. The default value is empty.
+    required: false
+    default: ''
 
 runs:
   using: docker
@@ -38,3 +44,4 @@ runs:
     - ${{ inputs.mode }}
     - --config
     - ${{ inputs.config }}
+    - ${{ inputs.args }}
