@@ -119,9 +119,12 @@ jobs:
       - name: Use Local Docker Image
         run: >
           perl -p -i -e 's/image: (?:.*)$/image: Dockerfile/g' action.yml
-      - uses: ./
+      - name: Check and fail if unknown
+        uses: ./
         with:
           args: --fail-if-unknown
+      - name: Check default config works
+        uses: ./
 
   required:
     name: Required
