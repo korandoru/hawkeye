@@ -35,7 +35,6 @@ inputs:
       Other arguments to be passed to the command, such as `--dry-run`, `--fail-if-unknown`,
       `--fail-if-updated`, etc. The default value is empty.
     required: false
-    default: ''
 
 runs:
   using: docker
