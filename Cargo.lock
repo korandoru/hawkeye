@@ -870,7 +870,7 @@ dependencies = [
 
 [[package]]
 name = "hawkeye"
-version = "5.4.0"
+version = "5.5.0"
 dependencies = [
  "build-data",
  "clap",
@@ -882,7 +882,7 @@ dependencies = [
 
 [[package]]
 name = "hawkeye-fmt"
-version = "5.4.0"
+version = "5.5.0"
 dependencies = [
  "gix",
  "ignore",
