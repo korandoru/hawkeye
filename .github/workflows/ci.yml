@@ -111,17 +111,20 @@ jobs:
         run: ./tests/it.py
 
   gha:
-    # GitHub Actions with Docker is only supported on Linux runners now.
-    runs-on: ubuntu-latest
-    name: Smoke test for GitHub Actions
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    name: Smoke test for GitHub Actions on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - name: Use Local Docker Image
-        run: >
-          perl -p -i -e 's/image: (?:.*)$/image: Dockerfile/g' action.yml
-      - uses: ./
+      - name: Check and fail if unknown
+        uses: ./
         with:
           args: --fail-if-unknown
+      - name: Check default config works
+        uses: ./
 
   required:
     name: Required

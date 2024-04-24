@@ -38,8 +38,7 @@ tracing = "0.1.40"
 sign-tag = true
 shared-version = true
 tag-name = "v{{version}}"
-# Use release.py to replace content in action.yml now; so this commit is made ther.
-#pre-release-commit-message = "chore: release v{{version}}"
+pre-release-commit-message = "chore: release v{{version}}"
 
 [workspace.metadata.dist]
 cargo-dist-version = "0.12.0"
