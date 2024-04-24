@@ -41,6 +41,4 @@ runs:
   image: docker://ghcr.io/korandoru/hawkeye:edge
   args:
     - ${{ inputs.mode }}
-    - --config
-    - ${{ inputs.config }}
-    - ${{ inputs.args }}
+    - --config ${{ inputs.config }} ${{ inputs.args }}
