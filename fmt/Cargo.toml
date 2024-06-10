@@ -23,7 +23,7 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-gix = { version = "0.61", default-features = false, features = ["excludes"] }
+gix = { version = "0.63", default-features = false, features = ["excludes"] }
 ignore = "0.4.22"
 regex = "1.10.3"
 serde = { version = "1.0.197", features = ["derive"] }

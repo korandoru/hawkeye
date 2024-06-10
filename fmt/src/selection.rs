@@ -219,8 +219,13 @@ fn select_files_with_git(
         let rela_path = path
             .strip_prefix(&workdir)
             .expect("git repository encloses iteration");
+        let mode = Some(if file_type.is_dir() {
+            gix::index::entry::Mode::DIR
+        } else {
+            gix::index::entry::Mode::FILE
+        });
         let platform = excludes
-            .at_path(rela_path, Some(file_type.is_dir()))
+            .at_path(rela_path, mode)
             .context(GixCheckExcludeOpSnafu)?;
 
         if file_type.is_dir() {
