@@ -18,9 +18,9 @@ use gix::Repository;
 use snafu::IntoError;
 use tracing::info;
 
-use crate::config::FeatureGate;
 use crate::{
     config,
+    config::FeatureGate,
     error::{GixDiscoverOpSnafu, InvalidConfigSnafu},
     Result,
 };

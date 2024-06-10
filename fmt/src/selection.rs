@@ -19,12 +19,12 @@ use snafu::{ensure, ResultExt};
 use tracing::debug;
 use walkdir::WalkDir;
 
-use crate::git::GitContext;
 use crate::{
     error::{
         GixCheckExcludeOpSnafu, GixExcludeOpSnafu, ResolveAbsolutePathSnafu, SelectFilesSnafu,
         SelectWithIgnoreSnafu, TraverseDirSnafu,
     },
+    git::GitContext,
     Result,
 };
 

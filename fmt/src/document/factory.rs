@@ -12,16 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use snafu::ResultExt;
-use std::borrow::Cow;
 use std::{
+    borrow::Cow,
     collections::{HashMap, HashSet},
     path::Path,
 };
 
-use crate::error::CreateDocumentSnafu;
-use crate::Result;
-use crate::{config::Mapping, document::Document, header::model::HeaderDef};
+use snafu::ResultExt;
+
+use crate::{
+    config::Mapping, document::Document, error::CreateDocumentSnafu, git::GitContext,
+    header::model::HeaderDef, Result,
+};
 
 pub struct DocumentFactory {
     mapping: HashSet<Mapping>,
@@ -29,6 +31,7 @@ pub struct DocumentFactory {
     properties: HashMap<String, String>,
 
     keywords: Vec<String>,
+    git_context: GitContext,
 }
 
 impl DocumentFactory {
@@ -37,12 +40,14 @@ impl DocumentFactory {
         definitions: HashMap<String, HeaderDef>,
         properties: HashMap<String, String>,
         keywords: Vec<String>,
+        git_context: GitContext,
     ) -> Self {
         Self {
             mapping,
             definitions,
             properties,
             keywords,
+            git_context,
         }
     }
 
@@ -72,6 +77,7 @@ impl DocumentFactory {
             .unwrap_or_else(|| Cow::Borrowed("<unknown>"))
             .to_string();
         properties.insert("hawkeye.core.filename".to_string(), filename);
+        properties.extend(resolve_git_file_attrs(&self.git_context, filepath)?);
 
         Document::new(
             filepath.to_path_buf(),
@@ -80,4 +86,16 @@ impl DocumentFactory {
             properties,
         )
     }
+}
+
+fn resolve_git_file_attrs(
+    _git_context: &GitContext,
+    _path: &Path,
+) -> Result<HashMap<String, String>> {
+    let properties = HashMap::new();
+
+    // TODO - implement these:
+    //   properties.insert("hawkeye.git.file_created".to_string(), ...);
+    //   properties.insert("hawkeye.git.file_modified".to_string(), ...);
+    Ok(properties)
 }

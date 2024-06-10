@@ -17,11 +17,13 @@ use std::{collections::HashMap, fs, fs::File, io::BufRead, path::PathBuf};
 use snafu::ResultExt;
 use tracing::debug;
 
-use crate::error::CreateDocumentSnafu;
-use crate::header::parser::{parse_header, FileContent};
 use crate::{
-    error::SaveDocumentSnafu,
-    header::{matcher::HeaderMatcher, model::HeaderDef, parser::HeaderParser},
+    error::{CreateDocumentSnafu, SaveDocumentSnafu},
+    header::{
+        matcher::HeaderMatcher,
+        model::HeaderDef,
+        parser::{parse_header, FileContent, HeaderParser},
+    },
     Result,
 };
 

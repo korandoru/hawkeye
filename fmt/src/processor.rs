@@ -68,6 +68,7 @@ pub fn check_license_header<C: Callback>(run_config: PathBuf, callback: &mut C) 
     );
 
     let git_context = git::discover(&basedir, config.git)?;
+
     let selected_files = {
         let selection = Selection::new(
             basedir,
@@ -75,7 +76,7 @@ pub fn check_license_header<C: Callback>(run_config: PathBuf, callback: &mut C) 
             &config.includes,
             &config.excludes,
             config.use_default_excludes,
-            git_context,
+            git_context.clone(),
         );
         selection.select()?
     };
@@ -107,8 +108,13 @@ pub fn check_license_header<C: Callback>(run_config: PathBuf, callback: &mut C) 
         HeaderMatcher::new(header_source.content)
     };
 
-    let document_factory =
-        DocumentFactory::new(mapping, definitions, config.properties, config.keywords);
+    let document_factory = DocumentFactory::new(
+        mapping,
+        definitions,
+        config.properties,
+        config.keywords,
+        git_context,
+    );
 
     for file in selected_files {
         let document = match document_factory.create_document(&file)? {
