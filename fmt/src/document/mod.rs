@@ -15,10 +15,12 @@
 use std::{borrow::Cow, collections::HashMap, fs, fs::File, io::BufRead, path::PathBuf};
 
 use snafu::ResultExt;
+use tracing::debug;
 
+use crate::error::CreateDocumentSnafu;
+use crate::header::parser::{parse_header, FileContent};
 use crate::{
     error::SaveDocumentSnafu,
-    header,
     header::{matcher::HeaderMatcher, model::HeaderDef, parser::HeaderParser},
     Result,
 };
@@ -41,14 +43,25 @@ impl Document {
         header_def: HeaderDef,
         keywords: &[String],
         properties: HashMap<String, String>,
-    ) -> std::io::Result<Self> {
-        let parser = header::parser::parse_header(&filepath, &header_def, keywords)?;
-        Ok(Self {
-            filepath,
-            header_def,
-            properties,
-            parser,
-        })
+    ) -> Result<Option<Self>> {
+        match FileContent::new(&filepath) {
+            Ok(content) => Ok(Some(Self {
+                filepath,
+                header_def,
+                properties,
+                parser: parse_header(content, &header_def, keywords),
+            })),
+            Err(e) => {
+                if matches!(e.kind(), std::io::ErrorKind::InvalidData) {
+                    debug!("skip non-textual file: {}", filepath.display());
+                    Ok(None)
+                } else {
+                    Err(e).context(CreateDocumentSnafu {
+                        path: filepath.display().to_string(),
+                    })
+                }
+            }
+        }
     }
 
     pub fn is_unsupported(&self) -> bool {

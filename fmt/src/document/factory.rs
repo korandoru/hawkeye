@@ -17,6 +17,7 @@ use std::{
     path::Path,
 };
 
+use crate::Result;
 use crate::{config::Mapping, document::Document, header::model::HeaderDef};
 
 pub struct DocumentFactory {
@@ -42,7 +43,7 @@ impl DocumentFactory {
         }
     }
 
-    pub fn create_document(&self, filepath: &Path) -> std::io::Result<Document> {
+    pub fn create_document(&self, filepath: &Path) -> Result<Option<Document>> {
         let lower_file_name = filepath
             .file_name()
             .map(|n| n.to_string_lossy().to_lowercase())
