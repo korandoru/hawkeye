@@ -60,5 +60,10 @@ macro_rules! match_bundled_headers {
 }
 
 fn bundled_headers(name: &str) -> Option<HeaderSource> {
-    match_bundled_headers!(name, "Apache-2.0.txt", "Apache-2.0-ASF.txt")
+    match_bundled_headers!(
+        name,
+        "Apache-2.0.txt",
+        "Apache-2.0-ASF.txt",
+        "Elastic-2.0.txt"
+    )
 }
