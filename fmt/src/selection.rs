@@ -19,21 +19,20 @@ use snafu::{ensure, ResultExt};
 use tracing::debug;
 use walkdir::WalkDir;
 
+use crate::git::GitContext;
 use crate::{
-    config,
     error::{
         GixCheckExcludeOpSnafu, GixExcludeOpSnafu, ResolveAbsolutePathSnafu, SelectFilesSnafu,
         SelectWithIgnoreSnafu, TraverseDirSnafu,
     },
-    git, Result,
+    Result,
 };
 
 pub struct Selection {
     basedir: PathBuf,
     includes: Vec<String>,
     excludes: Vec<String>,
-
-    git: config::Git,
+    git_context: GitContext,
 }
 
 impl Selection {
@@ -43,7 +42,7 @@ impl Selection {
         includes: &[String],
         excludes: &[String],
         use_default_excludes: bool,
-        git: config::Git,
+        git_context: GitContext,
     ) -> Selection {
         let includes = if includes.is_empty() {
             INCLUDES.iter().map(|s| s.to_string()).collect()
@@ -65,7 +64,7 @@ impl Selection {
             basedir,
             includes,
             excludes,
-            git,
+            git_context,
         }
     }
 
@@ -101,13 +100,14 @@ impl Selection {
             },
         );
 
-        let result = match git::discover(&self.basedir, self.git)? {
+        let ignore = self.git_context.config.ignore.is_auto();
+        let result = match self.git_context.repo {
             None => select_files_with_ignore(
                 &self.basedir,
                 &includes,
                 &excludes,
                 &reverse_excludes,
-                self.git.ignore.is_auto(),
+                ignore,
             )?,
             Some(repo) => {
                 select_files_with_git(&self.basedir, &includes, &excludes, &reverse_excludes, repo)?

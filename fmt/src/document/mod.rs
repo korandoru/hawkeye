@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{borrow::Cow, collections::HashMap, fs, fs::File, io::BufRead, path::PathBuf};
+use std::{collections::HashMap, fs, fs::File, io::BufRead, path::PathBuf};
 
 use snafu::ResultExt;
 use tracing::debug;
@@ -46,10 +46,10 @@ impl Document {
     ) -> Result<Option<Self>> {
         match FileContent::new(&filepath) {
             Ok(content) => Ok(Some(Self {
+                parser: parse_header(content, &header_def, keywords),
                 filepath,
                 header_def,
                 properties,
-                parser: parse_header(content, &header_def, keywords),
             })),
             Err(e) => {
                 if matches!(e.kind(), std::io::ErrorKind::InvalidData) {
@@ -145,15 +145,7 @@ impl Document {
     }
 
     pub(crate) fn merge_properties(&self, s: &str) -> String {
-        let mut properties = self.properties.clone();
-        let filename = self
-            .filepath
-            .file_name()
-            .map(|s| s.to_string_lossy())
-            .unwrap_or_else(|| Cow::Borrowed("<unknown>"))
-            .to_string();
-        properties.insert("hawkeye.core.filename".to_string(), filename);
-        merge_properties(&properties, s)
+        merge_properties(&self.properties, s)
     }
 }
 

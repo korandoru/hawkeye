@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use snafu::ResultExt;
+use std::borrow::Cow;
 use std::{
     collections::{HashMap, HashSet},
     path::Path,
 };
 
+use crate::error::CreateDocumentSnafu;
 use crate::Result;
 use crate::{config::Mapping, document::Document, header::model::HeaderDef};
 
@@ -57,13 +60,24 @@ impl DocumentFactory {
         let header_def = self
             .definitions
             .get(&header_type)
-            .ok_or_else(|| std::io::Error::other(format!("header type {header_type} not found")))?;
+            .ok_or_else(|| std::io::Error::other(format!("header type {header_type} not found")))
+            .context(CreateDocumentSnafu {
+                path: filepath.display().to_string(),
+            })?;
+
+        let mut properties = self.properties.clone();
+        let filename = filepath
+            .file_name()
+            .map(|s| s.to_string_lossy())
+            .unwrap_or_else(|| Cow::Borrowed("<unknown>"))
+            .to_string();
+        properties.insert("hawkeye.core.filename".to_string(), filename);
 
         Document::new(
             filepath.to_path_buf(),
             header_def.clone(),
             &self.keywords,
-            self.properties.clone(),
+            properties,
         )
     }
 }

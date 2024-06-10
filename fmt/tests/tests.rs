@@ -14,8 +14,8 @@
 
 use std::path::Path;
 
-use hawkeye_fmt::header::{model::default_headers, parser::parse_header};
 use hawkeye_fmt::header::parser::FileContent;
+use hawkeye_fmt::header::{model::default_headers, parser::parse_header};
 
 #[test]
 fn test_remove_file_only_header() {
@@ -24,8 +24,8 @@ fn test_remove_file_only_header() {
     let def = defs.get("script_style").unwrap().clone();
     let keywords = vec!["copyright".to_string()];
 
-    let file_content = FileContent::new(file)?;
-    let document = parse_header(file_content, &def, &keywords).unwrap();
+    let file_content = FileContent::new(file).unwrap();
+    let document = parse_header(file_content, &def, &keywords);
     let end_pos = document.end_pos.unwrap();
     let content = document.file_content.content();
     assert!(content[end_pos..].trim().is_empty());
@@ -38,8 +38,8 @@ fn test_two_headers_should_only_remove_the_first() {
     let def = defs.get("doubleslash_style").unwrap().clone();
     let keywords = vec!["copyright".to_string()];
 
-    let file_content = FileContent::new(file)?;
-    let document = parse_header(file_content, &def, &keywords).unwrap();
+    let file_content = FileContent::new(file).unwrap();
+    let document = parse_header(file_content, &def, &keywords);
     let end_pos = document.end_pos.unwrap();
     let content = document.file_content.content();
     assert!(content[end_pos..].contains("Copyright 2015 The Prometheus Authors"));

@@ -23,6 +23,7 @@ use crate::{
     config::Config,
     document::{factory::DocumentFactory, model::default_mapping, Document},
     error::{DeserializeSnafu, InvalidConfigSnafu, LoadConfigSnafu, TryMatchHeaderSnafu},
+    git,
     header::{
         matcher::HeaderMatcher,
         model::{default_headers, deserialize_header_definitions},
@@ -66,11 +67,7 @@ pub fn check_license_header<C: Callback>(run_config: PathBuf, callback: &mut C) 
         }
     );
 
-    let header_matcher = {
-        let header_source = HeaderSource::from_config(&config)?;
-        HeaderMatcher::new(header_source.content)
-    };
-
+    let git_context = git::discover(&basedir, config.git)?;
     let selected_files = {
         let selection = Selection::new(
             basedir,
@@ -78,13 +75,13 @@ pub fn check_license_header<C: Callback>(run_config: PathBuf, callback: &mut C) 
             &config.includes,
             &config.excludes,
             config.use_default_excludes,
-            config.git,
+            git_context,
         );
         selection.select()?
     };
 
     let mapping = {
-        let mut mapping = config.mapping;
+        let mut mapping = config.mapping.clone();
         if config.use_default_mapping {
             let default_mapping = default_mapping();
             mapping.extend(default_mapping);
@@ -103,6 +100,11 @@ pub fn check_license_header<C: Callback>(run_config: PathBuf, callback: &mut C) 
             defs.extend(additional_defs);
         }
         defs
+    };
+
+    let header_matcher = {
+        let header_source = HeaderSource::from_config(&config)?;
+        HeaderMatcher::new(header_source.content)
     };
 
     let document_factory =

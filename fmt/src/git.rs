@@ -18,41 +18,67 @@ use gix::Repository;
 use snafu::IntoError;
 use tracing::info;
 
+use crate::config::FeatureGate;
 use crate::{
     config,
     error::{GixDiscoverOpSnafu, InvalidConfigSnafu},
     Result,
 };
 
-pub fn discover(basedir: &Path, config: config::Git) -> Result<Option<Repository>> {
-    if config.ignore.is_disable() {
-        return Ok(None);
+#[derive(Debug, Clone)]
+pub struct GitContext {
+    pub repo: Option<Repository>,
+    pub config: config::Git,
+}
+
+pub fn discover(basedir: &Path, config: config::Git) -> Result<GitContext> {
+    let feature = resolve_features(&config);
+
+    if feature.is_disable() {
+        return Ok(GitContext { repo: None, config });
     }
 
-    let is_auto = config.ignore.is_auto();
     match gix::discover(basedir) {
         Ok(repo) => match repo.worktree() {
             None => {
                 let message = "bare repository detected";
-                if is_auto {
-                    info!("git.ignore=auto is resolved to fallback; {message}");
-                    Ok(None)
+                if feature.is_auto() {
+                    info!(?config, "git config is resolved to disabled; {message}");
+                    Ok(GitContext { repo: None, config })
                 } else {
                     InvalidConfigSnafu { message }.fail()
                 }
             }
             Some(_) => {
-                info!("git.ignore=auto is resolved to enabled");
-                Ok(Some(repo))
+                info!("git config is resolved to enabled");
+                Ok(GitContext {
+                    repo: Some(repo),
+                    config,
+                })
             }
         },
         Err(err) => {
-            if is_auto {
-                info!(?err, "git.ignore=auto is resolved to disabled");
-                Ok(None)
+            if feature.is_auto() {
+                info!(?err, ?config, "git config is resolved to disabled");
+                Ok(GitContext { repo: None, config })
             } else {
                 Err(GixDiscoverOpSnafu {}.into_error(Box::new(err)))
             }
         }
     }
+}
+
+fn resolve_features(config: &config::Git) -> FeatureGate {
+    let features = [config.attrs, config.ignore];
+    for feature in features.iter() {
+        if feature.is_enable() {
+            return FeatureGate::Enable;
+        }
+    }
+    for feature in features.iter() {
+        if feature.is_auto() {
+            return FeatureGate::Auto;
+        }
+    }
+    FeatureGate::Disable
 }

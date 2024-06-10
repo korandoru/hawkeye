@@ -56,6 +56,7 @@ pub struct Config {
 
 #[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
 pub struct Git {
+    pub attrs: FeatureGate,
     pub ignore: FeatureGate,
 }
 
