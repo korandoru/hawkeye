@@ -106,17 +106,17 @@ pub fn resolve_file_attrs(repo: &Repository) -> anyhow::Result<HashMap<String, G
     let mut cache = repo.diff_resource_cache(mode, Default::default())?;
 
     let head = repo.head_commit()?;
-    let mut prev_tree = head.tree()?;
+    let mut prev_commit = head.clone();
 
-    let sorting = gix::traverse::commit::simple::Sorting::ByCommitTimeNewestFirst;
-    for info in head.ancestors().sorting(sorting).all()? {
+    for info in head.ancestors().all()? {
         let info = info?;
-        let time = gix::date::Time::new(info.commit_time(), 0);
+        let this_commit = info.object()?;
+        let time = this_commit.time()?;
 
-        let tree = info.id().object()?.peel_to_tree()?;
+        let tree = this_commit.tree()?;
         let mut changes = tree.changes()?;
         changes.track_path().for_each_to_obtain_tree_with_cache(
-            &prev_tree,
+            &prev_commit.tree()?,
             &mut cache,
             |change| {
                 let filepath = workdir.join(change.location.to_string());
@@ -141,7 +141,7 @@ pub fn resolve_file_attrs(repo: &Repository) -> anyhow::Result<HashMap<String, G
                 Ok::<_, Infallible>(Default::default())
             },
         )?;
-        prev_tree = tree;
+        prev_commit = this_commit;
         cache.clear_resource_cache();
     }
 
