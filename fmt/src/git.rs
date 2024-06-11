@@ -111,6 +111,8 @@ pub fn resolve_file_attrs(repo: &Repository) -> anyhow::Result<HashMap<String, G
     for info in head.ancestors().all()? {
         let info = info?;
         let this_commit = info.object()?;
+        let time = this_commit.time()?;
+
         let tree = this_commit.tree()?;
         let mut changes = tree.changes()?;
         changes.track_path().for_each_to_obtain_tree_with_cache(
@@ -120,7 +122,6 @@ pub fn resolve_file_attrs(repo: &Repository) -> anyhow::Result<HashMap<String, G
                 let filepath = workdir.join(change.location.to_string());
                 let filepath = filepath.display().to_string();
 
-                let time = this_commit.time().expect("commit always has time");
                 match attrs.entry(filepath) {
                     Entry::Occupied(mut ent) => {
                         let attrs: &GitFileAttrs = ent.get();

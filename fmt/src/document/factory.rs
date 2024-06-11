@@ -22,7 +22,7 @@ use std::{
 };
 
 use snafu::ResultExt;
-use time::format_description;
+use time::{format_description, format_description::FormatItem};
 
 use crate::{
     config::Mapping, document::Document, error::CreateDocumentSnafu, git::GitFileAttrs,
@@ -36,6 +36,7 @@ pub struct DocumentFactory {
 
     keywords: Vec<String>,
     git_file_attrs: HashMap<String, GitFileAttrs>,
+    year_formatter: Vec<FormatItem<'static>>,
 }
 
 impl DocumentFactory {
@@ -46,12 +47,14 @@ impl DocumentFactory {
         keywords: Vec<String>,
         git_file_attrs: HashMap<String, GitFileAttrs>,
     ) -> Self {
+        let year_formatter = format_description::parse("[year]").expect("cannot parse format");
         Self {
             mapping,
             definitions,
             properties,
             keywords,
             git_file_attrs,
+            year_formatter,
         }
     }
 
@@ -83,18 +86,17 @@ impl DocumentFactory {
             .to_string();
         properties.insert("hawkeye.core.filename".to_string(), filename);
 
-        let year_formatter = format_description::parse("[year]").expect("cannot parse format");
         if let Some(attrs) = self
             .git_file_attrs
             .get(filepath.to_str().expect("path is never empty"))
         {
             properties.insert(
                 "hawkeye.git.fileCreatedYear".to_string(),
-                attrs.created_time.format(year_formatter.as_slice()),
+                attrs.created_time.format(self.year_formatter.as_slice()),
             );
             properties.insert(
                 "hawkeye.git.fileModifiedYear".to_string(),
-                attrs.modified_time.format(year_formatter.as_slice()),
+                attrs.modified_time.format(self.year_formatter.as_slice()),
             );
         }
 
