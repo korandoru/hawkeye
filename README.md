@@ -180,9 +180,18 @@ inceptionYear = 2023
 # 'auto' means this feature tries to be enabled with:
 #   * gix - if `basedir` is in a Git repository.
 #   * ignore crate's gitignore rules - if `basedir` is not in a Git repository.
-# 'enabled' means always enabled with gix; failed if it is impossible.
+# 'enable' means always enabled with gix; failed if it is impossible.
 # default: 'auto'
 ignore = 'auto'
+# If enabled, populate file attrs determinated by Git; possible value: ['auto', 'enable', 'disable']
+# Attributes contains:
+#   * 'hawkeye.git.fileCreatedYear'
+#   * 'hawkeye.git.fileModifiedYear'
+# 'auto' means this feature tries to be enabled with:
+#   * gix - if `basedir` is in a Git repository.
+# 'enable' means always enabled with gix; failed if it is impossible.
+# default: 'disable'
+attrs = 'disable'
 ```
 
 ### Header style file
