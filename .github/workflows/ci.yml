@@ -69,6 +69,8 @@ jobs:
     name: Docker sanity check on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          depth: 0
       - name: Build and load
         uses: docker/build-push-action@v5
         with:
@@ -99,6 +101,8 @@ jobs:
     name: Smoke test on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          depth: 0
       - uses: Swatinem/rust-cache@v2
       - name: Dog feed license check
         shell: bash
@@ -121,6 +125,8 @@ jobs:
     name: Smoke test for GitHub Actions on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          depth: 0
       - name: Check and fail if unknown
         uses: ./
         with:
