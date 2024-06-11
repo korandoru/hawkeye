@@ -11,6 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
+// SPDX-License-Identifier: Apache-2.0
 
 use snafu::Snafu;
 
@@ -136,6 +139,14 @@ pub enum Error {
     TraverseDir {
         #[snafu(source)]
         source: walkdir::Error,
+        #[snafu(implicit)]
+        loc: snafu::Location,
+    },
+
+    #[snafu(display("cannot obtain file attrs from Git: {}", source))]
+    GitFileAttrs {
+        #[snafu(source)]
+        source: anyhow::Error,
         #[snafu(implicit)]
         loc: snafu::Location,
     },

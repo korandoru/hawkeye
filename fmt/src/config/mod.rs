@@ -11,6 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
+// SPDX-License-Identifier: Apache-2.0
 
 use std::{
     collections::{HashMap, HashSet},
@@ -54,16 +57,25 @@ pub struct Config {
     pub additional_headers: Vec<String>,
 }
 
-#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Git {
+    pub attrs: FeatureGate,
     pub ignore: FeatureGate,
 }
 
-#[derive(Debug, Clone, Copy, Default, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
+impl Default for Git {
+    fn default() -> Self {
+        Git {
+            attrs: FeatureGate::Disable, // expensive
+            ignore: FeatureGate::Auto,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum FeatureGate {
     /// Determinate whether turn on the feature.
-    #[default]
     Auto,
     /// Force enable the feature.
     Enable,

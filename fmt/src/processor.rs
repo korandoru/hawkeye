@@ -11,6 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
+// SPDX-License-Identifier: Apache-2.0
 
 use std::{
     fs,
@@ -18,15 +21,15 @@ use std::{
 };
 
 use snafu::{ensure, ResultExt};
-use tracing::debug;
 
 use crate::{
     config::Config,
     document::{factory::DocumentFactory, model::default_mapping, Document},
     error::{
-        CreateDocumentSnafu, DeserializeSnafu, InvalidConfigSnafu, LoadConfigSnafu,
+        DeserializeSnafu, GitFileAttrsSnafu, InvalidConfigSnafu, LoadConfigSnafu,
         TryMatchHeaderSnafu,
     },
+    git,
     header::{
         matcher::HeaderMatcher,
         model::{default_headers, deserialize_header_definitions},
@@ -70,10 +73,7 @@ pub fn check_license_header<C: Callback>(run_config: PathBuf, callback: &mut C) 
         }
     );
 
-    let header_matcher = {
-        let header_source = HeaderSource::from_config(&config)?;
-        HeaderMatcher::new(header_source.content)
-    };
+    let git_context = git::discover(&basedir, config.git)?;
 
     let selected_files = {
         let selection = Selection::new(
@@ -82,13 +82,13 @@ pub fn check_license_header<C: Callback>(run_config: PathBuf, callback: &mut C) 
             &config.includes,
             &config.excludes,
             config.use_default_excludes,
-            config.git,
+            git_context.clone(),
         );
         selection.select()?
     };
 
     let mapping = {
-        let mut mapping = config.mapping;
+        let mut mapping = config.mapping.clone();
         if config.use_default_mapping {
             let default_mapping = default_mapping();
             mapping.extend(default_mapping);
@@ -109,23 +109,27 @@ pub fn check_license_header<C: Callback>(run_config: PathBuf, callback: &mut C) 
         defs
     };
 
-    let document_factory =
-        DocumentFactory::new(mapping, definitions, config.properties, config.keywords);
+    let header_matcher = {
+        let header_source = HeaderSource::from_config(&config)?;
+        HeaderMatcher::new(header_source.content)
+    };
+
+    let git_file_attrs = git::resolve_file_attrs(git_context).context(GitFileAttrsSnafu)?;
+
+    let document_factory = DocumentFactory::new(
+        mapping,
+        definitions,
+        config.properties,
+        config.keywords,
+        git_file_attrs,
+    );
 
     for file in selected_files {
-        let document = document_factory.create_document(&file);
-        let document = match document {
-            Ok(document) => document,
-            Err(e) => {
-                if matches!(e.kind(), std::io::ErrorKind::InvalidData) {
-                    debug!("skip non-textual file: {}", file.display());
-                    callback.on_unknown(&file)?;
-                    continue;
-                } else {
-                    return Err(e).context(CreateDocumentSnafu {
-                        path: file.display().to_string(),
-                    });
-                }
+        let document = match document_factory.create_document(&file)? {
+            Some(document) => document,
+            None => {
+                callback.on_unknown(&file)?;
+                continue;
             }
         };
 

@@ -11,15 +11,22 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
+// SPDX-License-Identifier: Apache-2.0
 
-use std::{borrow::Cow, collections::HashMap, fs, fs::File, io::BufRead, path::PathBuf};
+use std::{collections::HashMap, fs, fs::File, io::BufRead, path::PathBuf};
 
 use snafu::ResultExt;
+use tracing::debug;
 
 use crate::{
-    error::SaveDocumentSnafu,
-    header,
-    header::{matcher::HeaderMatcher, model::HeaderDef, parser::HeaderParser},
+    error::{CreateDocumentSnafu, SaveDocumentSnafu},
+    header::{
+        matcher::HeaderMatcher,
+        model::HeaderDef,
+        parser::{parse_header, FileContent, HeaderParser},
+    },
     Result,
 };
 
@@ -41,14 +48,25 @@ impl Document {
         header_def: HeaderDef,
         keywords: &[String],
         properties: HashMap<String, String>,
-    ) -> std::io::Result<Self> {
-        let parser = header::parser::parse_header(&filepath, &header_def, keywords)?;
-        Ok(Self {
-            filepath,
-            header_def,
-            properties,
-            parser,
-        })
+    ) -> Result<Option<Self>> {
+        match FileContent::new(&filepath) {
+            Ok(content) => Ok(Some(Self {
+                parser: parse_header(content, &header_def, keywords),
+                filepath,
+                header_def,
+                properties,
+            })),
+            Err(e) => {
+                if matches!(e.kind(), std::io::ErrorKind::InvalidData) {
+                    debug!("skip non-textual file: {}", filepath.display());
+                    Ok(None)
+                } else {
+                    Err(e).context(CreateDocumentSnafu {
+                        path: filepath.display().to_string(),
+                    })
+                }
+            }
+        }
     }
 
     pub fn is_unsupported(&self) -> bool {
@@ -132,15 +150,7 @@ impl Document {
     }
 
     pub(crate) fn merge_properties(&self, s: &str) -> String {
-        let mut properties = self.properties.clone();
-        let filename = self
-            .filepath
-            .file_name()
-            .map(|s| s.to_string_lossy())
-            .unwrap_or_else(|| Cow::Borrowed("<unknown>"))
-            .to_string();
-        properties.insert("hawkeye.core.filename".to_string(), filename);
-        merge_properties(&properties, s)
+        merge_properties(&self.properties, s)
     }
 }
 

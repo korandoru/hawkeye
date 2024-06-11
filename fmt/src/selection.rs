@@ -11,6 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
+// SPDX-License-Identifier: Apache-2.0
 
 use std::path::{Path, PathBuf};
 
@@ -20,20 +23,19 @@ use tracing::debug;
 use walkdir::WalkDir;
 
 use crate::{
-    config,
     error::{
         GixCheckExcludeOpSnafu, GixExcludeOpSnafu, ResolveAbsolutePathSnafu, SelectFilesSnafu,
         SelectWithIgnoreSnafu, TraverseDirSnafu,
     },
-    git, Result,
+    git::GitContext,
+    Result,
 };
 
 pub struct Selection {
     basedir: PathBuf,
     includes: Vec<String>,
     excludes: Vec<String>,
-
-    git: config::Git,
+    git_context: GitContext,
 }
 
 impl Selection {
@@ -43,7 +45,7 @@ impl Selection {
         includes: &[String],
         excludes: &[String],
         use_default_excludes: bool,
-        git: config::Git,
+        git_context: GitContext,
     ) -> Selection {
         let includes = if includes.is_empty() {
             INCLUDES.iter().map(|s| s.to_string()).collect()
@@ -65,7 +67,7 @@ impl Selection {
             basedir,
             includes,
             excludes,
-            git,
+            git_context,
         }
     }
 
@@ -101,13 +103,14 @@ impl Selection {
             },
         );
 
-        let result = match git::discover(&self.basedir, self.git)? {
+        let ignore = self.git_context.config.ignore.is_auto();
+        let result = match self.git_context.repo {
             None => select_files_with_ignore(
                 &self.basedir,
                 &includes,
                 &excludes,
                 &reverse_excludes,
-                self.git.ignore.is_auto(),
+                ignore,
             )?,
             Some(repo) => {
                 select_files_with_git(&self.basedir, &includes, &excludes, &reverse_excludes, repo)?
@@ -219,8 +222,13 @@ fn select_files_with_git(
         let rela_path = path
             .strip_prefix(&workdir)
             .expect("git repository encloses iteration");
+        let mode = Some(if file_type.is_dir() {
+            gix::index::entry::Mode::DIR
+        } else {
+            gix::index::entry::Mode::FILE
+        });
         let platform = excludes
-            .at_path(rela_path, Some(file_type.is_dir()))
+            .at_path(rela_path, mode)
             .context(GixCheckExcludeOpSnafu)?;
 
         if file_type.is_dir() {

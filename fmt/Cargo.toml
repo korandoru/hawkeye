@@ -11,6 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
+# SPDX-License-Identifier: Apache-2.0
 
 [package]
 name = "hawkeye-fmt"
@@ -23,11 +26,16 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-gix = { version = "0.61", default-features = false, features = ["excludes"] }
+anyhow = "1.0"
+gix = { version = "0.63", default-features = false, features = [
+    "blob-diff",
+    "excludes",
+] }
 ignore = "0.4.22"
 regex = "1.10.3"
 serde = { version = "1.0.197", features = ["derive"] }
 snafu.workspace = true
+time = "0.3"
 toml.workspace = true
 tracing.workspace = true
 walkdir = "2.5.0"

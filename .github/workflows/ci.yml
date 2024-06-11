@@ -11,6 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
+# SPDX-License-Identifier: Apache-2.0
 
 name: CI
 on:
@@ -38,7 +41,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: korandoru/hawkeye@v4
       - uses: Swatinem/rust-cache@v2
       - uses: dtolnay/rust-toolchain@nightly
       - name: Check Clippy
@@ -62,11 +64,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, buildjet-4vcpu-ubuntu-2204-arm ]
+        os: [ ubuntu-latest ]
     runs-on: ${{matrix.os}}
     name: Docker sanity check on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Build and load
         uses: docker/build-push-action@v5
         with:
@@ -97,6 +101,8 @@ jobs:
     name: Smoke test on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: Swatinem/rust-cache@v2
       - name: Dog feed license check
         shell: bash
@@ -119,6 +125,8 @@ jobs:
     name: Smoke test for GitHub Actions on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Check and fail if unknown
         uses: ./
         with:

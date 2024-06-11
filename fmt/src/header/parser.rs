@@ -11,6 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
+// SPDX-License-Identifier: Apache-2.0
 
 use std::{
     fmt::{Display, Formatter},
@@ -30,11 +33,10 @@ pub struct HeaderParser {
 }
 
 pub fn parse_header(
-    file: &Path,
+    mut file_content: FileContent,
     header_def: &HeaderDef,
     keywords: &[String],
-) -> std::io::Result<HeaderParser> {
-    let mut file_content = FileContent::new(file)?;
+) -> HeaderParser {
     let mut line = file_content.next_line();
 
     // 1. find begin position
@@ -64,11 +66,11 @@ pub fn parse_header(
         None
     };
 
-    Ok(HeaderParser {
+    HeaderParser {
         begin_pos,
         end_pos,
         file_content,
-    })
+    }
 }
 
 fn find_first_position(
