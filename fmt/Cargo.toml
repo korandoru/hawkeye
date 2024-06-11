@@ -23,11 +23,16 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-gix = { version = "0.63", default-features = false, features = ["excludes"] }
+anyhow = "1.0"
+gix = { version = "0.63", default-features = false, features = [
+    "blob-diff",
+    "excludes",
+] }
 ignore = "0.4.22"
 regex = "1.10.3"
 serde = { version = "1.0.197", features = ["derive"] }
 snafu.workspace = true
+time = "0.3"
 toml.workspace = true
 tracing.workspace = true
 walkdir = "2.5.0"

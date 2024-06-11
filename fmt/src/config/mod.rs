@@ -54,17 +54,25 @@ pub struct Config {
     pub additional_headers: Vec<String>,
 }
 
-#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Git {
     pub attrs: FeatureGate,
     pub ignore: FeatureGate,
 }
 
-#[derive(Debug, Clone, Copy, Default, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
+impl Default for Git {
+    fn default() -> Self {
+        Git {
+            attrs: FeatureGate::Disable, // expensive
+            ignore: FeatureGate::Auto,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum FeatureGate {
     /// Determinate whether turn on the feature.
-    #[default]
     Auto,
     /// Force enable the feature.
     Enable,

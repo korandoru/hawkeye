@@ -139,4 +139,12 @@ pub enum Error {
         #[snafu(implicit)]
         loc: snafu::Location,
     },
+
+    #[snafu(display("cannot obtain file attrs from Git: {}", source))]
+    GitFileAttrs {
+        #[snafu(source)]
+        source: anyhow::Error,
+        #[snafu(implicit)]
+        loc: snafu::Location,
+    },
 }

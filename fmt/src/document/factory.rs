@@ -15,14 +15,20 @@
 use std::{
     borrow::Cow,
     collections::{HashMap, HashSet},
+    convert::Infallible,
     path::Path,
 };
 
 use snafu::ResultExt;
+use time::format_description;
 
 use crate::{
-    config::Mapping, document::Document, error::CreateDocumentSnafu, git::GitContext,
-    header::model::HeaderDef, Result,
+    config::Mapping,
+    document::Document,
+    error::{CreateDocumentSnafu, GitFileAttrsSnafu},
+    git::GitContext,
+    header::model::HeaderDef,
+    Result,
 };
 
 pub struct DocumentFactory {
@@ -71,13 +77,29 @@ impl DocumentFactory {
             })?;
 
         let mut properties = self.properties.clone();
+
         let filename = filepath
             .file_name()
             .map(|s| s.to_string_lossy())
             .unwrap_or_else(|| Cow::Borrowed("<unknown>"))
             .to_string();
         properties.insert("hawkeye.core.filename".to_string(), filename);
-        properties.extend(resolve_git_file_attrs(&self.git_context, filepath)?);
+
+        let year_formatter = format_description::parse("[year]").expect("cannot parse format");
+        let git_file_attrs =
+            resolve_git_file_attrs(&self.git_context, filepath).context(GitFileAttrsSnafu)?;
+        if let Some(time) = git_file_attrs.created_time {
+            properties.insert(
+                "hawkeye.git.fileCreatedYear".to_string(),
+                time.format(year_formatter.as_slice()),
+            );
+        }
+        if let Some(time) = git_file_attrs.modified_time {
+            properties.insert(
+                "hawkeye.git.fileModifiedYear".to_string(),
+                time.format(year_formatter.as_slice()),
+            );
+        }
 
         Document::new(
             filepath.to_path_buf(),
@@ -88,14 +110,56 @@ impl DocumentFactory {
     }
 }
 
-fn resolve_git_file_attrs(
-    _git_context: &GitContext,
-    _path: &Path,
-) -> Result<HashMap<String, String>> {
-    let properties = HashMap::new();
+#[derive(Debug)]
+struct GitFileAttrs {
+    created_time: Option<gix::date::Time>,
+    modified_time: Option<gix::date::Time>,
+}
 
-    // TODO - implement these:
-    //   properties.insert("hawkeye.git.file_created".to_string(), ...);
-    //   properties.insert("hawkeye.git.file_modified".to_string(), ...);
-    Ok(properties)
+fn resolve_git_file_attrs(git_context: &GitContext, path: &Path) -> anyhow::Result<GitFileAttrs> {
+    let mut attrs = GitFileAttrs {
+        created_time: None,
+        modified_time: None,
+    };
+
+    if let Some(ref repo) = git_context.repo {
+        let workdir = repo.work_dir().expect("workdir cannot be absent");
+        let workdir = workdir.canonicalize()?;
+        let rela_path = path.strip_prefix(&workdir)?;
+        let location = rela_path.display().to_string();
+
+        let mode = gix::diff::blob::pipeline::Mode::ToGit;
+        let mut cache = repo.diff_resource_cache(mode, Default::default())?;
+
+        let head = repo.head_commit()?;
+        let mut prev_commit = head.clone();
+
+        for info in head.ancestors().all()? {
+            let info = info?;
+            let this_commit = info.object()?;
+            let tree = this_commit.tree()?;
+            let mut changes = tree.changes()?;
+            changes.track_path().for_each_to_obtain_tree_with_cache(
+                &prev_commit.tree()?,
+                &mut cache,
+                |change| {
+                    if change.location == location {
+                        let time = this_commit.time().expect("commit always has time");
+                        attrs.created_time = match attrs.created_time {
+                            None => Some(time),
+                            Some(t) => Some(t.min(time)),
+                        };
+                        attrs.modified_time = match attrs.modified_time {
+                            None => Some(time),
+                            Some(t) => Some(t.max(time)),
+                        };
+                    }
+                    Ok::<_, Infallible>(Default::default())
+                },
+            )?;
+            prev_commit = this_commit;
+        }
+    }
+
+    Ok(attrs)
 }
