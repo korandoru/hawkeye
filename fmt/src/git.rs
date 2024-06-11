@@ -96,8 +96,19 @@ pub struct GitFileAttrs {
     pub modified_time: gix::date::Time,
 }
 
-pub fn resolve_file_attrs(repo: &Repository) -> anyhow::Result<HashMap<String, GitFileAttrs>> {
+pub fn resolve_file_attrs(
+    git_context: GitContext,
+) -> anyhow::Result<HashMap<String, GitFileAttrs>> {
     let mut attrs = HashMap::new();
+
+    if git_context.config.attrs.is_disable() {
+        return Ok(attrs);
+    }
+
+    let repo = match git_context.repo {
+        Some(repo) => repo,
+        None => return Ok(attrs),
+    };
 
     let workdir = repo.work_dir().expect("workdir cannot be absent");
     let workdir = workdir.canonicalize()?;
