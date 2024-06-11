@@ -18,7 +18,7 @@
 use std::{
     collections::{hash_map::Entry, HashMap},
     convert::Infallible,
-    path::Path,
+    path::{Path, PathBuf},
 };
 
 use gix::Repository;
@@ -98,7 +98,7 @@ pub struct GitFileAttrs {
 
 pub fn resolve_file_attrs(
     git_context: GitContext,
-) -> anyhow::Result<HashMap<String, GitFileAttrs>> {
+) -> anyhow::Result<HashMap<PathBuf, GitFileAttrs>> {
     let mut attrs = HashMap::new();
 
     if git_context.config.attrs.is_disable() {
@@ -130,9 +130,8 @@ pub fn resolve_file_attrs(
             &prev_commit.tree()?,
             &mut cache,
             |change| {
-                let filepath = workdir.join(change.location.to_string());
-                let filepath = filepath.display().to_string();
-
+                let filepath = gix::path::from_bstr(change.location);
+                let filepath = workdir.join(filepath);
                 match attrs.entry(filepath) {
                     Entry::Occupied(mut ent) => {
                         let attrs: &GitFileAttrs = ent.get();
