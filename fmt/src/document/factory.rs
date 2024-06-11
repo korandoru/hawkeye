@@ -18,7 +18,7 @@
 use std::{
     borrow::Cow,
     collections::{HashMap, HashSet},
-    path::Path,
+    path::{Path, PathBuf},
 };
 
 use snafu::ResultExt;
@@ -35,7 +35,7 @@ pub struct DocumentFactory {
     properties: HashMap<String, String>,
 
     keywords: Vec<String>,
-    git_file_attrs: HashMap<String, GitFileAttrs>,
+    git_file_attrs: HashMap<PathBuf, GitFileAttrs>,
     year_formatter: Vec<FormatItem<'static>>,
 }
 
@@ -45,7 +45,7 @@ impl DocumentFactory {
         definitions: HashMap<String, HeaderDef>,
         properties: HashMap<String, String>,
         keywords: Vec<String>,
-        git_file_attrs: HashMap<String, GitFileAttrs>,
+        git_file_attrs: HashMap<PathBuf, GitFileAttrs>,
     ) -> Self {
         let year_formatter = format_description::parse("[year]").expect("cannot parse format");
         Self {
@@ -86,10 +86,7 @@ impl DocumentFactory {
             .to_string();
         properties.insert("hawkeye.core.filename".to_string(), filename);
 
-        if let Some(attrs) = self
-            .git_file_attrs
-            .get(filepath.to_str().expect("path is never empty"))
-        {
+        if let Some(attrs) = self.git_file_attrs.get(filepath) {
             properties.insert(
                 "hawkeye.git.fileCreatedYear".to_string(),
                 attrs.created_time.format(self.year_formatter.as_slice()),
