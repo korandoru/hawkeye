@@ -16,6 +16,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use std::{
+    collections::HashMap,
     fs,
     path::{Path, PathBuf},
 };
@@ -25,7 +26,10 @@ use snafu::{ensure, ResultExt};
 use crate::{
     config::Config,
     document::{factory::DocumentFactory, model::default_mapping, Document},
-    error::{DeserializeSnafu, InvalidConfigSnafu, LoadConfigSnafu, TryMatchHeaderSnafu},
+    error::{
+        DeserializeSnafu, GitFileAttrsSnafu, InvalidConfigSnafu, LoadConfigSnafu,
+        TryMatchHeaderSnafu,
+    },
     git,
     header::{
         matcher::HeaderMatcher,
@@ -111,12 +115,17 @@ pub fn check_license_header<C: Callback>(run_config: PathBuf, callback: &mut C) 
         HeaderMatcher::new(header_source.content)
     };
 
+    let git_file_attrs = match git_context.repo {
+        None => HashMap::new(),
+        Some(ref repo) => git::resolve_file_attrs(repo).context(GitFileAttrsSnafu)?,
+    };
+
     let document_factory = DocumentFactory::new(
         mapping,
         definitions,
         config.properties,
         config.keywords,
-        git_context,
+        git_file_attrs,
     );
 
     for file in selected_files {
