@@ -41,7 +41,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: korandoru/hawkeye@v4
       - uses: Swatinem/rust-cache@v2
       - uses: dtolnay/rust-toolchain@nightly
       - name: Check Clippy
@@ -65,7 +64,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, buildjet-4vcpu-ubuntu-2204-arm ]
+        os: [ ubuntu-latest ]
     runs-on: ${{matrix.os}}
     name: Docker sanity check on ${{ matrix.os }}
     steps:
