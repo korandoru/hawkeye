@@ -23,7 +23,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "5.6.0"
+version = "5.7.0"
 edition = "2021"
 authors = ["tison <wander4096@gmail.com>"]
 readme = "README.md"
@@ -32,7 +32,7 @@ repository = "https://github.com/korandoru/hawkeye/"
 rust-version = "1.76.0"
 
 [workspace.dependencies]
-hawkeye-fmt = { version = "5.6.0", path = "fmt" }
+hawkeye-fmt = { version = "5.7.0", path = "fmt" }
 snafu = "0.8.2"
 toml = "0.8.12"
 tracing = "0.1.40"
