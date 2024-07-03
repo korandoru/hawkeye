@@ -279,6 +279,12 @@ headerType = "XML_STYLE"
 extension = true
 filename = false
 
+[JSX]
+pattern = "jsx"
+headerType = "SLASHSTAR_STYLE"
+extension = true
+filename = false
+
 [KML]
 pattern = "kml"
 headerType = "XML_STYLE"
