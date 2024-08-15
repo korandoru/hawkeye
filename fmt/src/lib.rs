@@ -15,18 +15,13 @@
 // Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::error::Error;
-
 pub mod config;
 pub mod document;
-pub mod error;
 pub mod git;
 pub mod header;
 pub mod license;
 pub mod processor;
 pub mod selection;
-
-pub type Result<T> = std::result::Result<T, Error>;
 
 const fn default_true() -> bool {
     true

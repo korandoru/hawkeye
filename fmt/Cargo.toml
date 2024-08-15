@@ -26,16 +26,15 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-anyhow = "1.0"
-gix = { version = "0.63", default-features = false, features = [
+anyhow = { workspace = true }
+gix = { version = "0.64", default-features = false, features = [
     "blob-diff",
     "excludes",
 ] }
-ignore = "0.4.22"
-regex = "1.10.3"
-serde = { version = "1.0.197", features = ["derive"] }
-snafu.workspace = true
+ignore = "0.4"
+log = { workspace = true }
+regex = "1.10"
+serde = { version = "1.0", features = ["derive"] }
 time = "0.3"
-toml.workspace = true
-tracing.workspace = true
-walkdir = "2.5.0"
+toml = { workspace = true }
+walkdir = "2.5"

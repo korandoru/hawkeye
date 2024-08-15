@@ -15,12 +15,12 @@
 // Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{
-    fmt::{Display, Formatter},
-    fs::File,
-    io::{BufRead, BufReader},
-    path::Path,
-};
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::fs::File;
+use std::io::BufRead;
+use std::io::BufReader;
+use std::path::Path;
 
 use crate::header::model::HeaderDef;
 

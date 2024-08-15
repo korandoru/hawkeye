@@ -15,16 +15,15 @@
 // Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
 // SPDX-License-Identifier: Apache-2.0
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 
-use clap::{Args, Parser};
-use hawkeye_fmt::{
-    document::Document,
-    header::matcher::HeaderMatcher,
-    processor::{check_license_header, Callback},
-    Result,
-};
-use tracing::{error, info, warn};
+use clap::Args;
+use clap::Parser;
+use hawkeye_fmt::document::Document;
+use hawkeye_fmt::header::matcher::HeaderMatcher;
+use hawkeye_fmt::processor::check_license_header;
+use hawkeye_fmt::processor::Callback;
 
 #[derive(Parser)]
 pub enum SubCommand {
@@ -58,7 +57,7 @@ struct SharedEditOptions {
 }
 
 impl SubCommand {
-    pub fn run(self) -> Result<()> {
+    pub fn run(self) {
         match self {
             SubCommand::Check(cmd) => cmd.run(),
             SubCommand::Format(cmd) => cmd.run(),
@@ -86,39 +85,38 @@ struct CheckContext {
 }
 
 impl Callback for CheckContext {
-    fn on_unknown(&mut self, path: &Path) -> Result<()> {
+    fn on_unknown(&mut self, path: &Path) {
         self.unknown.push(path.display().to_string());
+    }
+
+    fn on_matched(&mut self, _: &HeaderMatcher, _: Document) -> anyhow::Result<()> {
         Ok(())
     }
 
-    fn on_matched(&mut self, _: &HeaderMatcher, _: Document) -> Result<()> {
-        Ok(())
-    }
-
-    fn on_not_matched(&mut self, _: &HeaderMatcher, document: Document) -> Result<()> {
+    fn on_not_matched(&mut self, _: &HeaderMatcher, document: Document) -> anyhow::Result<()> {
         self.missing.push(document.filepath.display().to_string());
         Ok(())
     }
 }
 
 impl CommandCheck {
-    fn run(self) -> Result<()> {
+    fn run(self) {
         let config = self.shared.config.unwrap_or_else(default_config);
         let mut context = CheckContext {
             unknown: vec![],
             missing: vec![],
         };
-        check_license_header(config, &mut context)?;
+        check_license_header(config, &mut context).unwrap();
+
         let mut failed = check_unknown_files(context.unknown, self.shared.fail_if_unknown);
         if !context.missing.is_empty() {
-            error!("Found missing header files: {:?}", context.missing);
+            log::error!("Found missing header files: {:?}", context.missing);
             failed |= self.fail_if_missing;
         }
         if failed {
             std::process::exit(1);
         }
-        info!("No missing header file has been found.");
-        Ok(())
+        log::info!("No missing header file has been found.");
     }
 }
 
@@ -137,16 +135,15 @@ struct FormatContext {
 }
 
 impl Callback for FormatContext {
-    fn on_unknown(&mut self, path: &Path) -> Result<()> {
+    fn on_unknown(&mut self, path: &Path) {
         self.unknown.push(path.display().to_string());
+    }
+
+    fn on_matched(&mut self, _: &HeaderMatcher, _: Document) -> anyhow::Result<()> {
         Ok(())
     }
 
-    fn on_matched(&mut self, _: &HeaderMatcher, _: Document) -> Result<()> {
-        Ok(())
-    }
-
-    fn on_not_matched(&mut self, header: &HeaderMatcher, mut doc: Document) -> Result<()> {
+    fn on_not_matched(&mut self, header: &HeaderMatcher, mut doc: Document) -> anyhow::Result<()> {
         if doc.header_detected() {
             doc.remove_header();
             doc.update_header(header);
@@ -157,6 +154,7 @@ impl Callback for FormatContext {
             self.updated
                 .push(format!("{}=added", doc.filepath.display()));
         }
+
         if self.dry_run {
             let mut extension = doc.filepath.extension().unwrap_or_default().to_os_string();
             extension.push(".formatted");
@@ -169,27 +167,28 @@ impl Callback for FormatContext {
 }
 
 impl CommandFormat {
-    fn run(self) -> Result<()> {
+    fn run(self) {
         let config = self.shared.config.unwrap_or_else(default_config);
         let mut context = FormatContext {
             dry_run: self.shared_edit.dry_run,
             unknown: vec![],
             updated: vec![],
         };
-        check_license_header(config, &mut context)?;
+        check_license_header(config, &mut context).unwrap();
+
         let mut failed = check_unknown_files(context.unknown, self.shared.fail_if_unknown);
         if !context.updated.is_empty() {
-            info!(
+            log::info!(
                 "Updated header for files (dryRun={}): {:?}",
-                self.shared_edit.dry_run, context.updated
+                self.shared_edit.dry_run,
+                context.updated
             );
             failed |= self.shared_edit.fail_if_updated;
         }
         if failed {
             std::process::exit(1);
         }
-        info!("All files have proper header.");
-        Ok(())
+        log::info!("All files have proper header.");
     }
 }
 
@@ -208,7 +207,7 @@ struct RemoveContext {
 }
 
 impl RemoveContext {
-    fn remove(&mut self, doc: &mut Document) -> Result<()> {
+    fn remove(&mut self, doc: &mut Document) -> anyhow::Result<()> {
         if !doc.header_detected() {
             return Ok(());
         }
@@ -227,52 +226,52 @@ impl RemoveContext {
 }
 
 impl Callback for RemoveContext {
-    fn on_unknown(&mut self, path: &Path) -> Result<()> {
+    fn on_unknown(&mut self, path: &Path) {
         self.unknown.push(path.display().to_string());
-        Ok(())
     }
 
-    fn on_matched(&mut self, _: &HeaderMatcher, mut doc: Document) -> Result<()> {
+    fn on_matched(&mut self, _: &HeaderMatcher, mut doc: Document) -> anyhow::Result<()> {
         self.remove(&mut doc)
     }
 
-    fn on_not_matched(&mut self, _: &HeaderMatcher, mut doc: Document) -> Result<()> {
+    fn on_not_matched(&mut self, _: &HeaderMatcher, mut doc: Document) -> anyhow::Result<()> {
         self.remove(&mut doc)
     }
 }
 
 impl CommandRemove {
-    fn run(self) -> Result<()> {
+    fn run(self) {
         let config = self.shared.config.unwrap_or_else(default_config);
         let mut context = RemoveContext {
             dry_run: self.shared_edit.dry_run,
             unknown: vec![],
             removed: vec![],
         };
-        check_license_header(config, &mut context)?;
+        check_license_header(config, &mut context).unwrap();
+
         let mut failed = check_unknown_files(context.unknown, self.shared.fail_if_unknown);
         if !context.removed.is_empty() {
-            info!(
+            log::info!(
                 "Removed header for files (dryRun={}): {:?}",
-                self.shared_edit.dry_run, context.removed
+                self.shared_edit.dry_run,
+                context.removed
             );
             failed |= self.shared_edit.fail_if_updated;
         }
         if failed {
             std::process::exit(1);
         }
-        info!("No file has been removed header.");
-        Ok(())
+        log::info!("No file has been removed header.");
     }
 }
 
 fn check_unknown_files(unknown: Vec<String>, fail_if_unknown: bool) -> bool {
     if !unknown.is_empty() {
         if fail_if_unknown {
-            error!("Processing unknown files: {:?}", unknown);
+            log::error!("Processing unknown files: {:?}", unknown);
             return true;
         } else {
-            warn!("Processing unknown files: {:?}", unknown);
+            log::warn!("Processing unknown files: {:?}", unknown);
         }
     }
     false
