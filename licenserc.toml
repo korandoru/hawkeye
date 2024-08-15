@@ -41,6 +41,7 @@ excludes = [
     # Test files
     "fmt/tests/content/**",
     "tests/load_header_path/**",
+    "tests/regression_blank_line/**",
 
     # Generated files
     ".github/workflows/release.yml",

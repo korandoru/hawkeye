@@ -185,7 +185,9 @@ fn select_files_with_git(
     let basedir = basedir
         .canonicalize()
         .with_context(|| format!("cannot resolve absolute path: {}", basedir.display()))?;
-    let mut it = WalkDir::new(basedir.clone()).follow_links(false).into_iter();
+    let mut it = WalkDir::new(basedir.clone())
+        .follow_links(false)
+        .into_iter();
 
     let workdir = repo.work_dir().expect("workdir cannot be absent");
     let workdir = workdir

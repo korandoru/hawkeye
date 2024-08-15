@@ -15,8 +15,9 @@
 // Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::config::Config;
 use anyhow::Context;
+
+use crate::config::Config;
 
 #[derive(Debug, Clone)]
 pub struct HeaderSource {
