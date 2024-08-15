@@ -17,15 +17,12 @@
 
 use std::collections::HashMap;
 
+use anyhow::Context;
 use regex::Regex;
-use serde::{Deserialize, Serialize};
-use snafu::{OptionExt, ResultExt};
+use serde::Deserialize;
+use serde::Serialize;
 
-use crate::{
-    default_true,
-    error::{DeserializeSnafu, EmptyRegexSnafu, MalformedRegexSnafu},
-    Result,
-};
+use crate::default_true;
 
 #[derive(Debug, Clone)]
 pub struct HeaderDef {
@@ -67,17 +64,13 @@ impl HeaderDef {
     }
 }
 
-pub fn default_headers() -> Result<HashMap<String, HeaderDef>> {
+pub fn default_headers() -> anyhow::Result<HashMap<String, HeaderDef>> {
     let defaults = include_str!("defaults.toml");
     deserialize_header_definitions(defaults.to_string())
 }
 
-pub fn deserialize_header_definitions(value: String) -> Result<HashMap<String, HeaderDef>> {
-    let header_styles: HashMap<String, HeaderStyle> = toml::from_str(&value)
-        .map_err(Box::new)
-        .context(DeserializeSnafu {
-            name: "default headers",
-        })?;
+pub fn deserialize_header_definitions(value: String) -> anyhow::Result<HashMap<String, HeaderDef>> {
+    let header_styles: HashMap<String, HeaderStyle> = toml::from_str(&value).map_err(Box::new)?;
 
     let headers = header_styles
         .into_iter()
@@ -100,24 +93,24 @@ pub fn deserialize_header_definitions(value: String) -> Result<HashMap<String, H
                 pad_lines: style.pad_lines,
                 skip_line_pattern: style
                     .skip_line_pattern
-                    .map(|pattern| Regex::new(&pattern).context(MalformedRegexSnafu {
-                        payload: pattern,
-                    })).transpose()?,
+                    .map(|pattern| Regex::new(&pattern).with_context(
+                        || format!("malformed regex: {pattern}")
+                    )).transpose()?,
                 first_line_detection_pattern: style
                     .first_line_detection_pattern
-                    .map(|pattern| Regex::new(&pattern).context(MalformedRegexSnafu {
-                        payload: pattern,
-                    })).transpose()?.context(EmptyRegexSnafu { header: name.clone() })?,
+                    .map(|pattern| Regex::new(&pattern).with_context(
+                        || format!("malformed regex: {pattern}")
+                    )).transpose()?.context("empty regex in header")?,
                 last_line_detection_pattern: style
                     .last_line_detection_pattern
-                    .map(|pattern| Regex::new(&pattern).context(MalformedRegexSnafu {
-                        payload: pattern,
-                    })).transpose()?.context(EmptyRegexSnafu { header: name.clone() })?,
+                    .map(|pattern| Regex::new(&pattern).with_context(
+                        || format!("malformed regex: {pattern}")
+                    )).transpose()?.context("empty regex in header")?,
             };
 
             Ok((name, def))
         })
-        .collect::<Result<HashMap<String, HeaderDef>>>()?;
+        .collect::<anyhow::Result<HashMap<String, HeaderDef>>>()?;
     Ok(headers)
 }
 

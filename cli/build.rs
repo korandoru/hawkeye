@@ -15,69 +15,36 @@
 // Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{borrow::Cow, sync::OnceLock};
+use std::collections::BTreeSet;
+use std::env;
 
-const UNKNOWN: &str = "unknown";
+use build_data::format_timestamp;
+use build_data::get_source_time;
+use shadow_rs::CARGO_METADATA;
+use shadow_rs::CARGO_TREE;
 
-pub struct BuildInfo {
-    pub branch: Cow<'static, str>,
-    pub commit: Cow<'static, str>,
-    pub commit_short: Cow<'static, str>,
-    pub dirty: Cow<'static, str>,
-    pub timestamp: Cow<'static, str>,
-
-    /// Rustc Version
-    pub rustc: Cow<'static, str>,
-    /// GreptimeDB Version
-    pub version: Cow<'static, str>,
-}
-
-static BUILD: OnceLock<BuildInfo> = OnceLock::new();
-
-pub fn build_info() -> &'static BuildInfo {
-    BUILD.get_or_init(|| {
-        let branch = build_data::get_git_branch()
-            .map(Cow::Owned)
-            .unwrap_or(Cow::Borrowed(UNKNOWN));
-        let commit = build_data::get_git_commit()
-            .map(Cow::Owned)
-            .unwrap_or(Cow::Borrowed(UNKNOWN));
-        let commit_short = build_data::get_git_commit_short()
-            .map(Cow::Owned)
-            .unwrap_or(Cow::Borrowed(UNKNOWN));
-        let dirty = build_data::get_git_dirty()
-            .map(|b| Cow::Owned(b.to_string()))
-            .unwrap_or(Cow::Borrowed(UNKNOWN));
-        let timestamp = build_data::get_source_time()
-            .map(|ts| Cow::Owned(build_data::format_timestamp(ts)))
-            .unwrap_or(Cow::Borrowed(UNKNOWN));
-        let rustc = build_data::get_rustc_version()
-            .map(Cow::Owned)
-            .unwrap_or(Cow::Borrowed(UNKNOWN));
-        let version = Cow::Borrowed(env!("CARGO_PKG_VERSION"));
-
-        BuildInfo {
-            branch,
-            commit,
-            commit_short,
-            dirty,
-            timestamp,
-            rustc,
-            version,
-        }
-    })
-}
-
-fn main() {
-    let build_info = build_info();
-    println!("cargo:rustc-env=GIT_COMMIT={}", build_info.commit);
+fn main() -> shadow_rs::SdResult<()> {
+    println!("cargo:rerun-if-changed=.git/refs/heads");
     println!(
-        "cargo:rustc-env=GIT_COMMIT_SHORT={}",
-        build_info.commit_short
+        "cargo:rustc-env=SOURCE_TIMESTAMP={}",
+        if let Ok(t) = get_source_time() {
+            format_timestamp(t)
+        } else {
+            "".to_string()
+        }
     );
-    println!("cargo:rustc-env=GIT_BRANCH={}", build_info.branch);
-    println!("cargo:rustc-env=GIT_DIRTY={}", build_info.dirty);
-    println!("cargo:rustc-env=GIT_DIRTY={}", build_info.dirty);
-    println!("cargo:rustc-env=RUSTC_VERSION={}", build_info.rustc);
-    println!("cargo:rustc-env=SOURCE_TIMESTAMP={}", build_info.timestamp);
+    build_data::set_BUILD_TIMESTAMP();
+
+    // The "CARGO_WORKSPACE_DIR" is set manually (not by Rust itself) in Cargo config file, to
+    // solve the problem where the "CARGO_MANIFEST_DIR" is not what we want when this repo is
+    // made as a submodule in another repo.
+    let src_path = env::var("CARGO_WORKSPACE_DIR").or_else(|_| env::var("CARGO_MANIFEST_DIR"))?;
+    let out_path = env::var("OUT_DIR")?;
+    let _ = shadow_rs::Shadow::build_with(
+        src_path,
+        out_path,
+        // exclude these two large constants that we don't need
+        BTreeSet::from([CARGO_METADATA, CARGO_TREE]),
+    )?;
+    Ok(())
 }

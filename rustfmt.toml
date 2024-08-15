@@ -15,7 +15,7 @@
 # Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
 # SPDX-License-Identifier: Apache-2.0
 
-imports_granularity = "Crate"
+imports_granularity = "Item"
 group_imports = "StdExternalCrate"
 comment_width = 120
 wrap_comments = true

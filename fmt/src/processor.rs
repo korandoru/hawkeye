@@ -15,62 +15,56 @@
 // Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{
-    fs,
-    path::{Path, PathBuf},
-};
+use std::fs;
+use std::path::Path;
+use std::path::PathBuf;
 
-use snafu::{ensure, ResultExt};
+use anyhow::Context;
 
-use crate::{
-    config::Config,
-    document::{factory::DocumentFactory, model::default_mapping, Document},
-    error::{
-        DeserializeSnafu, GitFileAttrsSnafu, InvalidConfigSnafu, LoadConfigSnafu,
-        TryMatchHeaderSnafu,
-    },
-    git,
-    header::{
-        matcher::HeaderMatcher,
-        model::{default_headers, deserialize_header_definitions},
-    },
-    license::HeaderSource,
-    selection::Selection,
-    Result,
-};
+use crate::config::Config;
+use crate::document::factory::DocumentFactory;
+use crate::document::model::default_mapping;
+use crate::document::Document;
+use crate::git;
+use crate::header::matcher::HeaderMatcher;
+use crate::header::model::default_headers;
+use crate::header::model::deserialize_header_definitions;
+use crate::license::HeaderSource;
+use crate::selection::Selection;
 
 /// Callback for processing the result of checking license headers.
 pub trait Callback {
     /// Called when the header is unknown.
-    fn on_unknown(&mut self, path: &Path) -> Result<()>;
+    fn on_unknown(&mut self, path: &Path);
 
     /// Called when the header is matched.
-    fn on_matched(&mut self, header: &HeaderMatcher, document: Document) -> Result<()>;
+    fn on_matched(&mut self, header: &HeaderMatcher, document: Document) -> anyhow::Result<()>;
 
     /// Called when the header is not matched.
-    fn on_not_matched(&mut self, header: &HeaderMatcher, document: Document) -> Result<()>;
+    fn on_not_matched(&mut self, header: &HeaderMatcher, document: Document) -> anyhow::Result<()>;
 }
 
 #[allow(clippy::type_complexity)]
-pub fn check_license_header<C: Callback>(run_config: PathBuf, callback: &mut C) -> Result<()> {
+pub fn check_license_header<C: Callback>(
+    run_config: PathBuf,
+    callback: &mut C,
+) -> anyhow::Result<()> {
     let config = {
         let name = run_config.display().to_string();
-        let config =
-            fs::read_to_string(&run_config).context(LoadConfigSnafu { name: name.clone() })?;
+        let config = fs::read_to_string(&run_config)
+            .with_context(|| format!("cannot load config: {name}"))?;
         toml::from_str::<Config>(&config)
             .map_err(Box::new)
-            .context(DeserializeSnafu { name })?
+            .with_context(|| format!("cannot parse config file: {name}"))?
     };
 
     let basedir = config.base_dir.clone();
-    ensure!(
+    anyhow::ensure!(
         basedir.is_dir(),
-        InvalidConfigSnafu {
-            message: format!(
-                "{} does not exist or is not a directory.",
-                basedir.display()
-            )
-        }
+        format!(
+            "{} does not exist or is not a directory.",
+            basedir.display()
+        )
     );
 
     let git_context = git::discover(&basedir, config.git)?;
@@ -100,9 +94,7 @@ pub fn check_license_header<C: Callback>(run_config: PathBuf, callback: &mut C) 
         let mut defs = default_headers()?;
         for additional_header in &config.additional_headers {
             let additional_defs = fs::read_to_string(additional_header)
-                .context(LoadConfigSnafu {
-                    name: additional_header.clone(),
-                })
+                .with_context(|| format!("cannot load header definitions: {additional_header}"))
                 .and_then(deserialize_header_definitions)?;
             defs.extend(additional_defs);
         }
@@ -114,7 +106,7 @@ pub fn check_license_header<C: Callback>(run_config: PathBuf, callback: &mut C) 
         HeaderMatcher::new(header_source.content)
     };
 
-    let git_file_attrs = git::resolve_file_attrs(git_context).context(GitFileAttrsSnafu)?;
+    let git_file_attrs = git::resolve_file_attrs(git_context)?;
 
     let document_factory = DocumentFactory::new(
         mapping,
@@ -128,16 +120,16 @@ pub fn check_license_header<C: Callback>(run_config: PathBuf, callback: &mut C) 
         let document = match document_factory.create_document(&file)? {
             Some(document) => document,
             None => {
-                callback.on_unknown(&file)?;
+                callback.on_unknown(&file);
                 continue;
             }
         };
 
         if document.is_unsupported() {
-            callback.on_unknown(&file)?;
+            callback.on_unknown(&file);
         } else if document
             .header_matched(&header_matcher, config.strict_check)
-            .context(TryMatchHeaderSnafu)?
+            .context("failed to match header")?
         {
             callback.on_matched(&header_matcher, document)?;
         } else {

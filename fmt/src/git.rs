@@ -15,22 +15,18 @@
 // Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{
-    collections::{hash_map::Entry, HashMap},
-    convert::Infallible,
-    path::{Path, PathBuf},
-};
+use std::collections::hash_map::Entry;
+use std::collections::HashMap;
+use std::convert::Infallible;
+use std::path::Path;
+use std::path::PathBuf;
 
+use anyhow::bail;
+use anyhow::Context;
 use gix::Repository;
-use snafu::IntoError;
-use tracing::info;
 
-use crate::{
-    config,
-    config::FeatureGate,
-    error::{GixDiscoverOpSnafu, InvalidConfigSnafu},
-    Result,
-};
+use crate::config;
+use crate::config::FeatureGate;
 
 #[derive(Debug, Clone)]
 pub struct GitContext {
@@ -38,7 +34,7 @@ pub struct GitContext {
     pub config: config::Git,
 }
 
-pub fn discover(basedir: &Path, config: config::Git) -> Result<GitContext> {
+pub fn discover(basedir: &Path, config: config::Git) -> anyhow::Result<GitContext> {
     let feature = resolve_features(&config);
 
     if feature.is_disable() {
@@ -50,14 +46,14 @@ pub fn discover(basedir: &Path, config: config::Git) -> Result<GitContext> {
             None => {
                 let message = "bare repository detected";
                 if feature.is_auto() {
-                    info!(?config, "git config is resolved to disabled; {message}");
+                    log::info!(config:?; "git config is resolved to disabled; {message}");
                     Ok(GitContext { repo: None, config })
                 } else {
-                    InvalidConfigSnafu { message }.fail()
+                    bail!("invalid config: {}", message);
                 }
             }
             Some(_) => {
-                info!("git config is resolved to enabled");
+                log::info!("git config is resolved to enabled");
                 Ok(GitContext {
                     repo: Some(repo),
                     config,
@@ -66,10 +62,10 @@ pub fn discover(basedir: &Path, config: config::Git) -> Result<GitContext> {
         },
         Err(err) => {
             if feature.is_auto() {
-                info!(?err, ?config, "git config is resolved to disabled");
+                log::info!(err:?, config:?; "git config is resolved to disabled");
                 Ok(GitContext { repo: None, config })
             } else {
-                Err(GixDiscoverOpSnafu {}.into_error(Box::new(err)))
+                Err(err).context("cannot discover git repository with gix")
             }
         }
     }

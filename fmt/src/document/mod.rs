@@ -15,20 +15,19 @@
 // Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{collections::HashMap, fs, fs::File, io::BufRead, path::PathBuf};
+use std::collections::HashMap;
+use std::fs;
+use std::fs::File;
+use std::io::BufRead;
+use std::path::PathBuf;
 
-use snafu::ResultExt;
-use tracing::debug;
+use anyhow::Context;
 
-use crate::{
-    error::{CreateDocumentSnafu, SaveDocumentSnafu},
-    header::{
-        matcher::HeaderMatcher,
-        model::HeaderDef,
-        parser::{parse_header, FileContent, HeaderParser},
-    },
-    Result,
-};
+use crate::header::matcher::HeaderMatcher;
+use crate::header::model::HeaderDef;
+use crate::header::parser::parse_header;
+use crate::header::parser::FileContent;
+use crate::header::parser::HeaderParser;
 
 pub mod factory;
 pub mod model;
@@ -48,7 +47,7 @@ impl Document {
         header_def: HeaderDef,
         keywords: &[String],
         properties: HashMap<String, String>,
-    ) -> Result<Option<Self>> {
+    ) -> anyhow::Result<Option<Self>> {
         match FileContent::new(&filepath) {
             Ok(content) => Ok(Some(Self {
                 parser: parse_header(content, &header_def, keywords),
@@ -58,11 +57,11 @@ impl Document {
             })),
             Err(e) => {
                 if matches!(e.kind(), std::io::ErrorKind::InvalidData) {
-                    debug!("skip non-textual file: {}", filepath.display());
+                    log::debug!("skip non-textual file: {}", filepath.display());
                     Ok(None)
                 } else {
-                    Err(e).context(CreateDocumentSnafu {
-                        path: filepath.display().to_string(),
+                    Err(e).with_context(|| {
+                        format!("cannot to create document: {}", filepath.display())
                     })
                 }
             }
@@ -142,11 +141,10 @@ impl Document {
         }
     }
 
-    pub fn save(&mut self, filepath: Option<&PathBuf>) -> Result<()> {
+    pub fn save(&mut self, filepath: Option<&PathBuf>) -> anyhow::Result<()> {
         let filepath = filepath.unwrap_or(&self.filepath);
-        fs::write(filepath, self.parser.file_content.content()).context(SaveDocumentSnafu {
-            path: filepath.display().to_string(),
-        })
+        fs::write(filepath, self.parser.file_content.content())
+            .context(format!("cannot save document {}", filepath.display()))
     }
 
     pub(crate) fn merge_properties(&self, s: &str) -> String {

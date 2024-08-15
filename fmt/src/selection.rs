@@ -15,21 +15,14 @@
 // Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
 // SPDX-License-Identifier: Apache-2.0
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 
+use anyhow::Context;
 use ignore::overrides::OverrideBuilder;
-use snafu::{ensure, ResultExt};
-use tracing::debug;
 use walkdir::WalkDir;
 
-use crate::{
-    error::{
-        GixCheckExcludeOpSnafu, GixExcludeOpSnafu, ResolveAbsolutePathSnafu, SelectFilesSnafu,
-        SelectWithIgnoreSnafu, TraverseDirSnafu,
-    },
-    git::GitContext,
-    Result,
-};
+use crate::git::GitContext;
 
 pub struct Selection {
     basedir: PathBuf,
@@ -71,9 +64,9 @@ impl Selection {
         }
     }
 
-    pub fn select(self) -> Result<Vec<PathBuf>> {
-        debug!(
-            "Selecting files with baseDir: {}, included: {:?}, excluded: {:?}",
+    pub fn select(self) -> anyhow::Result<Vec<PathBuf>> {
+        log::debug!(
+            "selecting files with baseDir: {}, included: {:?}, excluded: {:?}",
             self.basedir.display(),
             self.includes,
             self.excludes,
@@ -82,7 +75,7 @@ impl Selection {
         let (excludes, reverse_excludes) = {
             let mut excludes = self.excludes;
             let mut reverse_excludes = vec![];
-            // [TODO] can be simplified and no clone when extract_if stable
+            // TODO(tisonkun): can be simplified and no clone when extract_if stable
             excludes.retain_mut(|pat| {
                 if pat.starts_with('!') {
                     pat.remove(0);
@@ -96,11 +89,9 @@ impl Selection {
         };
 
         let includes = self.includes;
-        ensure!(
+        anyhow::ensure!(
             includes.iter().all(|pat| !pat.starts_with('!')),
-            SelectFilesSnafu {
-                message: format!("reverse pattern is not allowed for includes: {includes:?}"),
-            },
+            "select files failed; reverse pattern is not allowed for includes: {includes:?}"
         );
 
         let ignore = self.git_context.config.ignore.is_auto();
@@ -117,7 +108,7 @@ impl Selection {
             }
         };
 
-        debug!("selected files: {:?} (count: {})", result, result.len());
+        log::debug!("selected files: {:?} (count: {})", result, result.len());
         Ok(result)
     }
 }
@@ -128,8 +119,8 @@ fn select_files_with_ignore(
     excludes: &[String],
     reverse_excludes: &[String],
     turn_on_git_ignore: bool,
-) -> Result<Vec<PathBuf>> {
-    debug!(turn_on_git_ignore, "Selecting files with ignore crate");
+) -> anyhow::Result<Vec<PathBuf>> {
+    log::debug!(turn_on_git_ignore; "Selecting files with ignore crate");
     let mut result = vec![];
 
     let walker = ignore::WalkBuilder::new(basedir)
@@ -143,21 +134,21 @@ fn select_files_with_ignore(
         .overrides({
             let mut builder = OverrideBuilder::new(basedir);
             for pat in includes.iter() {
-                builder.add(pat).context(SelectWithIgnoreSnafu)?;
+                builder.add(pat)?;
             }
             for pat in excludes.iter() {
                 let pat = format!("!{pat}");
-                builder.add(pat.as_str()).context(SelectWithIgnoreSnafu)?;
+                builder.add(pat.as_str())?;
             }
             for pat in reverse_excludes.iter() {
-                builder.add(pat).context(SelectWithIgnoreSnafu)?;
+                builder.add(pat)?;
             }
-            builder.build().context(SelectWithIgnoreSnafu)?
+            builder.build()?
         })
         .build();
 
     for mat in walker {
-        let mat = mat.context(SelectWithIgnoreSnafu)?;
+        let mat = mat?;
         if mat.file_type().map(|ft| ft.is_file()).unwrap_or(false) {
             result.push(mat.into_path())
         }
@@ -172,50 +163,48 @@ fn select_files_with_git(
     excludes: &[String],
     reverse_excludes: &[String],
     repo: gix::Repository,
-) -> Result<Vec<PathBuf>> {
-    debug!("Selecting files with git helper");
+) -> anyhow::Result<Vec<PathBuf>> {
+    log::debug!("selecting files with git helper");
     let mut result = vec![];
 
     let matcher = {
         let mut builder = OverrideBuilder::new(basedir);
         for pat in includes.iter() {
-            builder.add(pat).context(SelectWithIgnoreSnafu)?;
+            builder.add(pat)?;
         }
         for pat in excludes.iter() {
             let pat = format!("!{pat}");
-            builder.add(pat.as_str()).context(SelectWithIgnoreSnafu)?;
+            builder.add(pat.as_str())?;
         }
         for pat in reverse_excludes.iter() {
-            builder.add(pat).context(SelectWithIgnoreSnafu)?;
+            builder.add(pat)?;
         }
-        builder.build().context(SelectWithIgnoreSnafu)?
+        builder.build()?
     };
 
     let basedir = basedir
         .canonicalize()
-        .with_context(|_| ResolveAbsolutePathSnafu {
-            path: basedir.display().to_string(),
-        })?;
-    let mut it = WalkDir::new(basedir).follow_links(false).into_iter();
+        .with_context(|| format!("cannot resolve absolute path: {}", basedir.display()))?;
+    let mut it = WalkDir::new(basedir.clone())
+        .follow_links(false)
+        .into_iter();
 
     let workdir = repo.work_dir().expect("workdir cannot be absent");
     let workdir = workdir
         .canonicalize()
-        .with_context(|_| ResolveAbsolutePathSnafu {
-            path: workdir.display().to_string(),
-        })?;
+        .with_context(|| format!("cannot resolve absolute path: {}", basedir.display()))?;
     let worktree = repo.worktree().expect("worktree cannot be absent");
     let mut excludes = worktree
         .excludes(None)
         .map_err(Box::new)
-        .context(GixExcludeOpSnafu)?;
+        .context("cannot create gix exclude stack")?;
 
     while let Some(entry) = it.next() {
-        let entry = entry.context(TraverseDirSnafu)?;
+        let entry = entry.context("cannot traverse directory")?;
         let path = entry.path();
         let file_type = entry.file_type();
         if !file_type.is_file() && !file_type.is_dir() {
-            debug!(?file_type, "skip file: {path:?}");
+            log::debug!(file_type:?; "skip file: {path:?}");
             continue;
         }
 
@@ -229,29 +218,29 @@ fn select_files_with_git(
         });
         let platform = excludes
             .at_path(rela_path, mode)
-            .context(GixCheckExcludeOpSnafu)?;
+            .context("cannot check gix exclude")?;
 
         if file_type.is_dir() {
             if platform.is_excluded() {
-                debug!(?path, ?rela_path, "skip git ignored directory");
+                log::debug!(path:?, rela_path:?; "skip git ignored directory");
                 it.skip_current_dir();
                 continue;
             }
             if matcher.matched(rela_path, file_type.is_dir()).is_ignore() {
-                debug!(?path, ?rela_path, "skip glob ignored directory");
+                log::debug!(path:?, rela_path:?; "skip glob ignored directory");
                 it.skip_current_dir();
                 continue;
             }
         } else if file_type.is_file() {
             if platform.is_excluded() {
-                debug!(?path, ?rela_path, "skip git ignored file");
+                log::debug!(path:?, rela_path:?; "skip git ignored file");
                 continue;
             }
             if !matcher
                 .matched(rela_path, file_type.is_dir())
                 .is_whitelist()
             {
-                debug!(?path, ?rela_path, "skip glob ignored file");
+                log::debug!(path:?, rela_path:?; "skip glob ignored file");
                 continue;
             }
             result.push(path.to_path_buf());

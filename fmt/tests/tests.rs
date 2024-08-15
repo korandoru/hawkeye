@@ -17,10 +17,9 @@
 
 use std::path::Path;
 
-use hawkeye_fmt::header::{
-    model::default_headers,
-    parser::{parse_header, FileContent},
-};
+use hawkeye_fmt::header::model::default_headers;
+use hawkeye_fmt::header::parser::parse_header;
+use hawkeye_fmt::header::parser::FileContent;
 
 #[test]
 fn test_remove_file_only_header() {

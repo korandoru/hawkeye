@@ -15,13 +15,16 @@
 // Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{
-    collections::{HashMap, HashSet},
-    hash::{Hash, Hasher},
-    path::PathBuf,
-};
+use std::collections::HashMap;
+use std::collections::HashSet;
+use std::hash::Hash;
+use std::hash::Hasher;
+use std::path::PathBuf;
 
-use serde::{de::Error, Deserialize, Deserializer, Serialize};
+use serde::de::Error;
+use serde::Deserialize;
+use serde::Deserializer;
+use serde::Serialize;
 use toml::Value;
 
 use crate::default_true;

@@ -15,47 +15,25 @@
 // Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
 // SPDX-License-Identifier: Apache-2.0
 
-use clap::{crate_description, FromArgMatches, Subcommand};
-use tracing::level_filters::LevelFilter;
-use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
+use clap::crate_description;
+use clap::FromArgMatches;
+use clap::Subcommand;
+use env_logger::Env;
 
-use crate::cli::SubCommand;
+use crate::subcommand::SubCommand;
 
-pub mod cli;
+pub mod subcommand;
+pub mod version;
 
-fn version() -> &'static str {
-    concat!(
-        "\nbranch: ",
-        env!("GIT_BRANCH"),
-        "\ncommit: ",
-        env!("GIT_COMMIT"),
-        "\ndirty: ",
-        env!("GIT_DIRTY"),
-        "\nversion: v",
-        env!("CARGO_PKG_VERSION"),
-        "\ntoolchain: ",
-        env!("RUSTC_VERSION"),
-        "\nbuild: ",
-        env!("SOURCE_TIMESTAMP"),
-    )
-}
+fn main() {
+    env_logger::init_from_env(Env::new().default_filter_or("info"));
 
-fn main() -> hawkeye_fmt::Result<()> {
-    tracing_subscriber::registry()
-        .with(fmt::layer())
-        .with(
-            EnvFilter::builder()
-                .with_default_directive(LevelFilter::INFO.into())
-                .from_env_lossy(),
-        )
-        .init();
-
-    let cli = clap::Command::new("hawkeye")
+    let command = clap::Command::new("hawkeye")
         .subcommand_required(true)
-        .version(version())
+        .version(version::version())
         .about(crate_description!());
-    let cli = SubCommand::augment_subcommands(cli);
-    let args = cli.get_matches();
+    let command = SubCommand::augment_subcommands(command);
+    let args = command.get_matches();
     match SubCommand::from_arg_matches(&args) {
         Ok(cmd) => cmd.run(),
         Err(e) => e.exit(),

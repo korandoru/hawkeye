@@ -1,4 +1,4 @@
-// Copyright 2024 tison <wander4096@gmail.com>
+// Copyright 2023 The CopyrightOwner
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,18 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
-// SPDX-License-Identifier: Apache-2.0
 
-pub mod config;
-pub mod document;
-pub mod git;
-pub mod header;
-pub mod license;
-pub mod processor;
-pub mod selection;
+//! Load balancer
 
-const fn default_true() -> bool {
-    true
-}
+use macros::define_result;

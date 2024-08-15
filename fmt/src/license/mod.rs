@@ -15,9 +15,9 @@
 // Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
 // SPDX-License-Identifier: Apache-2.0
 
-use snafu::OptionExt;
+use anyhow::Context;
 
-use crate::{config::Config, error::InvalidConfigSnafu, Result};
+use crate::config::Config;
 
 #[derive(Debug, Clone)]
 pub struct HeaderSource {
@@ -25,16 +25,17 @@ pub struct HeaderSource {
 }
 
 impl HeaderSource {
-    pub fn from_config(config: &Config) -> Result<Self> {
+    pub fn from_config(config: &Config) -> anyhow::Result<Self> {
         // 1. inline_header takes priority.
         if let Some(content) = config.inline_header.as_ref().cloned() {
             return Ok(HeaderSource { content });
         }
 
         // 2. Then, header_path tries to load from base_dir.
-        let header_path = config.header_path.as_ref().context(InvalidConfigSnafu {
-            message: "no header source found (both inline_header and header_path are None)",
-        })?;
+        let header_path = config
+            .header_path
+            .as_ref()
+            .context("no header source found (both inline_header and header_path are None)")?;
         let path = {
             let mut path = config.base_dir.clone();
             path.push(header_path);
@@ -45,8 +46,8 @@ impl HeaderSource {
         }
 
         // 3. Finally, fallback to try bundled headers.
-        bundled_headers(header_path).context(InvalidConfigSnafu {
-            message: format!("no header source found (header_path is invalid: {header_path})"),
+        bundled_headers(header_path).with_context(|| {
+            format!("no header source found (header_path is invalid: {header_path})")
         })
     }
 }

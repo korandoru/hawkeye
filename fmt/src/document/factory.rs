@@ -15,19 +15,20 @@
 // Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{
-    borrow::Cow,
-    collections::{HashMap, HashSet},
-    path::{Path, PathBuf},
-};
+use std::borrow::Cow;
+use std::collections::HashMap;
+use std::collections::HashSet;
+use std::path::Path;
+use std::path::PathBuf;
 
-use snafu::ResultExt;
-use time::{format_description, format_description::FormatItem};
+use anyhow::Context;
+use time::format_description;
+use time::format_description::FormatItem;
 
-use crate::{
-    config::Mapping, document::Document, error::CreateDocumentSnafu, git::GitFileAttrs,
-    header::model::HeaderDef, Result,
-};
+use crate::config::Mapping;
+use crate::document::Document;
+use crate::git::GitFileAttrs;
+use crate::header::model::HeaderDef;
 
 pub struct DocumentFactory {
     mapping: HashSet<Mapping>,
@@ -58,7 +59,7 @@ impl DocumentFactory {
         }
     }
 
-    pub fn create_document(&self, filepath: &Path) -> Result<Option<Document>> {
+    pub fn create_document(&self, filepath: &Path) -> anyhow::Result<Option<Document>> {
         let lower_file_name = filepath
             .file_name()
             .map(|n| n.to_string_lossy().to_lowercase())
@@ -73,9 +74,7 @@ impl DocumentFactory {
             .definitions
             .get(&header_type)
             .ok_or_else(|| std::io::Error::other(format!("header type {header_type} not found")))
-            .context(CreateDocumentSnafu {
-                path: filepath.display().to_string(),
-            })?;
+            .with_context(|| format!("cannot to create document: {}", filepath.display()))?;
 
         let mut properties = self.properties.clone();
 

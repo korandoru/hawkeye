@@ -1,0 +1,9 @@
+baseDir = "."
+headerPath = "Apache-2.0.txt"
+
+includes = ["*.rs"]
+excludes = ["*.expected"]
+
+[properties]
+inceptionYear = 2023
+copyrightOwner = "The CopyrightOwner"
