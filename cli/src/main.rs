@@ -15,7 +15,6 @@
 // Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
 // SPDX-License-Identifier: Apache-2.0
 
-use clap::crate_description;
 use clap::FromArgMatches;
 use clap::Subcommand;
 use env_logger::Env;
@@ -28,10 +27,12 @@ pub mod version;
 fn main() {
     env_logger::init_from_env(Env::new().default_filter_or("info"));
 
+    let build_info = version::build_info();
     let command = clap::Command::new("hawkeye")
         .subcommand_required(true)
-        .version(version::version())
-        .about(crate_description!());
+        .about(build_info.description)
+        .version(build_info.version)
+        .long_version(version::version());
     let command = SubCommand::augment_subcommands(command);
     let args = command.get_matches();
     match SubCommand::from_arg_matches(&args) {
