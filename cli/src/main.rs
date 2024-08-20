@@ -17,7 +17,11 @@
 
 use clap::FromArgMatches;
 use clap::Subcommand;
-use env_logger::Env;
+use logforth::append;
+use logforth::filter::EnvFilter;
+use logforth::layout::TextLayout;
+use logforth::Dispatch;
+use logforth::Logger;
 
 use crate::subcommand::SubCommand;
 
@@ -25,7 +29,12 @@ pub mod subcommand;
 pub mod version;
 
 fn main() {
-    env_logger::init_from_env(Env::new().default_filter_or("info"));
+    Logger::new().dispatch(
+        Dispatch::new()
+            .filter(EnvFilter::from_default_env_or("info"))
+            .layout(TextLayout::default())
+            .append(append::Stderr),
+    );
 
     let build_info = version::build_info();
     let command = clap::Command::new("hawkeye")
