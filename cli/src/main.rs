@@ -29,12 +29,15 @@ pub mod subcommand;
 pub mod version;
 
 fn main() {
-    Logger::new().dispatch(
-        Dispatch::new()
-            .filter(EnvFilter::from_default_env_or("info"))
-            .layout(TextLayout::default())
-            .append(append::Stderr),
-    );
+    Logger::new()
+        .dispatch(
+            Dispatch::new()
+                .filter(EnvFilter::from_default_env_or("info"))
+                .layout(TextLayout::default())
+                .append(append::Stderr),
+        )
+        .apply()
+        .unwrap();
 
     let build_info = version::build_info();
     let command = clap::Command::new("hawkeye")

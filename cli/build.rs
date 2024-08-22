@@ -17,6 +17,7 @@
 
 use std::collections::BTreeSet;
 use std::env;
+use std::path::Path;
 
 use build_data::format_timestamp;
 use build_data::get_source_time;
@@ -24,9 +25,13 @@ use shadow_rs::CARGO_METADATA;
 use shadow_rs::CARGO_TREE;
 
 fn main() -> shadow_rs::SdResult<()> {
-    println!("cargo:rerun-if-changed=.git/refs/heads");
+    if let Ok((dir, _)) = gix_discover::upwards(Path::new(env!("CARGO_MANIFEST_DIR"))) {
+        let git_refs_heads = dir.as_ref().join(".git/refs/heads");
+        println!("cargo::rerun-if-changed={}", git_refs_heads.display());
+    }
+
     println!(
-        "cargo:rustc-env=SOURCE_TIMESTAMP={}",
+        "cargo::rustc-env=SOURCE_TIMESTAMP={}",
         if let Ok(t) = get_source_time() {
             format_timestamp(t)
         } else {

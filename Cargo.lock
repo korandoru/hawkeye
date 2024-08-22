@@ -1116,6 +1116,7 @@ dependencies = [
  "build-data",
  "clap",
  "const_format",
+ "gix-discover",
  "hawkeye-fmt",
  "log",
  "logforth",
