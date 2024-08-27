@@ -23,7 +23,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "5.8.0"
+version = "5.8.1"
 edition = "2021"
 authors = ["tison <wander4096@gmail.com>"]
 readme = "README.md"
@@ -36,7 +36,7 @@ anyhow = "1.0"
 build-data = "0.2"
 clap = { version = "4.5", features = ["derive"] }
 const_format = { version = "0.2" }
-hawkeye-fmt = { version = "5.8.0", path = "fmt" }
+hawkeye-fmt = { version = "5.8.1", path = "fmt" }
 log = { version = "0.4", features = ["kv_unstable_serde", "serde"] }
 shadow-rs = "0.32"
 toml = "0.8"
