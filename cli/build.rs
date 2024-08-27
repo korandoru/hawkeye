@@ -24,11 +24,36 @@ use build_data::get_source_time;
 use shadow_rs::CARGO_METADATA;
 use shadow_rs::CARGO_TREE;
 
-fn main() -> shadow_rs::SdResult<()> {
-    if let Ok((dir, _)) = gix_discover::upwards(Path::new(env!("CARGO_MANIFEST_DIR"))) {
-        let git_refs_heads = dir.as_ref().join(".git/refs/heads");
-        println!("cargo::rerun-if-changed={}", git_refs_heads.display());
+fn configure_rerun_if_head_commit_changed() {
+    let mut current = Path::new(env!("CARGO_MANIFEST_DIR")).to_path_buf();
+
+    // skip if no valid-looking git repository could be found
+    while let Ok((dir, _)) = gix_discover::upwards(current.as_path()) {
+        match dir {
+            gix_discover::repository::Path::Repository(git_dir) => {
+                unreachable!(
+                    "build.rs should never be placed in a git bare repository: {}",
+                    git_dir.display()
+                );
+            }
+            gix_discover::repository::Path::WorkTree(work_dir) => {
+                let git_refs_heads = work_dir.join(".git/refs/heads");
+                println!("cargo::rerun-if-changed={}", git_refs_heads.display());
+                break;
+            }
+            gix_discover::repository::Path::LinkedWorkTree { work_dir, .. } => {
+                current = work_dir
+                    .parent()
+                    .expect("submodule's work_dir must have parent")
+                    .to_path_buf();
+                continue;
+            }
+        };
     }
+}
+
+fn main() -> shadow_rs::SdResult<()> {
+    configure_rerun_if_head_commit_changed();
 
     println!(
         "cargo::rustc-env=SOURCE_TIMESTAMP={}",
