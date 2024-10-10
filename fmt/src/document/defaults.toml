@@ -387,6 +387,18 @@ headerType = "SCRIPT_STYLE"
 extension = true
 filename = false
 
+[ROBOT_FRAMEWORK]
+pattern = "robot"
+headerType = "SCRIPT_STYLE"
+extension = true
+filename = false
+
+[ROBOT_FRAMEWORK_RESOURCE]
+pattern = "resource"
+headerType = "SCRIPT_STYLE"
+extension = true
+filename = false
+
 [RUBY]
 pattern = "rb"
 headerType = "SCRIPT_STYLE"
