@@ -24,17 +24,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-push-hawkeye:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, buildjet-4vcpu-ubuntu-2204-arm]
-        arch: [amd64, arm64]
-        include:
-          - os: ubuntu-latest
-            arch: amd64
-          - os: buildjet-4vcpu-ubuntu-2204-arm
-            arch: arm64
+  build-and-push-hawkeye-amd64:
+    runs-on: ubuntu-latest
     permissions:
       packages: write
     steps:
@@ -46,13 +37,30 @@ jobs:
           name: hawkeye
           file: Dockerfile
     outputs:
-      digest-${{ matrix.arch }}: ${{ steps.build.outputs.digest }}
+      digest: ${{ steps.build.outputs.digest }}
+
+  build-and-push-hawkeye-arm64:
+    runs-on: buildjet-4vcpu-ubuntu-2204-arm
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and push by digest
+        uses: ./.github/actions/docker-push-by-digest
+        id: build
+        with:
+          name: hawkeye
+          file: Dockerfile
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
 
   release-hawkeye:
     runs-on: ubuntu-latest
     permissions:
       packages: write
-    needs: build-and-push-hawkeye
+    needs:
+      - build-and-push-hawkeye-amd64
+      - build-and-push-hawkeye-arm64
     steps:
       - uses: actions/checkout@v4
       - name: Merge and push manifest
@@ -60,14 +68,16 @@ jobs:
         with:
           name: hawkeye
           digests: >
-            ${{ needs.build-and-push-hawkeye.outputs.digest-amd64 }}
-            ${{ needs.build-and-push-hawkeye.outputs.digest-arm64 }}
+            ${{needs.build-and-push-hawkeye-amd64.outputs.digest}}
+            ${{needs.build-and-push-hawkeye-arm64.outputs.digest}}
 
   release-native:
     runs-on: ubuntu-latest
     permissions:
       packages: write
-    needs: build-and-push-hawkeye
+    needs:
+      - build-and-push-hawkeye-amd64
+      - build-and-push-hawkeye-arm64
     steps:
       - uses: actions/checkout@v4
       - name: Merge and push manifest
@@ -75,5 +85,5 @@ jobs:
         with:
           name: hawkeye-native
           digests: >
-            ghcr.io/${{ github.repository_owner }}/hawkeye@${{ needs.build-and-push-hawkeye.outputs.digest-amd64 }}
-            ghcr.io/${{ github.repository_owner }}/hawkeye@${{ needs.build-and-push-hawkeye.outputs.digest-arm64 }}
+            ghcr.io/${{ github.repository_owner }}/hawkeye@${{needs.build-and-push-hawkeye-amd64.outputs.digest}}
+            ghcr.io/${{ github.repository_owner }}/hawkeye@${{needs.build-and-push-hawkeye-arm64.outputs.digest}}
