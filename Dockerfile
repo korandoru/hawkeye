@@ -15,7 +15,7 @@
 # Copyright 2024 - 2024, tison <wander4096@gmail.com> and the HawkEye contributors
 # SPDX-License-Identifier: Apache-2.0
 
-FROM public.ecr.aws/docker/library/rust:1.76.0-alpine3.19 as build
+FROM public.ecr.aws/docker/library/rust:1.81.0-alpine3.20 as build
 ENV RUSTFLAGS="-C target-feature=-crt-static"
 WORKDIR /build
 COPY . .
@@ -23,8 +23,8 @@ RUN apk fix && \
     apk --no-cache --update add git musl-dev && \
     cargo build --release --bin hawkeye
 
-FROM public.ecr.aws/docker/library/alpine:3.19.0
+FROM public.ecr.aws/docker/library/alpine:3.20.0
 COPY --from=build /build/target/release/hawkeye /bin/
-RUN apk fix && apk --no-cache --update add libgcc
+RUN apk fix && apk --no-cache --update add libgcc git
 WORKDIR /github/workspace/
 ENTRYPOINT ["/bin/hawkeye"]
