@@ -22,8 +22,7 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use anyhow::Context;
-use time::format_description;
-use time::format_description::FormatItem;
+use gix::date::time::format;
 
 use crate::config::Mapping;
 use crate::document::Document;
@@ -37,7 +36,6 @@ pub struct DocumentFactory {
 
     keywords: Vec<String>,
     git_file_attrs: HashMap<PathBuf, GitFileAttrs>,
-    year_formatter: Vec<FormatItem<'static>>,
 }
 
 impl DocumentFactory {
@@ -48,14 +46,12 @@ impl DocumentFactory {
         keywords: Vec<String>,
         git_file_attrs: HashMap<PathBuf, GitFileAttrs>,
     ) -> Self {
-        let year_formatter = format_description::parse("[year]").expect("cannot parse format");
         Self {
             mapping,
             definitions,
             properties,
             keywords,
             git_file_attrs,
-            year_formatter,
         }
     }
 
@@ -88,11 +84,13 @@ impl DocumentFactory {
         if let Some(attrs) = self.git_file_attrs.get(filepath) {
             properties.insert(
                 "hawkeye.git.fileCreatedYear".to_string(),
-                attrs.created_time.format(self.year_formatter.as_slice()),
+                // TODO(tisonkun): hack until git-date provide external constructor for
+                //  CustomFormat.
+                attrs.created_time.format(format::SHORT)[0..4].to_string(),
             );
             properties.insert(
                 "hawkeye.git.fileModifiedYear".to_string(),
-                attrs.modified_time.format(self.year_formatter.as_slice()),
+                attrs.modified_time.format(format::SHORT)[0..4].to_string(),
             );
         }
 
