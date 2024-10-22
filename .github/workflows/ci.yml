@@ -49,11 +49,16 @@ jobs:
         run: cargo fmt --all --check
 
   test:
+    strategy:
+      matrix:
+        rust-version: ["1.76.0", "stable"]
     name: Build and test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
+      - name: Delete rust-toolchain.toml
+        run: rm rust-toolchain.toml
       - run: cargo build --workspace --all-features --bins --tests --examples --benches
       - name: Run tests
         run: cargo test --workspace -- --nocapture

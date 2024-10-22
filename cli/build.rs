@@ -38,7 +38,7 @@ fn configure_rerun_if_head_commit_changed() {
             }
             gix_discover::repository::Path::WorkTree(work_dir) => {
                 let git_refs_heads = work_dir.join(".git/refs/heads");
-                println!("cargo::rerun-if-changed={}", git_refs_heads.display());
+                println!("cargo:rerun-if-changed={}", git_refs_heads.display());
                 break;
             }
             gix_discover::repository::Path::LinkedWorkTree { work_dir, .. } => {
@@ -56,7 +56,7 @@ fn main() -> shadow_rs::SdResult<()> {
     configure_rerun_if_head_commit_changed();
 
     println!(
-        "cargo::rustc-env=SOURCE_TIMESTAMP={}",
+        "cargo:rustc-env=SOURCE_TIMESTAMP={}",
         if let Ok(t) = get_source_time() {
             format_timestamp(t)
         } else {
