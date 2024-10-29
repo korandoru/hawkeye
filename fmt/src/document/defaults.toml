@@ -315,6 +315,12 @@ headerType = "LUA"
 extension = true
 filename = false
 
+[MAKEFILE]
+pattern = "Makefile"
+headerType = "SCRIPT_STYLE"
+extension = true
+filename = true
+
 [MOONBIT]
 pattern = "mbt"
 headerType = "DOUBLESLASH_STYLE"
