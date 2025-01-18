@@ -20,7 +20,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "5.8.1"
+version = "5.9.0"
 edition = "2021"
 authors = ["tison <wander4096@gmail.com>"]
 readme = "README.md"
@@ -29,7 +29,7 @@ repository = "https://github.com/korandoru/hawkeye/"
 rust-version = "1.76.0"
 
 [workspace.dependencies]
-hawkeye-fmt = { version = "5.8.1", path = "fmt" }
+hawkeye-fmt = { version = "5.9.0", path = "fmt" }
 
 anyhow = { version = "1.0.94" }
 build-data = { version = "0.2.1" }
