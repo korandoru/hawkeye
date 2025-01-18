@@ -22,7 +22,7 @@ on:
 
 jobs:
   build-and-push-hawkeye-amd64:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       packages: write
     steps:
@@ -37,7 +37,7 @@ jobs:
       digest: ${{ steps.build.outputs.digest }}
 
   build-and-push-hawkeye-arm64:
-    runs-on: buildjet-4vcpu-ubuntu-2204-arm
+    runs-on: ubuntu-24.04-arm
     permissions:
       packages: write
     steps:
@@ -52,7 +52,7 @@ jobs:
       digest: ${{ steps.build.outputs.digest }}
 
   release-hawkeye:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       packages: write
     needs:
@@ -69,7 +69,7 @@ jobs:
             ${{needs.build-and-push-hawkeye-arm64.outputs.digest}}
 
   release-native:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       packages: write
     needs:

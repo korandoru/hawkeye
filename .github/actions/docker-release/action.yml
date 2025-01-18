@@ -41,7 +41,6 @@ runs:
         tags: |
           type=semver,pattern={{raw}}
           type=semver,pattern=v{{major}}
-          type=sha,format=long
           type=edge,branch=main
     - name: Push manifest
       shell: bash
