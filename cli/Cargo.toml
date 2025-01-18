@@ -31,10 +31,10 @@ clap = { workspace = true }
 const_format = { workspace = true }
 hawkeye-fmt = { workspace = true }
 log = { workspace = true }
-logforth = { version = "0.13", features = ["env-filter"] }
+logforth = { version = "0.19.0" }
 shadow-rs = { workspace = true }
 
 [build-dependencies]
 build-data = { workspace = true }
 shadow-rs = { workspace = true }
-gix-discover = "0.35"
+gix-discover = { version = "0.37.0" }

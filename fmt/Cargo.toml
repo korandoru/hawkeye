@@ -27,13 +27,13 @@ repository.workspace = true
 
 [dependencies]
 anyhow = { workspace = true }
-gix = { version = "0.66", default-features = false, features = [
+gix = { version = "0.68.0", default-features = false, features = [
     "blob-diff",
     "excludes",
 ] }
-ignore = "0.4"
+ignore = { version = "0.4.23" }
 log = { workspace = true }
-regex = "1.11"
-serde = { version = "1.0", features = ["derive"] }
+regex = { version = "1.11.1" }
+serde = { version = "1.0.216", features = ["derive"] }
 toml = { workspace = true }
-walkdir = "2.5"
+walkdir = { version = "2.5.0" }
