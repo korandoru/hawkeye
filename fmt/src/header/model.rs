@@ -45,7 +45,7 @@ impl HeaderDef {
     pub fn is_skip_line(&self, line: &str) -> bool {
         self.skip_line_pattern
             .as_ref()
-            .map_or(false, |pattern| pattern.is_match(line))
+            .is_some_and(|pattern| pattern.is_match(line))
     }
 
     /// Tells if the given content line is the first line of a possible header of this definition

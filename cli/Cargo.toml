@@ -28,7 +28,7 @@ clap = { workspace = true }
 const_format = { workspace = true }
 hawkeye-fmt = { workspace = true }
 log = { workspace = true }
-logforth = { version = "0.19.0" }
+logforth = { version = "0.21.0" }
 shadow-rs = { workspace = true }
 
 [build-dependencies]

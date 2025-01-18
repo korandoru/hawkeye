@@ -119,11 +119,12 @@ pub fn resolve_file_attrs(
 
         let tree = this_commit.tree()?;
         let mut changes = tree.changes()?;
-        changes.track_path().for_each_to_obtain_tree_with_cache(
-            &prev_commit.tree()?,
-            &mut cache,
-            |change| {
-                let filepath = gix::path::from_bstr(change.location);
+        changes
+            .options(|opts| {
+                opts.track_path();
+            })
+            .for_each_to_obtain_tree_with_cache(&prev_commit.tree()?, &mut cache, |change| {
+                let filepath = gix::path::from_bstr(change.location());
                 let filepath = workdir.join(filepath);
                 match attrs.entry(filepath) {
                     Entry::Occupied(mut ent) => {
@@ -142,8 +143,7 @@ pub fn resolve_file_attrs(
                 }
 
                 Ok::<_, Infallible>(Default::default())
-            },
-        )?;
+            })?;
         prev_commit = this_commit;
         cache.clear_resource_cache();
     }
