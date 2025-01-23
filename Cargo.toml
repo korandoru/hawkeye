@@ -13,10 +13,7 @@
 # limitations under the License.
 
 [workspace]
-members = [
-    "cli",
-    "fmt",
-]
+members = ["cli", "fmt"]
 resolver = "2"
 
 [workspace.package]
@@ -45,13 +42,22 @@ shared-version = true
 tag-name = "v{{version}}"
 pre-release-commit-message = "chore: release v{{version}}"
 
+# Config for 'cargo dist'
 [workspace.metadata.dist]
-cargo-dist-version = "0.12.0"
-ci = ["github"]
+# The preferred cargo-dist version to use in CI (Cargo.toml SemVer syntax)
+cargo-dist-version = "0.22.1"
+# CI backends to support
+ci = "github"
+# The installers to generate for each app
 installers = ["shell"]
+# Target platforms to build apps for (Rust target-triple syntax)
 targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc"]
+# Which actions to run on pull requests
 pr-run-mode = "plan"
+# Whether to install an updater program
 install-updater = false
+# Path that installers should place binaries in
+install-path = "CARGO_HOME"
 
 # 'cargo dist' build with this profile
 [profile.dist]
