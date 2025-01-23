@@ -38,3 +38,7 @@ diff_files(basedir / "load_header_path" / "main.rs.expected", basedir / "load_he
 
 subprocess.run([hawkeye, "format", "--fail-if-unknown", "--fail-if-updated=false", "--dry-run"], cwd=(basedir / "regression_blank_line"), check=True)
 diff_files(basedir / "regression_blank_line" / "main.rs.expected", basedir / "regression_blank_line" / "main.rs.formatted")
+
+# adds a copyright header to a utf-8 with bom encoded file. The header is inserted before the bom. Which moves the bom behing the added copyright header
+subprocess.run([hawkeye, "format", "--fail-if-unknown", "--fail-if-updated=false", "--dry-run"], cwd=(basedir / "bom_issue"), check=True)
+diff_files(basedir / "bom_issue" / "headerless_bom.cs.expected", basedir / "bom_issue" / "headerless_bom.cs")
