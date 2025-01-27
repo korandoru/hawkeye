@@ -19,7 +19,7 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use anyhow::Context;
-use gix::date::time::format;
+use gix::date::time::CustomFormat;
 
 use crate::config::Mapping;
 use crate::document::Document;
@@ -79,15 +79,14 @@ impl DocumentFactory {
         properties.insert("hawkeye.core.filename".to_string(), filename);
 
         if let Some(attrs) = self.git_file_attrs.get(filepath) {
+            const YEAR_FORMAT: CustomFormat = CustomFormat::new("%Y");
             properties.insert(
                 "hawkeye.git.fileCreatedYear".to_string(),
-                // TODO(tisonkun): hack until git-date provide external constructor for
-                //  CustomFormat.
-                attrs.created_time.format(format::SHORT)[0..4].to_string(),
+                attrs.created_time.format(YEAR_FORMAT),
             );
             properties.insert(
                 "hawkeye.git.fileModifiedYear".to_string(),
-                attrs.modified_time.format(format::SHORT)[0..4].to_string(),
+                attrs.modified_time.format(YEAR_FORMAT),
             );
         }
 

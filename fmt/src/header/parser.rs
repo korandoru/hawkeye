@@ -75,7 +75,19 @@ fn find_first_position(
     file_content: &mut FileContent,
     header_def: &HeaderDef,
 ) -> usize {
+    const UTF8_BOM: [u8; 3] = [0xEF, 0xBB, 0xBF];
+
     let mut begin_pos = 0;
+
+    if let Some(l) = line.as_ref() {
+        // skip UTF-8 BOM if exists
+        if l.as_bytes().starts_with(&UTF8_BOM) {
+            log::debug!("Detected UTF-8 BOM for {}; skip", file_content);
+            begin_pos = 3;
+            file_content.reset_to(3);
+        }
+    }
+
     if header_def.skip_line_pattern.is_some() {
         // the format expect to find lines to be skipped
         while line
@@ -104,8 +116,17 @@ fn find_first_position(
             begin_pos = 0;
             file_content.reset();
             *line = file_content.next_line();
+
+            // recheck for UTF-8 BOM
+            if let Some(l) = line.as_ref() {
+                if l.as_bytes().starts_with(&UTF8_BOM) {
+                    begin_pos = 3;
+                    file_content.reset_to(3);
+                }
+            }
         }
     }
+
     begin_pos
 }
 

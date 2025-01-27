@@ -38,3 +38,6 @@ diff_files(basedir / "load_header_path" / "main.rs.expected", basedir / "load_he
 
 subprocess.run([hawkeye, "format", "--fail-if-unknown", "--fail-if-updated=false", "--dry-run"], cwd=(basedir / "regression_blank_line"), check=True)
 diff_files(basedir / "regression_blank_line" / "main.rs.expected", basedir / "regression_blank_line" / "main.rs.formatted")
+
+subprocess.run([hawkeye, "format", "--fail-if-unknown", "--fail-if-updated=false", "--dry-run"], cwd=(basedir / "bom_issue"), check=True)
+diff_files(basedir / "bom_issue" / "headerless_bom.cs.expected", basedir / "bom_issue" / "headerless_bom.cs.formatted")

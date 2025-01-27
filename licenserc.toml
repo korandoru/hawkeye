@@ -22,6 +22,7 @@ excludes = [
     "fmt/tests/content/**",
     "tests/load_header_path/**",
     "tests/regression_blank_line/**",
+    "tests/bom_issue/**",
 
     # Generated files
     ".github/workflows/release.yml",

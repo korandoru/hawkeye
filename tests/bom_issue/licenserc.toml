@@ -1,0 +1,11 @@
+baseDir = "."
+headerPath = "license.txt"
+
+excludes = ["*.toml", "*.expected"]
+
+additionalHeaders = [
+    "style.toml"
+]
+
+[mapping.HASH_SOURCE_STYLE]
+extensions = ["cs"]
