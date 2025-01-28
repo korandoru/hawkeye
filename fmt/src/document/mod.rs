@@ -18,23 +18,32 @@ use std::fs::File;
 use std::io::BufRead;
 use std::path::PathBuf;
 
-use anyhow::Context;
-
 use crate::header::matcher::HeaderMatcher;
 use crate::header::model::HeaderDef;
 use crate::header::parser::parse_header;
 use crate::header::parser::FileContent;
 use crate::header::parser::HeaderParser;
+use anyhow::Context;
+use minijinja::{context, Environment};
+use serde::{Deserialize, Serialize};
 
 pub mod factory;
 pub mod model;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Attributes {
+    pub filename: Option<String>,
+    pub git_created_time: Option<String>,
+    pub git_modified_time: Option<String>,
+}
 
 #[derive(Debug)]
 pub struct Document {
     pub filepath: PathBuf,
 
     header_def: HeaderDef,
-    properties: HashMap<String, String>,
+    props: HashMap<String, String>,
+    attrs: Attributes,
     parser: HeaderParser,
 }
 
@@ -43,14 +52,16 @@ impl Document {
         filepath: PathBuf,
         header_def: HeaderDef,
         keywords: &[String],
-        properties: HashMap<String, String>,
+        props: HashMap<String, String>,
+        attrs: Attributes,
     ) -> anyhow::Result<Option<Self>> {
         match FileContent::new(&filepath) {
             Ok(content) => Ok(Some(Self {
                 parser: parse_header(content, &header_def, keywords),
                 filepath,
                 header_def,
-                properties,
+                props,
+                attrs,
             })),
             Err(e) => {
                 if matches!(e.kind(), std::io::ErrorKind::InvalidData) {
@@ -145,7 +156,15 @@ impl Document {
     }
 
     pub(crate) fn merge_properties(&self, s: &str) -> String {
-        merge_properties(&self.properties, s)
+        let mut env = Environment::new();
+        env.add_template("template", s).unwrap();
+
+        let tmpl = env.get_template("template").unwrap();
+        tmpl.render(context! {
+            props => &self.props,
+            attrs => &self.attrs,
+        })
+        .unwrap()
     }
 }
 

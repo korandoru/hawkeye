@@ -33,7 +33,7 @@ build-data = { version = "0.2.1" }
 clap = { version = "4.5.23", features = ["derive"] }
 const_format = { version = "0.2.34" }
 log = { version = "0.4.22", features = ["kv_serde", "serde"] }
-shadow-rs = { version = "0.37.0" }
+shadow-rs = { version = "0.38.0" }
 toml = { version = "0.8.19" }
 
 [workspace.metadata.release]
