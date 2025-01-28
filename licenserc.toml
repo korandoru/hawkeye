@@ -20,9 +20,8 @@ excludes = [
 
     # Test files
     "fmt/tests/content/**",
-    "tests/load_header_path/**",
-    "tests/regression_blank_line/**",
-    "tests/bom_issue/**",
+    "tests/**",
+    "!tests/it.py",
 
     # Generated files
     ".github/workflows/release.yml",
