@@ -51,18 +51,22 @@ impl Document {
     pub fn new(
         filepath: PathBuf,
         header_def: HeaderDef,
+        header: &HeaderMatcher,
         keywords: &[String],
         props: HashMap<String, String>,
         attrs: Attributes,
     ) -> anyhow::Result<Option<Self>> {
         match FileContent::new(&filepath) {
-            Ok(content) => Ok(Some(Self {
-                parser: parse_header(content, &header_def, keywords),
-                filepath,
-                header_def,
-                props,
-                attrs,
-            })),
+            Ok(content) => {
+                let parser = parse_header(content, &header_def, keywords);
+                Ok(Some(Self {
+                    parser,
+                    filepath,
+                    header_def,
+                    props,
+                    attrs,
+                }))
+            }
             Err(e) => {
                 if matches!(e.kind(), std::io::ErrorKind::InvalidData) {
                     log::debug!("skip non-textual file: {}", filepath.display());

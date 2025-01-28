@@ -35,10 +35,10 @@ pub trait Callback {
     fn on_unknown(&mut self, path: &Path);
 
     /// Called when the header is matched.
-    fn on_matched(&mut self, header: &HeaderMatcher, document: Document) -> anyhow::Result<()>;
+    fn on_matched(&mut self, document: Document) -> anyhow::Result<()>;
 
     /// Called when the header is not matched.
-    fn on_not_matched(&mut self, header: &HeaderMatcher, document: Document) -> anyhow::Result<()>;
+    fn on_not_matched(&mut self, document: Document) -> anyhow::Result<()>;
 }
 
 #[allow(clippy::type_complexity)]
@@ -114,7 +114,7 @@ pub fn check_license_header<C: Callback>(
     );
 
     for file in selected_files {
-        let document = match document_factory.create_document(&file)? {
+        let document = match document_factory.create_document(&file, &header_matcher)? {
             Some(document) => document,
             None => {
                 callback.on_unknown(&file);
@@ -128,9 +128,9 @@ pub fn check_license_header<C: Callback>(
             .header_matched(&header_matcher, config.strict_check)
             .context("failed to match header")?
         {
-            callback.on_matched(&header_matcher, document)?;
+            callback.on_matched(document)?;
         } else {
-            callback.on_not_matched(&header_matcher, document)?;
+            callback.on_not_matched(document)?;
         }
     }
 
