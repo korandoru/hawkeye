@@ -33,8 +33,8 @@ pub mod model;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Attributes {
     pub filename: Option<String>,
-    pub git_created_time: Option<String>,
-    pub git_modified_time: Option<String>,
+    pub git_file_created_year: Option<String>,
+    pub git_file_modified_year: Option<String>,
     pub git_authors: Vec<String>,
 }
 

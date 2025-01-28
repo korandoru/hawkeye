@@ -74,11 +74,11 @@ impl DocumentFactory {
             filename: filepath
                 .file_name()
                 .map(|s| s.to_string_lossy().to_string()),
-            git_created_time: self
+            git_file_created_year: self
                 .git_file_attrs
                 .get(filepath)
                 .map(|attrs| attrs.created_time.format(YEAR_FORMAT)),
-            git_modified_time: self
+            git_file_modified_year: self
                 .git_file_attrs
                 .get(filepath)
                 .map(|attrs| attrs.modified_time.format(YEAR_FORMAT)),

@@ -2,8 +2,8 @@
 // props["copyrightOwner"]=Mike Delaney <dev@mldelaney.io>
 //
 // attrs.filename=main.rs
-// attrs.git_created_time=2025
-// attrs.git_modified_time=2025
+// attrs.git_file_created_year=2025
+// attrs.git_file_modified_year=2025
 // attrs.git_authors=tison
 
 fn main() {
