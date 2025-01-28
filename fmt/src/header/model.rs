@@ -61,9 +61,9 @@ impl HeaderDef {
     }
 }
 
-pub fn default_headers() -> anyhow::Result<HashMap<String, HeaderDef>> {
+pub fn default_headers() -> HashMap<String, HeaderDef> {
     let defaults = include_str!("defaults.toml");
-    deserialize_header_definitions(defaults.to_string())
+    deserialize_header_definitions(defaults.to_string()).unwrap()
 }
 
 pub fn deserialize_header_definitions(value: String) -> anyhow::Result<HashMap<String, HeaderDef>> {

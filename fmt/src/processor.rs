@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
@@ -92,12 +93,23 @@ pub fn check_license_header<C: Callback>(
     };
 
     let definitions = {
-        let mut defs = default_headers()?;
+        let mut defs = HashMap::new();
+        for (k, v) in default_headers() {
+            if defs.contains_key(&k) {
+                anyhow::bail!("Header definition {k} is defined more than once");
+            }
+            defs.insert(k, v);
+        }
         for additional_header in &config.additional_headers {
             let additional_defs = fs::read_to_string(additional_header)
                 .with_context(|| format!("cannot load header definitions: {additional_header}"))
                 .and_then(deserialize_header_definitions)?;
-            defs.extend(additional_defs);
+            for (k, v) in additional_defs {
+                if defs.contains_key(&k) {
+                    anyhow::bail!("Header definition {k} is defined more than once");
+                }
+                defs.insert(k, v);
+            }
         }
         defs
     };
