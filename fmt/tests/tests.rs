@@ -21,7 +21,7 @@ use hawkeye_fmt::header::parser::FileContent;
 #[test]
 fn test_remove_file_only_header() {
     let file = Path::new("tests/content/empty.py");
-    let defs = default_headers().unwrap();
+    let defs = default_headers();
     let def = defs.get("script_style").unwrap().clone();
     let keywords = vec!["copyright".to_string()];
 
@@ -35,7 +35,7 @@ fn test_remove_file_only_header() {
 #[test]
 fn test_two_headers_should_only_remove_the_first() {
     let file = Path::new("tests/content/two_headers.rs");
-    let defs = default_headers().unwrap();
+    let defs = default_headers();
     let def = defs.get("doubleslash_style").unwrap().clone();
     let keywords = vec!["copyright".to_string()];
 

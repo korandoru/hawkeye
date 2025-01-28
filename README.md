@@ -166,13 +166,13 @@ filenames = ["..."]  # e.g. "Dockerfile.native"
 extensions = ["..."] # e.g. "cc"
 
 # Properties to fulfill the template.
-# For a defined key-value pair, you can use ${key} in the header template, which will be substituted
-# with the corresponding value.
-#
-# Preset properties:
-# * 'hawkeye.core.filename' is the current file name, like: pom.xml.
+# For a defined key-value pair, you can use {{props["key"]}} in the header template, which will be
+# substituted with the corresponding value.
 [properties]
 inceptionYear = 2023
+
+# There are also preset attributes that can be used in the header template (no need to surround them with `props[]`).:
+# * 'attrs.filename' is the current file name, like: pom.xml.
 
 # Options to configure Git features.
 [git]
@@ -185,8 +185,8 @@ inceptionYear = 2023
 ignore = 'auto'
 # If enabled, populate file attrs determinated by Git; possible value: ['auto', 'enable', 'disable']
 # Attributes contains:
-#   * 'hawkeye.git.fileCreatedYear'
-#   * 'hawkeye.git.fileModifiedYear'
+#   * 'attrs.git_file_created_year'
+#   * 'attrs.git_file_modified_year'
 # 'auto' means this feature tries to be enabled with:
 #   * gix - if `basedir` is in a Git repository.
 # 'enable' means always enabled with gix; failed if it is impossible.

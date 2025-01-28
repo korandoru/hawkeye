@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::collections::BTreeSet;
 use std::collections::HashMap;
 use std::fs;
 use std::fs::File;
@@ -19,6 +20,10 @@ use std::io::BufRead;
 use std::path::PathBuf;
 
 use anyhow::Context;
+use minijinja::context;
+use minijinja::Environment;
+use serde::Deserialize;
+use serde::Serialize;
 
 use crate::header::matcher::HeaderMatcher;
 use crate::header::model::HeaderDef;
@@ -29,12 +34,21 @@ use crate::header::parser::HeaderParser;
 pub mod factory;
 pub mod model;
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Attributes {
+    pub filename: Option<String>,
+    pub git_file_created_year: Option<String>,
+    pub git_file_modified_year: Option<String>,
+    pub git_authors: BTreeSet<String>,
+}
+
 #[derive(Debug)]
 pub struct Document {
     pub filepath: PathBuf,
 
     header_def: HeaderDef,
-    properties: HashMap<String, String>,
+    props: HashMap<String, String>,
+    attrs: Attributes,
     parser: HeaderParser,
 }
 
@@ -43,14 +57,16 @@ impl Document {
         filepath: PathBuf,
         header_def: HeaderDef,
         keywords: &[String],
-        properties: HashMap<String, String>,
+        props: HashMap<String, String>,
+        attrs: Attributes,
     ) -> anyhow::Result<Option<Self>> {
         match FileContent::new(&filepath) {
             Ok(content) => Ok(Some(Self {
                 parser: parse_header(content, &header_def, keywords),
                 filepath,
                 header_def,
-                properties,
+                props,
+                attrs,
             })),
             Err(e) => {
                 if matches!(e.kind(), std::io::ErrorKind::InvalidData) {
@@ -79,7 +95,7 @@ impl Document {
         &self,
         header: &HeaderMatcher,
         strict_check: bool,
-    ) -> std::io::Result<bool> {
+    ) -> anyhow::Result<bool> {
         if strict_check {
             let file_header = {
                 let mut lines = self.read_file_first_lines(header)?.join("\n");
@@ -88,13 +104,13 @@ impl Document {
             };
             let expected_header = {
                 let raw_header = header.build_for_definition(&self.header_def);
-                let resolved_header = self.merge_properties(&raw_header);
+                let resolved_header = self.merge_properties(&raw_header)?;
                 resolved_header.replace(" *\r?\n", "\n")
             };
             Ok(file_header.contains(expected_header.as_str()))
         } else {
             let file_header = self.read_file_header_on_one_line(header)?;
-            let expected_header = self.merge_properties(header.header_content_one_line());
+            let expected_header = self.merge_properties(header.header_content_one_line())?;
             Ok(file_header.contains(expected_header.as_str()))
         }
     }
@@ -121,13 +137,14 @@ impl Document {
         Ok(file_header)
     }
 
-    pub fn update_header(&mut self, header: &HeaderMatcher) {
+    pub fn update_header(&mut self, header: &HeaderMatcher) -> anyhow::Result<()> {
         let header_str = header.build_for_definition(&self.header_def);
-        let header_str = self.merge_properties(&header_str);
+        let header_str = self.merge_properties(&header_str)?;
         let begin_pos = self.parser.begin_pos;
         self.parser
             .file_content
             .insert(begin_pos, header_str.as_str());
+        Ok(())
     }
 
     pub fn remove_header(&mut self) {
@@ -144,15 +161,17 @@ impl Document {
             .context(format!("cannot save document {}", filepath.display()))
     }
 
-    pub(crate) fn merge_properties(&self, s: &str) -> String {
-        merge_properties(&self.properties, s)
-    }
-}
+    pub(crate) fn merge_properties(&self, s: &str) -> anyhow::Result<String> {
+        let mut env = Environment::new();
+        env.add_template("template", s)
+            .context("malformed template")?;
 
-pub fn merge_properties(properties: &HashMap<String, String>, s: &str) -> String {
-    let mut result = s.to_string();
-    for (key, value) in properties {
-        result = result.replace(&format!("${{{key}}}"), value);
+        let tmpl = env.get_template("template").expect("template must exist");
+        let mut result = tmpl.render(context! {
+            props => &self.props,
+            attrs => &self.attrs,
+        })?;
+        result.push('\n');
+        Ok(result)
     }
-    result
 }

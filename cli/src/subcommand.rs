@@ -143,11 +143,11 @@ impl Callback for FormatContext {
     fn on_not_matched(&mut self, header: &HeaderMatcher, mut doc: Document) -> anyhow::Result<()> {
         if doc.header_detected() {
             doc.remove_header();
-            doc.update_header(header);
+            doc.update_header(header)?;
             self.updated
                 .push(format!("{}=replaced", doc.filepath.display()));
         } else {
-            doc.update_header(header);
+            doc.update_header(header)?;
             self.updated
                 .push(format!("{}=added", doc.filepath.display()));
         }

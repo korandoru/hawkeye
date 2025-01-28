@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use std::collections::hash_map::Entry;
+use std::collections::BTreeSet;
 use std::collections::HashMap;
 use std::convert::Infallible;
 use std::path::Path;
@@ -87,6 +88,7 @@ fn resolve_features(config: &config::Git) -> FeatureGate {
 pub struct GitFileAttrs {
     pub created_time: gix::date::Time,
     pub modified_time: gix::date::Time,
+    pub authors: BTreeSet<String>,
 }
 
 pub fn resolve_file_attrs(
@@ -116,6 +118,7 @@ pub fn resolve_file_attrs(
         let info = info?;
         let this_commit = info.object()?;
         let time = this_commit.time()?;
+        let author = this_commit.author()?.name.to_string();
 
         let tree = this_commit.tree()?;
         let mut changes = tree.changes()?;
@@ -128,16 +131,20 @@ pub fn resolve_file_attrs(
                 let filepath = workdir.join(filepath);
                 match attrs.entry(filepath) {
                     Entry::Occupied(mut ent) => {
-                        let attrs: &GitFileAttrs = ent.get();
-                        ent.insert(GitFileAttrs {
-                            created_time: time.min(attrs.created_time),
-                            modified_time: time.max(attrs.modified_time),
-                        });
+                        let attrs: &mut GitFileAttrs = ent.get_mut();
+                        attrs.created_time = time.min(attrs.created_time);
+                        attrs.modified_time = time.max(attrs.modified_time);
+                        attrs.authors.insert(author.clone());
                     }
                     Entry::Vacant(ent) => {
                         ent.insert(GitFileAttrs {
                             created_time: time,
                             modified_time: time,
+                            authors: {
+                                let mut authors = BTreeSet::new();
+                                authors.insert(author.clone());
+                                authors
+                            },
                         });
                     }
                 }

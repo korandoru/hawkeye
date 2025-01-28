@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::borrow::Cow;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::path::Path;
@@ -22,6 +21,7 @@ use anyhow::Context;
 use gix::date::time::CustomFormat;
 
 use crate::config::Mapping;
+use crate::document::Attributes;
 use crate::document::Document;
 use crate::git::GitFileAttrs;
 use crate::header::model::HeaderDef;
@@ -69,32 +69,34 @@ impl DocumentFactory {
             .ok_or_else(|| std::io::Error::other(format!("header type {header_type} not found")))
             .with_context(|| format!("cannot to create document: {}", filepath.display()))?;
 
-        let mut properties = self.properties.clone();
+        let props = self.properties.clone();
 
-        let filename = filepath
-            .file_name()
-            .map(|s| s.to_string_lossy())
-            .unwrap_or_else(|| Cow::Borrowed("<unknown>"))
-            .to_string();
-        properties.insert("hawkeye.core.filename".to_string(), filename);
-
-        if let Some(attrs) = self.git_file_attrs.get(filepath) {
-            const YEAR_FORMAT: CustomFormat = CustomFormat::new("%Y");
-            properties.insert(
-                "hawkeye.git.fileCreatedYear".to_string(),
-                attrs.created_time.format(YEAR_FORMAT),
-            );
-            properties.insert(
-                "hawkeye.git.fileModifiedYear".to_string(),
-                attrs.modified_time.format(YEAR_FORMAT),
-            );
-        }
+        const YEAR_FORMAT: CustomFormat = CustomFormat::new("%Y");
+        let attrs = Attributes {
+            filename: filepath
+                .file_name()
+                .map(|s| s.to_string_lossy().to_string()),
+            git_file_created_year: self
+                .git_file_attrs
+                .get(filepath)
+                .map(|attrs| attrs.created_time.format(YEAR_FORMAT)),
+            git_file_modified_year: self
+                .git_file_attrs
+                .get(filepath)
+                .map(|attrs| attrs.modified_time.format(YEAR_FORMAT)),
+            git_authors: self
+                .git_file_attrs
+                .get(filepath)
+                .map(|attrs| attrs.authors.clone())
+                .unwrap_or_default(),
+        };
 
         Document::new(
             filepath.to_path_buf(),
             header_def.clone(),
             &self.keywords,
-            properties,
+            props,
+            attrs,
         )
     }
 }
