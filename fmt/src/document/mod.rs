@@ -35,6 +35,7 @@ pub struct Attributes {
     pub filename: Option<String>,
     pub git_created_time: Option<String>,
     pub git_modified_time: Option<String>,
+    pub git_authors: Vec<String>,
 }
 
 #[derive(Debug)]
@@ -158,9 +159,10 @@ impl Document {
 
     pub(crate) fn merge_properties(&self, s: &str) -> anyhow::Result<String> {
         let mut env = Environment::new();
-        env.add_template("template", s)?;
+        env.add_template("template", s)
+            .context("malformed template")?;
 
-        let tmpl = env.get_template("template")?;
+        let tmpl = env.get_template("template").expect("template must exist");
         let mut result = tmpl.render(context! {
             props => &self.props,
             attrs => &self.attrs,

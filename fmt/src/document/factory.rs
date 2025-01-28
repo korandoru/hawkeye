@@ -18,7 +18,7 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use crate::config::Mapping;
-use crate::document::{Document, Attributes};
+use crate::document::{Attributes, Document};
 use crate::git::GitFileAttrs;
 use crate::header::model::HeaderDef;
 use anyhow::Context;
@@ -82,6 +82,11 @@ impl DocumentFactory {
                 .git_file_attrs
                 .get(filepath)
                 .map(|attrs| attrs.modified_time.format(YEAR_FORMAT)),
+            git_authors: self
+                .git_file_attrs
+                .get(filepath)
+                .map(|attrs| attrs.authors.clone())
+                .unwrap_or_default(),
         };
 
         Document::new(

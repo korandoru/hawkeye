@@ -87,6 +87,7 @@ fn resolve_features(config: &config::Git) -> FeatureGate {
 pub struct GitFileAttrs {
     pub created_time: gix::date::Time,
     pub modified_time: gix::date::Time,
+    pub authors: Vec<String>,
 }
 
 pub fn resolve_file_attrs(
@@ -116,6 +117,7 @@ pub fn resolve_file_attrs(
         let info = info?;
         let this_commit = info.object()?;
         let time = this_commit.time()?;
+        let author = this_commit.author()?.name.to_string();
 
         let tree = this_commit.tree()?;
         let mut changes = tree.changes()?;
@@ -128,16 +130,16 @@ pub fn resolve_file_attrs(
                 let filepath = workdir.join(filepath);
                 match attrs.entry(filepath) {
                     Entry::Occupied(mut ent) => {
-                        let attrs: &GitFileAttrs = ent.get();
-                        ent.insert(GitFileAttrs {
-                            created_time: time.min(attrs.created_time),
-                            modified_time: time.max(attrs.modified_time),
-                        });
+                        let attrs: &mut GitFileAttrs = ent.get_mut();
+                        attrs.created_time = time.min(attrs.created_time);
+                        attrs.modified_time = time.max(attrs.modified_time);
+                        attrs.authors.push(author);
                     }
                     Entry::Vacant(ent) => {
                         ent.insert(GitFileAttrs {
                             created_time: time,
                             modified_time: time,
+                            authors: vec![author],
                         });
                     }
                 }
