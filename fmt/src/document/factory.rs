@@ -17,12 +17,14 @@ use std::collections::HashSet;
 use std::path::Path;
 use std::path::PathBuf;
 
-use crate::config::Mapping;
-use crate::document::{Attributes, Document};
-use crate::git::GitFileAttrs;
-use crate::header::model::HeaderDef;
 use anyhow::Context;
 use gix::date::time::CustomFormat;
+
+use crate::config::Mapping;
+use crate::document::Attributes;
+use crate::document::Document;
+use crate::git::GitFileAttrs;
+use crate::header::model::HeaderDef;
 
 pub struct DocumentFactory {
     mapping: HashSet<Mapping>,

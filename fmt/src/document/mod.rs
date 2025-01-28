@@ -18,14 +18,17 @@ use std::fs::File;
 use std::io::BufRead;
 use std::path::PathBuf;
 
+use anyhow::Context;
+use minijinja::context;
+use minijinja::Environment;
+use serde::Deserialize;
+use serde::Serialize;
+
 use crate::header::matcher::HeaderMatcher;
 use crate::header::model::HeaderDef;
 use crate::header::parser::parse_header;
 use crate::header::parser::FileContent;
 use crate::header::parser::HeaderParser;
-use anyhow::Context;
-use minijinja::{context, Environment};
-use serde::{Deserialize, Serialize};
 
 pub mod factory;
 pub mod model;
@@ -167,7 +170,7 @@ impl Document {
             props => &self.props,
             attrs => &self.attrs,
         })?;
-        result.push_str("\n");
+        result.push('\n');
         Ok(result)
     }
 }
