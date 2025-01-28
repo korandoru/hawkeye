@@ -42,7 +42,7 @@ To check license headers in GitHub Actions, add a step in your GitHub workflow:
 
 ```yaml
 - name: Check License Header
-  uses: korandoru/hawkeye@v5
+  uses: korandoru/hawkeye@v6
 ```
 
 ### Docker
@@ -77,7 +77,7 @@ cargo install hawkeye
 Instead of `cargo install`, you can install `hawkeye` as a prebuilt binary by:
 
 ```shell
-export VERSION=v5.3.1
+export VERSION=v6.0.0
 curl --proto '=https' --tlsv1.2 -LsSf https://github.com/korandoru/hawkeye/releases/download/$VERSION/hawkeye-installer.sh | sh
 ```
 
