@@ -133,13 +133,13 @@ pub fn resolve_file_attrs(
                         let attrs: &mut GitFileAttrs = ent.get_mut();
                         attrs.created_time = time.min(attrs.created_time);
                         attrs.modified_time = time.max(attrs.modified_time);
-                        attrs.authors.push(author);
+                        attrs.authors.push(author.clone());
                     }
                     Entry::Vacant(ent) => {
                         ent.insert(GitFileAttrs {
                             created_time: time,
                             modified_time: time,
-                            authors: vec![author],
+                            authors: vec![author.clone()],
                         });
                     }
                 }
