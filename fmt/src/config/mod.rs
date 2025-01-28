@@ -21,12 +21,11 @@ use std::path::PathBuf;
 use serde::de::Error;
 use serde::Deserialize;
 use serde::Deserializer;
-use serde::Serialize;
 use toml::Value;
 
 use crate::default_true;
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct Config {
     #[serde(default = "default_cwd")]
@@ -57,7 +56,7 @@ pub struct Config {
     pub additional_headers: Vec<String>,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Deserialize)]
 pub struct Git {
     pub attrs: FeatureGate,
     pub ignore: FeatureGate,
@@ -72,7 +71,7 @@ impl Default for Git {
     }
 }
 
-#[derive(Debug, Clone, Copy, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Ord, PartialOrd, Eq, PartialEq, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum FeatureGate {
     /// Determinate whether turn on the feature.
@@ -109,7 +108,7 @@ impl FeatureGate {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Mapping {
     Filename {
         pattern: String,

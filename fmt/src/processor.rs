@@ -82,7 +82,11 @@ pub fn check_license_header<C: Callback>(
         let mut mapping = config.mapping.clone();
         if config.use_default_mapping {
             let default_mapping = default_mapping();
-            mapping.extend(default_mapping);
+            for m in default_mapping {
+                if !mapping.contains(&m) {
+                    mapping.insert(m);
+                }
+            }
         }
         mapping
     };

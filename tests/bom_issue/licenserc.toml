@@ -7,5 +7,5 @@ additionalHeaders = [
     "style.toml"
 ]
 
-[mapping.HASH_SOURCE_STYLE]
+[mapping.CS_TEST_STYLE]
 extensions = ["cs"]
