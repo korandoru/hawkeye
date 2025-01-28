@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use std::collections::hash_map::Entry;
+use std::collections::BTreeSet;
 use std::collections::HashMap;
 use std::convert::Infallible;
 use std::path::Path;
@@ -87,7 +88,7 @@ fn resolve_features(config: &config::Git) -> FeatureGate {
 pub struct GitFileAttrs {
     pub created_time: gix::date::Time,
     pub modified_time: gix::date::Time,
-    pub authors: Vec<String>,
+    pub authors: BTreeSet<String>,
 }
 
 pub fn resolve_file_attrs(
@@ -133,13 +134,17 @@ pub fn resolve_file_attrs(
                         let attrs: &mut GitFileAttrs = ent.get_mut();
                         attrs.created_time = time.min(attrs.created_time);
                         attrs.modified_time = time.max(attrs.modified_time);
-                        attrs.authors.push(author.clone());
+                        attrs.authors.insert(author.clone());
                     }
                     Entry::Vacant(ent) => {
                         ent.insert(GitFileAttrs {
                             created_time: time,
                             modified_time: time,
-                            authors: vec![author.clone()],
+                            authors: {
+                                let mut authors = BTreeSet::new();
+                                authors.insert(author.clone());
+                                authors
+                            },
                         });
                     }
                 }

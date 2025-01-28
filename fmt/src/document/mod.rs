@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::collections::BTreeSet;
 use std::collections::HashMap;
 use std::fs;
 use std::fs::File;
@@ -38,7 +39,7 @@ pub struct Attributes {
     pub filename: Option<String>,
     pub git_file_created_year: Option<String>,
     pub git_file_modified_year: Option<String>,
-    pub git_authors: Vec<String>,
+    pub git_authors: BTreeSet<String>,
 }
 
 #[derive(Debug)]

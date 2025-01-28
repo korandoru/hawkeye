@@ -17,7 +17,7 @@ All the `properties` configured will be passed to the template engine as the `pr
 
 New properties:
 
-* `attrs.git_authors` is a list of authors of the file. You can join them with `, ` to get a string by `{{ attrs.git_authors | join(", ") }}`.
+* `attrs.git_authors` is a collection of authors of the file. You can join them with `, ` to get a string by `{{ attrs.git_authors | join(", ") }}`.
 
 ### Notable changes
 
