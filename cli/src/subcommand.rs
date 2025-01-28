@@ -86,11 +86,11 @@ impl Callback for CheckContext {
         self.unknown.push(path.display().to_string());
     }
 
-    fn on_matched(&mut self, _: Document) -> anyhow::Result<()> {
+    fn on_matched(&mut self, _: &HeaderMatcher, _: Document) -> anyhow::Result<()> {
         Ok(())
     }
 
-    fn on_not_matched(&mut self, document: Document) -> anyhow::Result<()> {
+    fn on_not_matched(&mut self, _: &HeaderMatcher, document: Document) -> anyhow::Result<()> {
         self.missing.push(document.filepath.display().to_string());
         Ok(())
     }
@@ -136,33 +136,29 @@ impl Callback for FormatContext {
         self.unknown.push(path.display().to_string());
     }
 
-    fn on_matched(&mut self, _: Document) -> anyhow::Result<()> {
+    fn on_matched(&mut self, _: &HeaderMatcher, _: Document) -> anyhow::Result<()> {
         Ok(())
     }
 
-    fn on_not_matched(&mut self, mut document: Document) -> anyhow::Result<()> {
-        if document.header_detected() {
-            document.remove_header();
-            document.update_header();
+    fn on_not_matched(&mut self, header: &HeaderMatcher, mut doc: Document) -> anyhow::Result<()> {
+        if doc.header_detected() {
+            doc.remove_header();
+            doc.update_header(header)?;
             self.updated
-                .push(format!("{}=replaced", document.filepath.display()));
+                .push(format!("{}=replaced", doc.filepath.display()));
         } else {
-            document.update_header();
+            doc.update_header(header)?;
             self.updated
-                .push(format!("{}=added", document.filepath.display()));
+                .push(format!("{}=added", doc.filepath.display()));
         }
 
         if self.dry_run {
-            let mut extension = document
-                .filepath
-                .extension()
-                .unwrap_or_default()
-                .to_os_string();
+            let mut extension = doc.filepath.extension().unwrap_or_default().to_os_string();
             extension.push(".formatted");
-            let copied = document.filepath.with_extension(extension);
-            document.save(Some(&copied))
+            let copied = doc.filepath.with_extension(extension);
+            doc.save(Some(&copied))
         } else {
-            document.save(None)
+            doc.save(None)
         }
     }
 }
@@ -231,12 +227,12 @@ impl Callback for RemoveContext {
         self.unknown.push(path.display().to_string());
     }
 
-    fn on_matched(&mut self, mut document: Document) -> anyhow::Result<()> {
-        self.remove(&mut document)
+    fn on_matched(&mut self, _: &HeaderMatcher, mut doc: Document) -> anyhow::Result<()> {
+        self.remove(&mut doc)
     }
 
-    fn on_not_matched(&mut self, mut document: Document) -> anyhow::Result<()> {
-        self.remove(&mut document)
+    fn on_not_matched(&mut self, _: &HeaderMatcher, mut doc: Document) -> anyhow::Result<()> {
+        self.remove(&mut doc)
     }
 }
 

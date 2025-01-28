@@ -23,7 +23,6 @@ use crate::git::GitFileAttrs;
 use crate::header::model::HeaderDef;
 use anyhow::Context;
 use gix::date::time::CustomFormat;
-use crate::header::matcher::HeaderMatcher;
 
 pub struct DocumentFactory {
     mapping: HashSet<Mapping>,
@@ -51,7 +50,7 @@ impl DocumentFactory {
         }
     }
 
-    pub fn create_document(&self, filepath: &Path, header: &HeaderMatcher) -> anyhow::Result<Option<Document>> {
+    pub fn create_document(&self, filepath: &Path) -> anyhow::Result<Option<Document>> {
         let lower_file_name = filepath
             .file_name()
             .map(|n| n.to_string_lossy().to_lowercase())
@@ -68,6 +67,8 @@ impl DocumentFactory {
             .ok_or_else(|| std::io::Error::other(format!("header type {header_type} not found")))
             .with_context(|| format!("cannot to create document: {}", filepath.display()))?;
 
+        let props = self.properties.clone();
+
         const YEAR_FORMAT: CustomFormat = CustomFormat::new("%Y");
         let attrs = Attributes {
             filename: filepath
@@ -82,12 +83,10 @@ impl DocumentFactory {
                 .get(filepath)
                 .map(|attrs| attrs.modified_time.format(YEAR_FORMAT)),
         };
-        let props = self.properties.clone();
 
         Document::new(
             filepath.to_path_buf(),
             header_def.clone(),
-            header,
             &self.keywords,
             props,
             attrs,
