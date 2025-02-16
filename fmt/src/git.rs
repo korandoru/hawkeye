@@ -105,6 +105,27 @@ pub fn resolve_file_attrs(
         None => return Ok(attrs),
     };
 
+    let mut do_insert_attrs =
+        |filepath: PathBuf, time: gix::date::Time, author: &str| match attrs.entry(filepath) {
+            Entry::Occupied(mut ent) => {
+                let attrs: &mut GitFileAttrs = ent.get_mut();
+                attrs.created_time = time.min(attrs.created_time);
+                attrs.modified_time = time.max(attrs.modified_time);
+                attrs.authors.insert(author.to_string());
+            }
+            Entry::Vacant(ent) => {
+                ent.insert(GitFileAttrs {
+                    created_time: time,
+                    modified_time: time,
+                    authors: {
+                        let mut authors = BTreeSet::new();
+                        authors.insert(author.to_string());
+                        authors
+                    },
+                });
+            }
+        };
+
     let workdir = repo.work_dir().expect("workdir cannot be absent");
     let workdir = workdir.canonicalize()?;
 
@@ -127,34 +148,24 @@ pub fn resolve_file_attrs(
                 opts.track_path();
             })
             .for_each_to_obtain_tree_with_cache(&this_commit.tree()?, &mut cache, |change| {
-                dbg!((&this_commit, &next_commit, &change));
-
                 let filepath = gix::path::from_bstr(change.location());
                 let filepath = workdir.join(filepath);
-                match attrs.entry(filepath) {
-                    Entry::Occupied(mut ent) => {
-                        let attrs: &mut GitFileAttrs = ent.get_mut();
-                        attrs.created_time = time.min(attrs.created_time);
-                        attrs.modified_time = time.max(attrs.modified_time);
-                        attrs.authors.insert(author.clone());
-                    }
-                    Entry::Vacant(ent) => {
-                        ent.insert(GitFileAttrs {
-                            created_time: time,
-                            modified_time: time,
-                            authors: {
-                                let mut authors = BTreeSet::new();
-                                authors.insert(author.clone());
-                                authors
-                            },
-                        });
-                    }
-                }
-
+                do_insert_attrs(filepath, time, author.as_str());
                 Ok::<_, Infallible>(Default::default())
             })?;
         next_commit = this_commit;
         cache.clear_resource_cache();
+    }
+
+    // process the root commit
+    let time = next_commit.time()?;
+    let author = next_commit.author()?.name.to_string();
+    let tree = next_commit.tree()?;
+    for ent in tree.iter() {
+        let ent = ent?;
+        let filepath = gix::path::from_bstr(ent.filename());
+        let filepath = workdir.join(filepath);
+        do_insert_attrs(filepath, time, author.as_str());
     }
 
     Ok(attrs)
