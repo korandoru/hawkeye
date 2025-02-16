@@ -108,7 +108,7 @@ impl FeatureGate {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone)]
 pub enum Mapping {
     Filename {
         pattern: String,
@@ -119,6 +119,22 @@ pub enum Mapping {
         header_type: String,
     },
 }
+
+impl PartialEq for Mapping {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Mapping::Filename { pattern: p1, .. }, Mapping::Filename { pattern: p2, .. }) => {
+                p1 == p2
+            }
+            (Mapping::Extension { pattern: p1, .. }, Mapping::Extension { pattern: p2, .. }) => {
+                p1 == p2
+            }
+            _ => false,
+        }
+    }
+}
+
+impl Eq for Mapping {}
 
 impl Hash for Mapping {
     fn hash<H: Hasher>(&self, state: &mut H) {
