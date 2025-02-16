@@ -152,7 +152,6 @@ pub fn resolve_file_attrs(
 
         let changes = repo.diff_tree_to_tree(Some(&this_tree), Some(&next_tree), Some(option))?;
         for change in changes {
-            dbg!((&this_commit, &next_commit, &change));
             do_insert_attrs(change, time, author.as_str());
         }
         next_commit = this_commit;
@@ -164,7 +163,6 @@ pub fn resolve_file_attrs(
     let next_tree = next_commit.tree()?;
     let changes = repo.diff_tree_to_tree(None, Some(&next_tree), Some(option))?;
     for change in changes {
-        dbg!((&next_commit, &change));
         do_insert_attrs(change, time, author.as_str());
     }
 
