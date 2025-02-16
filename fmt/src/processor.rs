@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
@@ -84,9 +85,11 @@ pub fn check_license_header<C: Callback>(
         if config.use_default_mapping {
             let default_mapping = default_mapping();
             for m in default_mapping {
-                if !mapping.contains(&m) {
-                    mapping.insert(m);
+                if let Some(o) = mapping.get(&m) {
+                    log::warn!("default mapping {m:?} is override by {o:?}");
+                    continue;
                 }
+                mapping.insert(m);
             }
         }
         mapping
@@ -95,20 +98,30 @@ pub fn check_license_header<C: Callback>(
     let definitions = {
         let mut defs = HashMap::new();
         for (k, v) in default_headers() {
-            if defs.contains_key(&k) {
-                anyhow::bail!("Header definition {k} is defined more than once");
+            match defs.entry(k) {
+                Entry::Occupied(mut ent) => {
+                    log::warn!("Default header {} is override", ent.key());
+                    ent.insert(v);
+                }
+                Entry::Vacant(ent) => {
+                    ent.insert(v);
+                }
             }
-            defs.insert(k, v);
         }
         for additional_header in &config.additional_headers {
             let additional_defs = fs::read_to_string(additional_header)
                 .with_context(|| format!("cannot load header definitions: {additional_header}"))
                 .and_then(deserialize_header_definitions)?;
             for (k, v) in additional_defs {
-                if defs.contains_key(&k) {
-                    anyhow::bail!("Header definition {k} is defined more than once");
+                match defs.entry(k) {
+                    Entry::Occupied(mut ent) => {
+                        log::warn!("Additional header {} is override", ent.key());
+                        ent.insert(v);
+                    }
+                    Entry::Vacant(ent) => {
+                        ent.insert(v);
+                    }
                 }
-                defs.insert(k, v);
             }
         }
         defs
