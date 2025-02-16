@@ -112,21 +112,23 @@ pub fn resolve_file_attrs(
     let mut cache = repo.diff_resource_cache(mode, Default::default())?;
 
     let head = repo.head_commit()?;
-    let mut prev_commit = head.clone();
+    let mut next_commit = head.clone();
 
     for info in head.ancestors().all()? {
         let info = info?;
         let this_commit = info.object()?;
-        let time = this_commit.time()?;
-        let author = this_commit.author()?.name.to_string();
+        let time = next_commit.time()?;
+        let author = next_commit.author()?.name.to_string();
 
-        let tree = this_commit.tree()?;
+        let tree = next_commit.tree()?;
         let mut changes = tree.changes()?;
         changes
             .options(|opts| {
                 opts.track_path();
             })
-            .for_each_to_obtain_tree_with_cache(&prev_commit.tree()?, &mut cache, |change| {
+            .for_each_to_obtain_tree_with_cache(&this_commit.tree()?, &mut cache, |change| {
+                dbg!((&this_commit, &next_commit, &change));
+
                 let filepath = gix::path::from_bstr(change.location());
                 let filepath = workdir.join(filepath);
                 match attrs.entry(filepath) {
@@ -151,7 +153,7 @@ pub fn resolve_file_attrs(
 
                 Ok::<_, Infallible>(Default::default())
             })?;
-        prev_commit = this_commit;
+        next_commit = this_commit;
         cache.clear_resource_cache();
     }
 
