@@ -354,6 +354,18 @@ headerType = "SCRIPT_STYLE"
 extension = true
 filename = false
 
+[PKL]
+pattern = "pkl"
+headerType = "LINE_BLOCK_STYLE"
+extension = true
+filename = false
+
+[PKL_PROJECT]
+pattern = "PklProject"
+headerType = "LINE_BLOCK_STYLE"
+extension = false
+filename = true
+
 [PHP]
 pattern = "php"
 headerType = "PHP"
