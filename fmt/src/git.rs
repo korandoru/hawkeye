@@ -15,7 +15,6 @@
 use std::collections::hash_map::Entry;
 use std::collections::BTreeSet;
 use std::collections::HashMap;
-use std::convert::Infallible;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -108,51 +107,63 @@ pub fn resolve_file_attrs(
     let workdir = repo.work_dir().expect("workdir cannot be absent");
     let workdir = workdir.canonicalize()?;
 
-    let mode = gix::diff::blob::pipeline::Mode::ToGit;
-    let mut cache = repo.diff_resource_cache(mode, Default::default())?;
+    let mut do_insert_attrs =
+        |change: gix::diff::tree_with_rewrites::Change, time: gix::date::Time, author: &str| {
+            let filepath = gix::path::from_bstr(change.location());
+            let filepath = workdir.join(filepath);
+            match attrs.entry(filepath) {
+                Entry::Occupied(mut ent) => {
+                    let attrs: &mut GitFileAttrs = ent.get_mut();
+                    attrs.created_time = time.min(attrs.created_time);
+                    attrs.modified_time = time.max(attrs.modified_time);
+                    attrs.authors.insert(author.to_string());
+                }
+                Entry::Vacant(ent) => {
+                    ent.insert(GitFileAttrs {
+                        created_time: time,
+                        modified_time: time,
+                        authors: {
+                            let mut authors = BTreeSet::new();
+                            authors.insert(author.to_string());
+                            authors
+                        },
+                    });
+                }
+            }
+        };
+
+    let option = {
+        let mut option = gix::diff::Options::default();
+        option.track_path();
+        option
+    };
 
     let head = repo.head_commit()?;
-    let mut prev_commit = head.clone();
+    let mut next_commit = head.clone();
 
     for info in head.ancestors().all()? {
         let info = info?;
         let this_commit = info.object()?;
-        let time = this_commit.time()?;
-        let author = this_commit.author()?.name.to_string();
+        let time = next_commit.time()?;
+        let author = next_commit.author()?.name.to_string();
 
-        let tree = this_commit.tree()?;
-        let mut changes = tree.changes()?;
-        changes
-            .options(|opts| {
-                opts.track_path();
-            })
-            .for_each_to_obtain_tree_with_cache(&prev_commit.tree()?, &mut cache, |change| {
-                let filepath = gix::path::from_bstr(change.location());
-                let filepath = workdir.join(filepath);
-                match attrs.entry(filepath) {
-                    Entry::Occupied(mut ent) => {
-                        let attrs: &mut GitFileAttrs = ent.get_mut();
-                        attrs.created_time = time.min(attrs.created_time);
-                        attrs.modified_time = time.max(attrs.modified_time);
-                        attrs.authors.insert(author.clone());
-                    }
-                    Entry::Vacant(ent) => {
-                        ent.insert(GitFileAttrs {
-                            created_time: time,
-                            modified_time: time,
-                            authors: {
-                                let mut authors = BTreeSet::new();
-                                authors.insert(author.clone());
-                                authors
-                            },
-                        });
-                    }
-                }
+        let this_tree = this_commit.tree()?;
+        let next_tree = next_commit.tree()?;
 
-                Ok::<_, Infallible>(Default::default())
-            })?;
-        prev_commit = this_commit;
-        cache.clear_resource_cache();
+        let changes = repo.diff_tree_to_tree(Some(&this_tree), Some(&next_tree), Some(option))?;
+        for change in changes {
+            do_insert_attrs(change, time, author.as_str());
+        }
+        next_commit = this_commit;
+    }
+
+    // process the root commit
+    let time = next_commit.time()?;
+    let author = next_commit.author()?.name.to_string();
+    let next_tree = next_commit.tree()?;
+    let changes = repo.diff_tree_to_tree(None, Some(&next_tree), Some(option))?;
+    for change in changes {
+        do_insert_attrs(change, time, author.as_str());
     }
 
     Ok(attrs)
