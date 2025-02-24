@@ -444,6 +444,12 @@ headerType = "SCRIPT_STYLE"
 extension = false
 filename = false
 
+[SVELTE]
+pattern = "svelte"
+headerType = "XML_STYLE"
+extension = true
+filename = false
+
 [SQL]
 pattern = "sql"
 headerType = "DOUBLEDASHES_STYLE"
