@@ -1185,7 +1185,7 @@ checksum = "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289"
 
 [[package]]
 name = "hawkeye"
-version = "6.0.1"
+version = "6.0.2"
 dependencies = [
  "anyhow",
  "build-data",
@@ -1200,7 +1200,7 @@ dependencies = [
 
 [[package]]
 name = "hawkeye-fmt"
-version = "6.0.1"
+version = "6.0.2"
 dependencies = [
  "anyhow",
  "gix",
