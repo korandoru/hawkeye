@@ -26,7 +26,7 @@ use toml::Value;
 use crate::default_true;
 
 #[derive(Debug, Clone, Default, Deserialize)]
-#[serde(default, rename_all = "camelCase")]
+#[serde(default, deny_unknown_fields, rename_all = "camelCase")]
 pub struct Config {
     #[serde(default = "default_cwd")]
     pub base_dir: PathBuf,
