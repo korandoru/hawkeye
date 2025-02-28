@@ -252,6 +252,6 @@ lastLineDetectionPattern = "..."
 
 ## History
 
-This software is originally from [license-maven-plugin](https://github.com/mathieucarbou/license-maven-plugin),with an initial motivation to bring it beyond a Maven plugin. The core abstractions like `Document`, `Header`, and `HeaderParser` are originally copied from the license-maven-plugin sources under the terms of Apache License 2.0.
+This software is originally from [license-maven-plugin](https://github.com/mathieucarbou/license-maven-plugin), with an initial motivation to bring it beyond a Maven plugin. The core abstractions like `Document`, `Header`, and `HeaderParser` are originally copied from the license-maven-plugin sources under the terms of Apache License 2.0.
 
-Later, when I started focusing on the Docker image's size and integrate with Git, I found that Rust is better than Java (GraalVM Native Image) for this purpose. So I rewrote the core logic in Rust and keep ship a slim image.
+Later, when I started focusing on the Docker image's size and integration with Git, I found that Rust is better than Java (GraalVM Native Image) for this purpose. So, I rewrote the core logic in Rust while keeping a slim image. (The old Java implementation is achieved at the [archive-native-image](https://github.com/korandoru/hawkeye/tree/archive-native-image) branch)
