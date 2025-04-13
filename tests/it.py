@@ -41,8 +41,8 @@ def drive(name, files):
         diff_files(case_dir / f"{file}.expected", case_dir / f"{file}.formatted")
 
 
-# drive("attrs_and_props", ["main.rs"])
-# drive("load_header_path", ["main.rs"])
-# drive("bom_issue", ["headless_bom.cs"])
-# drive("regression_blank_line", ["main.rs"])
+drive("attrs_and_props", ["main.rs"])
+drive("load_header_path", ["main.rs"])
+drive("bom_issue", ["headless_bom.cs"])
+drive("regression_blank_line", ["main.rs"])
 drive("regression_no_blank_lines", ["repro.py"])
