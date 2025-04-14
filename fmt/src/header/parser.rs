@@ -163,8 +163,6 @@ fn existing_header(
     // first header detected line & potential blank lines have been detected
     // following lines should be header lines
     if let Some(l) = line.as_ref() {
-        in_place_header.push_str(&l.to_lowercase());
-
         let before = {
             let mut before = header_def.before_each_line.trim_end();
             if before.is_empty() && !header_def.multiple_lines {
@@ -178,10 +176,10 @@ fn existing_header(
             if (header_def.multiple_lines && header_def.is_last_header_line(l))
                 || l.trim().is_empty()
             {
+                in_place_header.push_str(&l.to_lowercase());
                 found_end = true;
             } else {
                 loop {
-                    *line = file_content.next_line();
                     match line.as_ref() {
                         Some(l) if l.starts_with(before) => {
                             in_place_header.push_str(&l.to_lowercase());
@@ -192,6 +190,7 @@ fn existing_header(
                         }
                         _ => break,
                     }
+                    *line = file_content.next_line();
                 }
 
                 if line.as_ref().map(|l| l.trim().is_empty()).unwrap_or(true) {
@@ -204,10 +203,10 @@ fn existing_header(
         // skip blank lines after header text
         if header_def.multiple_lines && header_def.allow_blank_lines && !found_end {
             loop {
-                *line = file_content.next_line();
                 if !line.as_ref().map(|l| l.trim().is_empty()).unwrap_or(false) {
                     break;
                 }
+                *line = file_content.next_line();
             }
             file_content.rewind();
         } else if !header_def.multiple_lines && !found_end {

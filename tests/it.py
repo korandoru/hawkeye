@@ -33,14 +33,16 @@ rootdir = basedir.parent
 subprocess.run(["cargo", "build", "--bin", "hawkeye"], cwd=rootdir, check=True)
 hawkeye = rootdir / "target" / "debug" / "hawkeye"
 
-subprocess.run([hawkeye, "format", "--fail-if-unknown", "--fail-if-updated=false", "--dry-run"], cwd=(basedir / "attrs_and_props"), check=True)
-diff_files(basedir / "attrs_and_props" / "main.rs.expected", basedir / "attrs_and_props" / "main.rs.formatted")
+def drive(name, files):
+    case_dir = basedir / name
+    subprocess.run([hawkeye, "format", "--fail-if-unknown", "--fail-if-updated=false", "--dry-run"], cwd=case_dir, check=True)
 
-subprocess.run([hawkeye, "format", "--fail-if-unknown", "--fail-if-updated=false", "--dry-run"], cwd=(basedir / "load_header_path"), check=True)
-diff_files(basedir / "load_header_path" / "main.rs.expected", basedir / "load_header_path" / "main.rs.formatted")
+    for file in files:
+        diff_files(case_dir / f"{file}.expected", case_dir / f"{file}.formatted")
 
-subprocess.run([hawkeye, "format", "--fail-if-unknown", "--fail-if-updated=false", "--dry-run"], cwd=(basedir / "bom_issue"), check=True)
-diff_files(basedir / "bom_issue" / "headerless_bom.cs.expected", basedir / "bom_issue" / "headerless_bom.cs.formatted")
 
-subprocess.run([hawkeye, "format", "--fail-if-unknown", "--fail-if-updated=false", "--dry-run"], cwd=(basedir / "regression_blank_line"), check=True)
-diff_files(basedir / "regression_blank_line" / "main.rs.expected", basedir / "regression_blank_line" / "main.rs.formatted")
+drive("attrs_and_props", ["main.rs"])
+drive("load_header_path", ["main.rs"])
+drive("bom_issue", ["headless_bom.cs"])
+drive("regression_blank_line", ["main.rs"])
+drive("regression_no_blank_lines", ["repro.py"])
