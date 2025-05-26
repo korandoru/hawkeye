@@ -53,9 +53,9 @@ fn main() -> shadow_rs::SdResult<()> {
     configure_rerun_if_head_commit_changed();
 
     println!(
-        "cargo:rustc-env=SOURCE_TIMESTAMP={}",
+        "cargo::rustc-env=SOURCE_TIMESTAMP={}",
         if let Ok(t) = get_source_time() {
-            format_timestamp(t)
+            format_timestamp(t)?
         } else {
             "".to_string()
         }
