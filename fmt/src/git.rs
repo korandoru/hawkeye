@@ -104,7 +104,7 @@ pub fn resolve_file_attrs(
         None => return Ok(attrs),
     };
 
-    let workdir = repo.work_dir().expect("workdir cannot be absent");
+    let workdir = repo.workdir().expect("workdir cannot be absent");
     let workdir = workdir.canonicalize()?;
 
     let mut do_insert_attrs =
