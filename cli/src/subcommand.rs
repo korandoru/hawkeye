@@ -107,7 +107,7 @@ impl CommandCheck {
 
         let mut failed = check_unknown_files(context.unknown, self.shared.fail_if_unknown);
         if !context.missing.is_empty() {
-            log::error!("Found missing header files: {:?}", context.missing);
+            log::error!("Found missing header! Files: {}", context.missing.join(", "));
             failed |= self.fail_if_missing;
         }
         if failed {
