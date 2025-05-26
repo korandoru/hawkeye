@@ -23,17 +23,17 @@ authors = ["tison <wander4096@gmail.com>"]
 readme = "README.md"
 license = "Apache-2.0"
 repository = "https://github.com/korandoru/hawkeye/"
-rust-version = "1.76.0"
+rust-version = "1.85.0"
 
 [workspace.dependencies]
 hawkeye-fmt = { version = "6.0.3", path = "fmt" }
 
 anyhow = { version = "1.0.94" }
-build-data = { version = "0.2.1" }
+build-data = { version = "0.3.0" }
 clap = { version = "4.5.23", features = ["derive"] }
 const_format = { version = "0.2.34" }
 log = { version = "0.4.22", features = ["kv_serde", "serde"] }
-shadow-rs = { version = "0.38.0" }
+shadow-rs = { version = "1.1.1" }
 toml = { version = "0.8.19" }
 
 [workspace.metadata.release]
