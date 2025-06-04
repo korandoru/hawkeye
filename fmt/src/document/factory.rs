@@ -17,6 +17,8 @@ use std::collections::HashSet;
 use std::path::Path;
 use std::path::PathBuf;
 
+use std::fs;
+
 use anyhow::Context;
 use gix::date::time::CustomFormat;
 
@@ -89,6 +91,13 @@ impl DocumentFactory {
                 .get(filepath)
                 .map(|attrs| attrs.authors.clone())
                 .unwrap_or_default(),
+            disk_file_creation_year: fs::metadata(filepath)
+                .and_then(|meta| meta.created())
+                .ok()
+                .map(|created_time| {
+                    let datetime = chrono::DateTime::<chrono::Utc>::from(created_time);
+                    datetime.format("%Y").to_string()
+                }),
         };
 
         Document::new(
