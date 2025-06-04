@@ -4,7 +4,6 @@
 // attrs.filename=main.rs
 // attrs.git_file_created_year=2025
 // attrs.git_file_modified_year=2025
-// attrs.disk_file_creation_year=2025
 
 fn main() {
     println!("Hello, world!");
