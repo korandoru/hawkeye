@@ -24,11 +24,11 @@ repository.workspace = true
 
 [dependencies]
 anyhow = { workspace = true }
-chrono = "0.4.41"
 gix = { version = "0.72.1", default-features = false, features = [
   "blob-diff",
   "excludes",
 ] }
+jiff = { version = "0.2.14" }
 ignore = { version = "0.4.23" }
 log = { workspace = true }
 minijinja = { version = "2.5.0" }

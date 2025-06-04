@@ -37,10 +37,10 @@ pub mod model;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Attributes {
     pub filename: Option<String>,
+    pub disk_file_created_year: Option<String>,
     pub git_file_created_year: Option<String>,
     pub git_file_modified_year: Option<String>,
     pub git_authors: BTreeSet<String>,
-    pub disk_file_creation_year: Option<String>,
 }
 
 #[derive(Debug)]
