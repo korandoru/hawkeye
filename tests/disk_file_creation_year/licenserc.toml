@@ -1,0 +1,4 @@
+baseDir = "."
+headerPath = "license.txt"
+
+excludes = ["licenserc.toml", "*.expected"]
