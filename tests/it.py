@@ -18,6 +18,7 @@ import difflib
 import subprocess
 import os
 import shutil
+import datetime
 
 def diff_files(file1, file2):
     with file1.open("r", encoding="utf8") as f1, file2.open("r", encoding="utf8") as f2:
@@ -37,21 +38,30 @@ hawkeye = rootdir / "target" / "debug" / "hawkeye"
 
 def drive(name, files, create_temp_copy=False):
     temp_paths = []
+    expected_files = []
     case_dir = basedir / name
     try:
         if create_temp_copy:
-            # Copy all files, appending _temp before the extension
+            current_year = str(datetime.datetime.now().year)
             for filepath in files:
                 base, ext = os.path.splitext(filepath)
                 temp_path = f"{base}_temp{ext}"
                 shutil.copy2(case_dir / filepath, case_dir / temp_path)
                 temp_paths.append(temp_path)
+                expected_temp_path = f"{base}_temp{ext}.expected"
+                shutil.copy2(case_dir / f"{filepath}.expected", case_dir / expected_temp_path)
+                expected_files.append(expected_temp_path)
+                with (case_dir / expected_temp_path).open("r", encoding="utf8") as f:
+                    content = f.read()
+                content = content.replace("<CURRENT_YEAR>", current_year)
+                with (case_dir / expected_temp_path).open("w", encoding="utf8") as f:
+                    f.write(content)
         else:
             temp_paths = files
+            expected_files = [f"{file}.expected" for file in files]
         subprocess.run([hawkeye, "format", "--fail-if-unknown", "--fail-if-updated=false", "--dry-run"], cwd=case_dir, check=True)
 
         for file in temp_paths:
-            file = file.replace("_temp", "")
             diff_files(case_dir / f"{file}.expected", case_dir / f"{file}.formatted")
     finally:
         # Remove all temp files at the end
@@ -59,6 +69,9 @@ def drive(name, files, create_temp_copy=False):
             for temp_path in temp_paths:
                 if os.path.exists(case_dir / temp_path):
                     os.remove(case_dir / temp_path)
+            for expected_file in expected_files:
+                if os.path.exists(case_dir / expected_file):
+                    os.remove(case_dir / expected_file)
 
 drive("attrs_and_props", ["main.rs"])
 drive("load_header_path", ["main.rs"])
