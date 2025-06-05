@@ -17,7 +17,7 @@ use std::collections::HashSet;
 use std::path::Path;
 use std::path::PathBuf;
 
-use std::fs;
+use std::{fs, io};
 
 use anyhow::Context;
 use gix::date::time::CustomFormat;
@@ -78,6 +78,13 @@ impl DocumentFactory {
             filename: filepath
                 .file_name()
                 .map(|s| s.to_string_lossy().to_string()),
+            disk_file_created_year: fs::metadata(filepath)
+                .and_then(|meta| meta.created())
+                .and_then(|t| match jiff::Timestamp::try_from(t) {
+                    Ok(datetime) => Ok(datetime.strftime("%Y").to_string()),
+                    Err(err) => Err(io::Error::other(err)),
+                })
+                .ok(),
             git_file_created_year: self
                 .git_file_attrs
                 .get(filepath)
@@ -91,13 +98,6 @@ impl DocumentFactory {
                 .get(filepath)
                 .map(|attrs| attrs.authors.clone())
                 .unwrap_or_default(),
-            disk_file_creation_year: fs::metadata(filepath)
-                .and_then(|meta| meta.created())
-                .ok()
-                .map(|created_time| {
-                    let datetime = chrono::DateTime::<chrono::Utc>::from(created_time);
-                    datetime.format("%Y").to_string()
-                }),
         };
 
         Document::new(

@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 New properties:
 
-* `attrs.disk_file_creation_year` can be used to replace not existing git history attrs values like `{{attrs.git_file_created_year if attrs.git_file_created_year else attrs.disk_file_creation_year }}`
+* `attrs.disk_file_created_year` can be used to replace nonexisting Git attrs like `{{attrs.git_file_created_year if attrs.git_file_created_year else attrs.disk_file_created_year }}`
 
 ## [6.0.0] 2025-01-28
 
