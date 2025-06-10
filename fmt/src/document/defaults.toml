@@ -594,13 +594,13 @@ headerType = "DOUBLESLASH_STYLE"
 extension = true
 filename = false
 
-[VELOG]
+[VERILOG]
 pattern = "v"
 headerType = "SINGLE_LINE_DOUBLESLASH_STYLE"
 extension = true
 filename = false
 
-[SYSTEM_VELOG]
+[SYSTEM_VERILOG]
 pattern = "sv"
 headerType = "SINGLE_LINE_DOUBLESLASH_STYLE"
 extension = false
