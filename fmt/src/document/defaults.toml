@@ -593,3 +593,15 @@ pattern = "zig"
 headerType = "DOUBLESLASH_STYLE"
 extension = true
 filename = false
+
+[VELOG]
+pattern = "v"
+headerType = "SINGLE_LINE_DOUBLESLASH_STYLE"
+extension = true
+filename = false
+
+[SYSTEM_VELOG]
+pattern = "sv"
+headerType = "SINGLE_LINE_DOUBLESLASH_STYLE"
+extension = false
+filename = true
