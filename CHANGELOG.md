@@ -2,9 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.1.1] 2025-06-11
+
+### New features
+
+* Supports format CommonJS files: pattern = "cjs" and headerType = "SLASHSTAR_STYLE".
+* Supports format Verilog files: pattern = "v" and headerType = "SLASHSTAR_STYLE".
+* Supports format SystemVerilog files: pattern = "sv" and headerType = "SLASHSTAR_STYLE".
+
 ## [6.1.0] 2025-06-06
 
-New properties:
+### New features
 
 * `attrs.disk_file_created_year` can be used to replace nonexisting Git attrs like `{{attrs.git_file_created_year if attrs.git_file_created_year else attrs.disk_file_created_year }}`
 
