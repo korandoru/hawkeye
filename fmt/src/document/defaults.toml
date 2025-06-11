@@ -264,6 +264,12 @@ headerType = "SLASHSTAR_STYLE"
 extension = true
 filename = false
 
+[COMMONJS]
+pattern = "cjs"
+headerType = "SLASHSTAR_STYLE"
+extension = true
+filename = false
+
 [JSP]
 pattern = "jsp"
 headerType = "DYNASCRIPT_STYLE"
@@ -585,5 +591,17 @@ filename = false
 [ZIG]
 pattern = "zig"
 headerType = "DOUBLESLASH_STYLE"
+extension = true
+filename = false
+
+[VERILOG]
+pattern = "v"
+headerType = "SLASHSTAR_STYLE"
+extension = true
+filename = false
+
+[SYSTEM_VERILOG]
+pattern = "sv"
+headerType = "SLASHSTAR_STYLE"
 extension = true
 filename = false
