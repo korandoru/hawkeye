@@ -264,6 +264,12 @@ headerType = "SLASHSTAR_STYLE"
 extension = true
 filename = false
 
+[COMMONJS]
+pattern = "cjs"
+headerType = "SLASHSTAR_STYLE"
+extension = true
+filename = false
+
 [JSP]
 pattern = "jsp"
 headerType = "DYNASCRIPT_STYLE"
