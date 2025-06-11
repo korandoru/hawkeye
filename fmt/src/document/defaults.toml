@@ -599,3 +599,9 @@ pattern = "v"
 headerType = "SLASHSTAR_STYLE"
 extension = true
 filename = false
+
+[SYSTEM_VERILOG]
+pattern = "sv"
+headerType = "SLASHSTAR_STYLE"
+extension = true
+filename = false
