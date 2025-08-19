@@ -96,6 +96,12 @@ headerType = "DYNASCRIPT3_STYLE"
 extension = true
 filename = false
 
+[CONTAINERFILE]
+pattern = "Containerfile"
+headerType = "SCRIPT_STYLE"
+extension = false
+filename = true
+
 [CPP]
 pattern = "cpp"
 headerType = "SLASHSTAR_STYLE"
@@ -525,6 +531,12 @@ filename = false
 [VELOCITY]
 pattern = "vm"
 headerType = "SHARPSTAR_STYLE"
+extension = true
+filename = false
+
+[VUE]
+pattern = "vue"
+headerType = "XML_STYLE"
 extension = true
 filename = false
 
