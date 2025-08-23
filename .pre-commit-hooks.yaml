@@ -22,3 +22,13 @@
   require_serial: true
   additional_dependencies: []
   minimum_pre_commit_version: "2.9.2"
+- id: hawkeye-format-docker
+  name: hawkeye-format
+  description: "Run `hawkeye format` for license header formatting"
+  entry: hawkeye format
+  language: docker
+  args: []
+  pass_filenames: false
+  require_serial: true
+  additional_dependencies: []
+  minimum_pre_commit_version: "2.9.2"
