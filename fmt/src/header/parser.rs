@@ -82,7 +82,7 @@ fn find_first_position(
     if let Some(l) = line.as_ref() {
         // skip UTF-8 BOM if exists
         if l.as_bytes().starts_with(&UTF8_BOM) {
-            log::debug!("Detected UTF-8 BOM for {}; skip", file_content);
+            log::debug!("Detected UTF-8 BOM for {file_content}; skip");
             begin_pos = 3;
             file_content.reset_to(3);
         }
