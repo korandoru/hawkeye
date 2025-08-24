@@ -34,7 +34,7 @@ clap = { version = "4.5.23", features = ["derive"] }
 const_format = { version = "0.2.34" }
 log = { version = "0.4.22", features = ["kv_serde", "serde"] }
 shadow-rs = { version = "1.1.1" }
-toml = { version = "0.8.19" }
+toml = { version = "0.9.5" }
 
 [workspace.metadata.release]
 sign-tag = true
