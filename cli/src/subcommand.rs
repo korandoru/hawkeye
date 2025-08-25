@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -21,6 +22,7 @@ use hawkeye_fmt::document::Document;
 use hawkeye_fmt::header::matcher::HeaderMatcher;
 use hawkeye_fmt::processor::check_license_header;
 use hawkeye_fmt::processor::Callback;
+use serde::Serialize;
 
 #[derive(Parser)]
 pub enum SubCommand {
@@ -36,6 +38,12 @@ pub enum SubCommand {
 struct SharedOptions {
     #[arg(long, help = "path to the config file")]
     config: Option<PathBuf>,
+    #[arg(
+        short = 'o',
+        long = "output",
+        help = "Write the output as JSON object to the specified file"
+    )]
+    output_file: Option<PathBuf>,
     #[arg(long, help = "fail if process unknown files", default_value_t = false)]
     fail_if_unknown: bool,
 }
@@ -76,6 +84,7 @@ pub struct CommandCheck {
     fail_if_missing: bool,
 }
 
+#[derive(Serialize)]
 struct CheckContext {
     unknown: Vec<String>,
     missing: Vec<String>,
@@ -105,10 +114,13 @@ impl CommandCheck {
         };
         check_license_header(config, &mut context).unwrap();
 
-        let mut failed = check_unknown_files(context.unknown, self.shared.fail_if_unknown);
+        let mut failed = check_unknown_files(&context.unknown, self.shared.fail_if_unknown);
         if !context.missing.is_empty() {
             log::error!("Found header missing in files: {:?}", context.missing);
             failed |= self.fail_if_missing;
+        }
+        if let Some(f) = self.shared.output_file {
+            write_to_file(&f, &context);
         }
         if failed {
             std::process::exit(1);
@@ -125,6 +137,7 @@ pub struct CommandFormat {
     shared_edit: SharedEditOptions,
 }
 
+#[derive(Serialize)]
 struct FormatContext {
     dry_run: bool,
     unknown: Vec<String>,
@@ -173,7 +186,7 @@ impl CommandFormat {
         };
         check_license_header(config, &mut context).unwrap();
 
-        let mut failed = check_unknown_files(context.unknown, self.shared.fail_if_unknown);
+        let mut failed = check_unknown_files(&context.unknown, self.shared.fail_if_unknown);
         if !context.updated.is_empty() {
             log::info!(
                 "Updated header for files (dryRun={}): {:?}",
@@ -181,6 +194,9 @@ impl CommandFormat {
                 context.updated
             );
             failed |= self.shared_edit.fail_if_updated;
+        }
+        if let Some(f) = self.shared.output_file {
+            write_to_file(&f, &context);
         }
         if failed {
             std::process::exit(1);
@@ -197,6 +213,7 @@ pub struct CommandRemove {
     shared_edit: SharedEditOptions,
 }
 
+#[derive(Serialize)]
 struct RemoveContext {
     dry_run: bool,
     unknown: Vec<String>,
@@ -246,7 +263,7 @@ impl CommandRemove {
         };
         check_license_header(config, &mut context).unwrap();
 
-        let mut failed = check_unknown_files(context.unknown, self.shared.fail_if_unknown);
+        let mut failed = check_unknown_files(&context.unknown, self.shared.fail_if_unknown);
         if !context.removed.is_empty() {
             log::info!(
                 "Removed header for files (dryRun={}): {:?}",
@@ -255,6 +272,9 @@ impl CommandRemove {
             );
             failed |= self.shared_edit.fail_if_updated;
         }
+        if let Some(f) = self.shared.output_file {
+            write_to_file(&f, &context);
+        }
         if failed {
             std::process::exit(1);
         }
@@ -262,13 +282,24 @@ impl CommandRemove {
     }
 }
 
-fn check_unknown_files(unknown: Vec<String>, fail_if_unknown: bool) -> bool {
+fn write_to_file(path: &Path, result: impl Serialize) {
+    fn do_write_to_file(path: &Path, result: impl Serialize) -> std::io::Result<()> {
+        let mut file = std::fs::File::create(path)?;
+        serde_json::to_writer(&file, &result)?;
+        file.flush()
+    }
+
+    do_write_to_file(path, result)
+        .unwrap_or_else(|err| panic!("failed to write output to file {}: {}", path.display(), err));
+}
+
+fn check_unknown_files(unknown: &[String], fail_if_unknown: bool) -> bool {
     if !unknown.is_empty() {
         if fail_if_unknown {
-            log::error!("Processing unknown files: {:?}", unknown);
+            log::error!("Processing unknown files: {unknown:?}");
             return true;
         } else {
-            log::warn!("Processing unknown files: {:?}", unknown);
+            log::warn!("Processing unknown files: {unknown:?}");
         }
     }
     false

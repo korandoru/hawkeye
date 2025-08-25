@@ -14,10 +14,10 @@
 
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::fs;
+use std::io;
 use std::path::Path;
 use std::path::PathBuf;
-
-use std::{fs, io};
 
 use anyhow::Context;
 use gix::date::time::CustomFormat;
