@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.2.0] 2025-08-25
+
+### New features
+
+* Supports format Vue files: pattern = "vue" and headerType = "XML_STYLE".
+* Supports format Containerfile files: pattern = "Containerfile" and headerType = "SCRIPT_STYLE".
+* Add a shared flag to store lists of files to change ([#194](https://github.com/korandoru/hawkeye/pull/194)).
+
 ## [6.1.1] 2025-06-11
 
 ### New features
