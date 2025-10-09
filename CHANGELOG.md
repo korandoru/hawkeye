@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.3.0] 2025-10-09
+
+### New features
+
+* Add distribution against musl libc ([#196](https://github.com/korandoru/hawkeye/pull/196)).
+
 ## [6.2.0] 2025-08-25
 
 ### New features
