@@ -20,6 +20,7 @@ use std::path::PathBuf;
 
 use anyhow::bail;
 use anyhow::Context;
+use gix::bstr::BStr;
 use gix::Repository;
 
 use crate::config;
@@ -88,9 +89,6 @@ pub struct GitFileAttrs {
     pub created_time: gix::date::Time,
     pub modified_time: gix::date::Time,
     pub authors: BTreeSet<String>,
-
-    /// The time when the file is modified in working tree but not committed.
-    pub dirty_time: Option<gix::date::Time>,
 }
 
 pub fn resolve_file_attrs(
@@ -107,34 +105,37 @@ pub fn resolve_file_attrs(
         None => return Ok(attrs),
     };
 
+    let current_username = match repo.committer() {
+        Some(Ok(username)) => username.name.to_string(),
+        _ => "<unknown>".to_string(),
+    };
+
     let workdir = repo.workdir().expect("workdir cannot be absent");
     let workdir = workdir.canonicalize()?;
 
-    let mut do_insert_attrs =
-        |change: gix::diff::tree_with_rewrites::Change, time: gix::date::Time, author: &str| {
-            let filepath = gix::path::from_bstr(change.location());
-            let filepath = workdir.join(filepath);
-            match attrs.entry(filepath) {
-                Entry::Occupied(mut ent) => {
-                    let attrs: &mut GitFileAttrs = ent.get_mut();
-                    attrs.created_time = time.min(attrs.created_time);
-                    attrs.modified_time = time.max(attrs.modified_time);
-                    attrs.authors.insert(author.to_string());
-                }
-                Entry::Vacant(ent) => {
-                    ent.insert(GitFileAttrs {
-                        created_time: time,
-                        modified_time: time,
-                        authors: {
-                            let mut authors = BTreeSet::new();
-                            authors.insert(author.to_string());
-                            authors
-                        },
-                        dirty_time: None,
-                    });
-                }
+    let mut update_attrs = |rel_path: &BStr, time: gix::date::Time, author: &str| {
+        let filepath = gix::path::from_bstr(rel_path);
+        let filepath = workdir.join(filepath);
+        match attrs.entry(filepath) {
+            Entry::Occupied(mut ent) => {
+                let attrs: &mut GitFileAttrs = ent.get_mut();
+                attrs.created_time = time.min(attrs.created_time);
+                attrs.modified_time = time.max(attrs.modified_time);
+                attrs.authors.insert(author.to_string());
             }
-        };
+            Entry::Vacant(ent) => {
+                ent.insert(GitFileAttrs {
+                    created_time: time,
+                    modified_time: time,
+                    authors: {
+                        let mut authors = BTreeSet::new();
+                        authors.insert(author.to_string());
+                        authors
+                    },
+                });
+            }
+        }
+    };
 
     let option = {
         let mut option = gix::diff::Options::default();
@@ -156,7 +157,7 @@ pub fn resolve_file_attrs(
 
         let changes = repo.diff_tree_to_tree(Some(&this_tree), Some(&next_tree), Some(option))?;
         for change in changes {
-            do_insert_attrs(change, time, author.as_str());
+            update_attrs(change.location(), time, author.as_str());
         }
         next_commit = this_commit;
     }
@@ -167,7 +168,7 @@ pub fn resolve_file_attrs(
     let next_tree = next_commit.tree()?;
     let changes = repo.diff_tree_to_tree(None, Some(&next_tree), Some(option))?;
     for change in changes {
-        do_insert_attrs(change, time, author.as_str());
+        update_attrs(change.location(), time, author.as_str());
     }
 
     // process dirty working tree
@@ -177,21 +178,7 @@ pub fn resolve_file_attrs(
     for item in status_iter {
         let item = item.context("failed to check git status item")?;
         let rel_path = item.rela_path();
-        let filepath = workdir.join(gix::path::from_bstr(rel_path));
-        match attrs.entry(filepath) {
-            Entry::Occupied(mut ent) => {
-                let attrs: &mut GitFileAttrs = ent.get_mut();
-                attrs.dirty_time = Some(now);
-            }
-            Entry::Vacant(ent) => {
-                ent.insert(GitFileAttrs {
-                    created_time: now,
-                    modified_time: now,
-                    authors: BTreeSet::new(),
-                    dirty_time: Some(now),
-                });
-            }
-        }
+        update_attrs(rel_path, now, current_username.as_str());
     }
 
     Ok(attrs)

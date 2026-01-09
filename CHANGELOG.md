@@ -6,11 +6,10 @@ All notable changes to this project will be documented in this file.
 
 ### Notable changes
 
-* `attrs.disk_file_created_year`, `attrs.disk_file_modified_year`, `attrs.git_file_created_year`, and `attrs.git_file_modified_year` are now integers instead of strings. Most use cases should not be affected.
-
-### New features
-
-* `attrs.disk_file_modified_year` can be used to replace nonexisting Git attrs like `{{attrs.git_file_created_year if attrs.git_file_created_year else attrs.disk_file_modified_year }}`
+* `attrs.disk_file_created_year`, `attrs.git_file_created_year`, and `attrs.git_file_modified_year` are now integers instead of strings. Most use cases should not be affected.
+* `attrs.git_file_created_year` is now set even if the file is not tracked by Git. In this case, it will be set to the current year (as if it were committed now).
+* `attrs.git_file_modified_year` is now overwritten if the file is modified but not committed by Git. In this case, it will be set to the current year (as if it were committed now).
+* `attrs.disk_file_created_year` is then soft-deprecated. It will still be set, but it is recommended to use `attrs.git_file_created_year` and `attrs.git_file_modified_year` directly instead.
 
 ## [6.3.0] 2025-10-09
 

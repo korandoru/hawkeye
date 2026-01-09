@@ -81,10 +81,6 @@ impl DocumentFactory {
                 .as_ref()
                 .and_then(|m| m.created().ok())
                 .and_then(file_time_to_year),
-            disk_file_modified_year: filemeta
-                .as_ref()
-                .and_then(|m| m.modified().ok())
-                .and_then(file_time_to_year),
             git_file_created_year: self
                 .git_file_attrs
                 .get(filepath)

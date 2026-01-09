@@ -15,7 +15,7 @@
 use clap::FromArgMatches;
 use clap::Subcommand;
 use logforth::append;
-use logforth::filter::EnvFilter;
+use logforth::filter::env_filter::EnvFilterBuilder;
 
 use crate::subcommand::SubCommand;
 
@@ -23,9 +23,9 @@ pub mod subcommand;
 pub mod version;
 
 fn main() {
-    logforth::builder()
+    logforth::starter_log::builder()
         .dispatch(|b| {
-            b.filter(EnvFilter::from_default_env_or("info"))
+            b.filter(EnvFilterBuilder::from_default_env_or("info").build())
                 .append(append::Stderr::default())
         })
         .apply();

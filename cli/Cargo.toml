@@ -28,7 +28,7 @@ clap = { workspace = true }
 const_format = { workspace = true }
 hawkeye-fmt = { workspace = true }
 log = { workspace = true }
-logforth = { version = "0.27.0" }
+logforth = { version = "0.29.1", features = ["starter-log"] }
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = { version = "1.0.143" }
 shadow-rs = { workspace = true }
@@ -36,4 +36,4 @@ shadow-rs = { workspace = true }
 [build-dependencies]
 build-data = { workspace = true }
 shadow-rs = { workspace = true }
-gix-discover = { version = "0.41.0" }
+gix-discover = { version = "0.45.0" }
