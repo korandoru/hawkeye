@@ -43,7 +43,6 @@ pub trait Callback {
     fn on_not_matched(&mut self, header: &HeaderMatcher, document: Document) -> anyhow::Result<()>;
 }
 
-#[allow(clippy::type_complexity)]
 pub fn check_license_header<C: Callback>(
     run_config: PathBuf,
     callback: &mut C,

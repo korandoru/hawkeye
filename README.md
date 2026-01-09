@@ -173,6 +173,7 @@ inceptionYear = 2023
 
 # There are also preset attributes that can be used in the header template (no need to surround them with `props[]`).:
 # * 'attrs.filename' is the current file name, like: pom.xml.
+# * 'attrs.disk_file_created_year'
 
 # Options to configure Git features.
 [git]

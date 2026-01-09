@@ -12,15 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use anyhow::Context;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
 use std::io;
 use std::path::Path;
 use std::path::PathBuf;
-
-use anyhow::Context;
-use gix::date::time::CustomFormat;
+use std::time::SystemTime;
 
 use crate::config::Mapping;
 use crate::document::Attributes;
@@ -68,31 +67,28 @@ impl DocumentFactory {
         let header_def = self
             .definitions
             .get(&header_type)
-            .ok_or_else(|| std::io::Error::other(format!("header type {header_type} not found")))
+            .ok_or_else(|| io::Error::other(format!("header type {header_type} not found")))
             .with_context(|| format!("cannot to create document: {}", filepath.display()))?;
 
         let props = self.properties.clone();
 
-        const YEAR_FORMAT: CustomFormat = CustomFormat::new("%Y");
+        let filemeta = fs::metadata(filepath).ok();
         let attrs = Attributes {
             filename: filepath
                 .file_name()
                 .map(|s| s.to_string_lossy().to_string()),
-            disk_file_created_year: fs::metadata(filepath)
-                .and_then(|meta| meta.created())
-                .and_then(|t| match jiff::Timestamp::try_from(t) {
-                    Ok(datetime) => Ok(datetime.strftime("%Y").to_string()),
-                    Err(err) => Err(io::Error::other(err)),
-                })
-                .ok(),
+            disk_file_created_year: filemeta
+                .as_ref()
+                .and_then(|m| m.created().ok())
+                .and_then(file_time_to_year),
             git_file_created_year: self
                 .git_file_attrs
                 .get(filepath)
-                .map(|attrs| attrs.created_time.format(YEAR_FORMAT)),
+                .and_then(|attrs| git_time_to_year(attrs.created_time)),
             git_file_modified_year: self
                 .git_file_attrs
                 .get(filepath)
-                .map(|attrs| attrs.modified_time.format(YEAR_FORMAT)),
+                .and_then(|attrs| git_time_to_year(attrs.modified_time)),
             git_authors: self
                 .git_file_attrs
                 .get(filepath)
@@ -108,4 +104,17 @@ impl DocumentFactory {
             attrs,
         )
     }
+}
+
+fn file_time_to_year(time: SystemTime) -> Option<i16> {
+    let ts = jiff::Timestamp::try_from(time).ok()?;
+    Some(ts.to_zoned(jiff::tz::TimeZone::system()).year())
+}
+
+fn git_time_to_year(t: gix::date::Time) -> Option<i16> {
+    let offset = jiff::tz::Offset::from_seconds(t.offset).expect("valid offset");
+    let zoned = jiff::Timestamp::from_second(t.seconds)
+        .expect("always valid unix time")
+        .to_zoned(offset.to_time_zone());
+    Some(zoned.year())
 }
