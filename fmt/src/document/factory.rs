@@ -68,7 +68,7 @@ impl DocumentFactory {
         let header_def = self
             .definitions
             .get(&header_type)
-            .ok_or_else(|| std::io::Error::other(format!("header type {header_type} not found")))
+            .ok_or_else(|| io::Error::other(format!("header type {header_type} not found")))
             .with_context(|| format!("cannot to create document: {}", filepath.display()))?;
 
         let props = self.properties.clone();

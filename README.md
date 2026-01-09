@@ -172,7 +172,13 @@ extensions = ["..."] # e.g. "cc"
 inceptionYear = 2023
 
 # There are also preset attributes that can be used in the header template (no need to surround them with `props[]`).:
+#
+# The following attributes are stable.
 # * 'attrs.filename' is the current file name, like: pom.xml.
+#
+# The following attributes are determined by your local file system rather than the version control system.
+# * 'attrs.disk_file_created_year' is the year when the file is created.
+# * 'attrs.disk_file_modified_year' is the year when the file is last modified on.
 
 # Options to configure Git features.
 [git]
