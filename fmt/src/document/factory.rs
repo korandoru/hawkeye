@@ -72,17 +72,18 @@ impl DocumentFactory {
 
         let props = self.properties.clone();
 
+        let filemeta = fs::metadata(filepath).ok();
         let attrs = Attributes {
             filename: filepath
                 .file_name()
                 .map(|s| s.to_string_lossy().to_string()),
-            disk_file_created_year: fs::metadata(filepath)
-                .and_then(|m| m.created())
-                .ok()
+            disk_file_created_year: filemeta
+                .as_ref()
+                .and_then(|m| m.created().ok())
                 .and_then(file_time_to_year),
-            disk_file_modified_year: fs::metadata(filepath)
-                .and_then(|m| m.modified())
-                .ok()
+            disk_file_modified_year: filemeta
+                .as_ref()
+                .and_then(|m| m.modified().ok())
                 .and_then(file_time_to_year),
             git_file_created_year: self
                 .git_file_attrs
