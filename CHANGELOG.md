@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+### Notable changes
+
+* `attrs.disk_file_created_year`, `attrs.disk_file_modified_year`, `attrs.git_file_created_year`, and `attrs.git_file_modified_year` are now integers instead of strings. Most use cases should not be affected.
+
 ### New features
 
 * `attrs.disk_file_modified_year` can be used to replace nonexisting Git attrs like `{{attrs.git_file_created_year if attrs.git_file_created_year else attrs.disk_file_modified_year }}`

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use anyhow::Context;
-use gix::date::time::CustomFormat;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
@@ -73,21 +72,26 @@ impl DocumentFactory {
 
         let props = self.properties.clone();
 
-        const YEAR_FORMAT: CustomFormat = CustomFormat::new("%Y");
         let attrs = Attributes {
             filename: filepath
                 .file_name()
                 .map(|s| s.to_string_lossy().to_string()),
-            disk_file_created_year: fetch_file_time(filepath, |meta| meta.created()),
-            disk_file_modified_year: fetch_file_time(filepath, |meta| meta.modified()),
+            disk_file_created_year: fs::metadata(filepath)
+                .and_then(|m| m.created())
+                .ok()
+                .and_then(file_time_to_year),
+            disk_file_modified_year: fs::metadata(filepath)
+                .and_then(|m| m.modified())
+                .ok()
+                .and_then(file_time_to_year),
             git_file_created_year: self
                 .git_file_attrs
                 .get(filepath)
-                .map(|attrs| attrs.created_time.format(YEAR_FORMAT)),
+                .and_then(|attrs| git_time_to_year(attrs.created_time)),
             git_file_modified_year: self
                 .git_file_attrs
                 .get(filepath)
-                .map(|attrs| attrs.modified_time.format(YEAR_FORMAT)),
+                .and_then(|attrs| git_time_to_year(attrs.modified_time)),
             git_authors: self
                 .git_file_attrs
                 .get(filepath)
@@ -105,12 +109,15 @@ impl DocumentFactory {
     }
 }
 
-fn fetch_file_time(
-    file: &Path,
-    f: impl FnOnce(fs::Metadata) -> io::Result<SystemTime>,
-) -> Option<String> {
-    let meta = fs::metadata(file).ok()?;
-    let time = f(meta).ok()?;
+fn file_time_to_year(time: SystemTime) -> Option<i16> {
     let ts = jiff::Timestamp::try_from(time).ok()?;
-    Some(ts.strftime("%Y").to_string())
+    Some(ts.to_zoned(jiff::tz::TimeZone::system()).year())
+}
+
+fn git_time_to_year(t: gix::date::Time) -> Option<i16> {
+    let offset = jiff::tz::Offset::from_seconds(t.offset).expect("valid offset");
+    let zoned = jiff::Timestamp::from_second(t.seconds)
+        .expect("always valid unix time")
+        .to_zoned(offset.to_time_zone());
+    Some(zoned.year())
 }

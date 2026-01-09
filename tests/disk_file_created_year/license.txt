@@ -1,2 +1,2 @@
 Copyright {{attrs.git_file_created_year if attrs.git_file_created_year else attrs.disk_file_created_year }}
-Modified {{attrs.disk_file_modified_year}}
+Modified {{[attrs.git_modified_year, attrs.disk_file_modified_year] | max}}

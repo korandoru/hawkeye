@@ -177,8 +177,8 @@ inceptionYear = 2023
 # * 'attrs.filename' is the current file name, like: pom.xml.
 #
 # The following attributes are determined by your local file system rather than the version control system.
-# * 'attrs.disk_file_created_year' is the year when the file is created.
-# * 'attrs.disk_file_modified_year' is the year when the file is last modified on.
+# * 'attrs.disk_file_created_year'
+# * 'attrs.disk_file_modified_year'
 
 # Options to configure Git features.
 [git]
