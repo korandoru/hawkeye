@@ -88,6 +88,9 @@ pub struct GitFileAttrs {
     pub created_time: gix::date::Time,
     pub modified_time: gix::date::Time,
     pub authors: BTreeSet<String>,
+
+    /// The time when the file is modified in working tree but not committed.
+    pub dirty_time: Option<gix::date::Time>,
 }
 
 pub fn resolve_file_attrs(
@@ -127,6 +130,7 @@ pub fn resolve_file_attrs(
                             authors.insert(author.to_string());
                             authors
                         },
+                        dirty_time: None,
                     });
                 }
             }
@@ -164,6 +168,30 @@ pub fn resolve_file_attrs(
     let changes = repo.diff_tree_to_tree(None, Some(&next_tree), Some(option))?;
     for change in changes {
         do_insert_attrs(change, time, author.as_str());
+    }
+
+    // process dirty working tree
+    let status_platform = repo.status(gix::progress::Discard)?;
+    let status_iter = status_platform.into_index_worktree_iter(None)?;
+    let now = gix::date::Time::now_local_or_utc();
+    for item in status_iter {
+        let item = item.context("failed to check git status item")?;
+        let rel_path = item.rela_path();
+        let filepath = workdir.join(gix::path::from_bstr(rel_path));
+        match attrs.entry(filepath) {
+            Entry::Occupied(mut ent) => {
+                let attrs: &mut GitFileAttrs = ent.get_mut();
+                attrs.dirty_time = Some(now);
+            }
+            Entry::Vacant(ent) => {
+                ent.insert(GitFileAttrs {
+                    created_time: now,
+                    modified_time: now,
+                    authors: BTreeSet::new(),
+                    dirty_time: Some(now),
+                });
+            }
+        }
     }
 
     Ok(attrs)
