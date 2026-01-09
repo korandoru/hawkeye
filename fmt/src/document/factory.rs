@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use anyhow::Context;
+use gix::date::time::CustomFormat;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
 use std::io;
 use std::path::Path;
 use std::path::PathBuf;
-
-use anyhow::Context;
-use gix::date::time::CustomFormat;
+use std::time::SystemTime;
 
 use crate::config::Mapping;
 use crate::document::Attributes;
@@ -78,13 +78,8 @@ impl DocumentFactory {
             filename: filepath
                 .file_name()
                 .map(|s| s.to_string_lossy().to_string()),
-            disk_file_created_year: fs::metadata(filepath)
-                .and_then(|meta| meta.created())
-                .and_then(|t| match jiff::Timestamp::try_from(t) {
-                    Ok(datetime) => Ok(datetime.strftime("%Y").to_string()),
-                    Err(err) => Err(io::Error::other(err)),
-                })
-                .ok(),
+            disk_file_created_year: fetch_file_time(filepath, |meta| meta.created()),
+            disk_file_modified_year: fetch_file_time(filepath, |meta| meta.modified()),
             git_file_created_year: self
                 .git_file_attrs
                 .get(filepath)
@@ -108,4 +103,14 @@ impl DocumentFactory {
             attrs,
         )
     }
+}
+
+fn fetch_file_time(
+    file: &Path,
+    f: impl FnOnce(fs::Metadata) -> io::Result<SystemTime>,
+) -> Option<String> {
+    let meta = fs::metadata(file).ok()?;
+    let time = f(meta).ok()?;
+    let ts = jiff::Timestamp::try_from(time).ok()?;
+    Some(ts.strftime("%Y").to_string())
 }

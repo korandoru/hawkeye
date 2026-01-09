@@ -1,4 +1,5 @@
 // Copyright <CURRENT_YEAR>
+// Modified <CURRENT_YEAR>
 
 fn main() {
     println!("Hello, world!");

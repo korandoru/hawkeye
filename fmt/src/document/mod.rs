@@ -38,6 +38,7 @@ pub mod model;
 pub struct Attributes {
     pub filename: Option<String>,
     pub disk_file_created_year: Option<String>,
+    pub disk_file_modified_year: Option<String>,
     pub git_file_created_year: Option<String>,
     pub git_file_modified_year: Option<String>,
     pub git_authors: BTreeSet<String>,

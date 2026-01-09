@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### New features
+
+* `attrs.disk_file_modified_year` can be used to replace nonexisting Git attrs like `{{attrs.git_file_created_year if attrs.git_file_created_year else attrs.disk_file_modified_year }}`
+
 ## [6.3.0] 2025-10-09
 
 ### New features
