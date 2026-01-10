@@ -13,6 +13,11 @@ All notable changes to this project will be documented in this file.
 
 The semantic changes above are breaking, but they should not affect most users and should always be what you want.
 
+* `additionalHeaders` and `headerPath` now search from the following paths in order:
+  1. The directory of the configuration file, a.k.a., config_dir.
+  2. The baseDir configured.
+  3. The current working directory.
+
 ## [6.3.0] 2025-10-09
 
 ### New features
