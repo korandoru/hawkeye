@@ -28,6 +28,8 @@ use crate::git;
 use crate::header::matcher::HeaderMatcher;
 use crate::header::model::default_headers;
 use crate::header::model::deserialize_header_definitions;
+use crate::header::model::HeaderDef;
+use crate::license::bundled_headers;
 use crate::license::HeaderSource;
 use crate::selection::Selection;
 
@@ -55,6 +57,10 @@ pub fn check_license_header<C: Callback>(
             .map_err(Box::new)
             .with_context(|| format!("cannot parse config file: {name}"))?
     };
+
+    let config_dir = run_config
+        .parent()
+        .context("cannot get parent directory of config file")?;
 
     let basedir = config.base_dir.clone();
     anyhow::ensure!(
@@ -107,10 +113,9 @@ pub fn check_license_header<C: Callback>(
                 }
             }
         }
+
         for additional_header in &config.additional_headers {
-            let additional_defs = fs::read_to_string(additional_header)
-                .with_context(|| format!("cannot load header definitions: {additional_header}"))
-                .and_then(deserialize_header_definitions)?;
+            let additional_defs = load_additional_headers(additional_header, &config, config_dir)?;
             for (k, v) in additional_defs {
                 match defs.entry(k) {
                     Entry::Occupied(mut ent) => {
@@ -123,11 +128,12 @@ pub fn check_license_header<C: Callback>(
                 }
             }
         }
+
         defs
     };
 
     let header_matcher = {
-        let header_source = HeaderSource::from_config(&config)?;
+        let header_source = load_header_sources(&config, config_dir)?;
         HeaderMatcher::new(header_source.content)
     };
 
@@ -163,4 +169,91 @@ pub fn check_license_header<C: Callback>(
     }
 
     Ok(())
+}
+
+fn load_additional_headers(
+    additional_header: impl AsRef<Path>,
+    config: &Config,
+    config_dir: &Path,
+) -> anyhow::Result<HashMap<String, HeaderDef>> {
+    let additional_header = additional_header.as_ref();
+
+    // 1. Based on config directory.
+    let path = {
+        let mut path = config_dir.to_path_buf();
+        path.push(additional_header);
+        path
+    };
+    if let Ok(content) = fs::read_to_string(&path) {
+        return deserialize_header_definitions(content)
+            .with_context(|| format!("cannot load header definitions: {}", path.display()));
+    }
+
+    // 2. Based on the base_dir.
+    let path = {
+        let mut path = config.base_dir.clone();
+        path.push(additional_header);
+        path
+    };
+    if let Ok(content) = fs::read_to_string(&path) {
+        return deserialize_header_definitions(content)
+            .with_context(|| format!("cannot load header definitions: {}", path.display()));
+    }
+
+    // 3. Based on current working directory.
+    if let Ok(content) = fs::read_to_string(additional_header) {
+        return deserialize_header_definitions(content).with_context(|| {
+            format!(
+                "cannot load header definitions: {}",
+                additional_header.display()
+            )
+        });
+    }
+
+    Err(anyhow::anyhow!(
+        "cannot find header definitions: {}",
+        additional_header.display()
+    ))
+}
+
+fn load_header_sources(config: &Config, config_dir: &Path) -> anyhow::Result<HeaderSource> {
+    // 1. inline_header takes priority.
+    if let Some(content) = config.inline_header.as_ref().cloned() {
+        return Ok(HeaderSource { content });
+    }
+
+    // 2. Then, try to load from header_path.
+    let header_path = config
+        .header_path
+        .as_ref()
+        .context("no header source found (both inline_header and header_path are None)")?;
+
+    // 2.1 Based on config directory.
+    let path = {
+        let mut path = config_dir.to_path_buf();
+        path.push(header_path);
+        path
+    };
+    if let Ok(content) = fs::read_to_string(path) {
+        return Ok(HeaderSource { content });
+    }
+
+    // 2.2 Based on the base_dir.
+    let path = {
+        let mut path = config.base_dir.clone();
+        path.push(header_path);
+        path
+    };
+    if let Ok(content) = fs::read_to_string(path) {
+        return Ok(HeaderSource { content });
+    }
+
+    // 2.3 Based on current working directory.
+    if let Ok(content) = fs::read_to_string(header_path) {
+        return Ok(HeaderSource { content });
+    }
+
+    // 3. Finally, fallback to try bundled headers.
+    bundled_headers(header_path)
+        .with_context(|| format!("no header source found (header_path is invalid: {header_path})"))
 }

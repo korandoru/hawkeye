@@ -12,41 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Context;
-
-use crate::config::Config;
-
 #[derive(Debug, Clone)]
 pub struct HeaderSource {
     pub content: String,
-}
-
-impl HeaderSource {
-    pub fn from_config(config: &Config) -> anyhow::Result<Self> {
-        // 1. inline_header takes priority.
-        if let Some(content) = config.inline_header.as_ref().cloned() {
-            return Ok(HeaderSource { content });
-        }
-
-        // 2. Then, header_path tries to load from base_dir.
-        let header_path = config
-            .header_path
-            .as_ref()
-            .context("no header source found (both inline_header and header_path are None)")?;
-        let path = {
-            let mut path = config.base_dir.clone();
-            path.push(header_path);
-            path
-        };
-        if let Ok(content) = std::fs::read_to_string(path) {
-            return Ok(HeaderSource { content });
-        }
-
-        // 3. Finally, fallback to try bundled headers.
-        bundled_headers(header_path).with_context(|| {
-            format!("no header source found (header_path is invalid: {header_path})")
-        })
-    }
 }
 
 macro_rules! match_bundled_headers {
@@ -60,7 +28,7 @@ macro_rules! match_bundled_headers {
     }
 }
 
-fn bundled_headers(name: &str) -> Option<HeaderSource> {
+pub(crate) fn bundled_headers(name: &str) -> Option<HeaderSource> {
     match_bundled_headers!(
         name,
         "Apache-2.0.txt",

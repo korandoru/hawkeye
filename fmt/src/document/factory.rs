@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Context;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
@@ -20,6 +19,8 @@ use std::io;
 use std::path::Path;
 use std::path::PathBuf;
 use std::time::SystemTime;
+
+use anyhow::Context;
 
 use crate::config::Mapping;
 use crate::document::Attributes;
