@@ -18,13 +18,13 @@ use std::collections::HashMap;
 use std::path::Path;
 use std::path::PathBuf;
 
+use crate::config;
+use crate::config::FeatureGate;
 use anyhow::bail;
 use anyhow::Context;
 use gix::bstr::BStr;
+use gix::status::Item;
 use gix::Repository;
-
-use crate::config;
-use crate::config::FeatureGate;
 
 #[derive(Debug, Clone)]
 pub struct GitContext {
@@ -173,11 +173,14 @@ pub fn resolve_file_attrs(
 
     // process dirty working tree
     let status_platform = repo.status(gix::progress::Discard)?;
-    let status_iter = status_platform.into_index_worktree_iter(None)?;
+    let status_iter = status_platform.into_iter(None)?;
     let now = gix::date::Time::now_local_or_utc();
     for item in status_iter {
         let item = item.context("failed to check git status item")?;
-        let rel_path = item.rela_path();
+        let rel_path = match &item {
+            Item::IndexWorktree(item) => item.rela_path(),
+            Item::TreeIndex(item) => item.location(),
+        };
         update_attrs(rel_path, now, current_username.as_str());
     }
 
