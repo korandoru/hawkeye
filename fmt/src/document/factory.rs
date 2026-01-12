@@ -69,7 +69,7 @@ impl DocumentFactory {
             .definitions
             .get(&header_type)
             .ok_or_else(|| io::Error::other(format!("header type {header_type} not found")))
-            .with_context(|| format!("cannot to create document: {}", filepath.display()))?;
+            .with_context(|| format!("cannot create document: {}", filepath.display()))?;
 
         let props = self.properties.clone();
 
