@@ -306,5 +306,19 @@ fn check_unknown_files(unknown: &[String], fail_if_unknown: bool) -> bool {
 }
 
 fn default_config() -> PathBuf {
-    PathBuf::new().join("licenserc.toml")
+    let candidates = [
+        PathBuf::from("licenserc.toml"),
+        PathBuf::from(".licenserc.toml"),
+    ];
+
+    for path in &candidates {
+        if path.exists() {
+            return path.clone();
+        }
+    }
+
+    panic!(
+        "cannot find config file in any of the default locations: {:?}",
+        candidates.iter().map(|p| p.display()).collect::<Vec<_>>()
+    );
 }

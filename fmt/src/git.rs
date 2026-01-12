@@ -18,13 +18,14 @@ use std::collections::HashMap;
 use std::path::Path;
 use std::path::PathBuf;
 
-use crate::config;
-use crate::config::FeatureGate;
 use anyhow::bail;
 use anyhow::Context;
 use gix::bstr::BStr;
 use gix::status::Item;
 use gix::Repository;
+
+use crate::config;
+use crate::config::FeatureGate;
 
 #[derive(Debug, Clone)]
 pub struct GitContext {

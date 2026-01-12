@@ -74,9 +74,8 @@ impl Document {
                     log::debug!("skip non-textual file: {}", filepath.display());
                     Ok(None)
                 } else {
-                    Err(e).with_context(|| {
-                        format!("cannot to create document: {}", filepath.display())
-                    })
+                    Err(e)
+                        .with_context(|| format!("cannot create document: {}", filepath.display()))
                 }
             }
         }
