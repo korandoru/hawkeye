@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## [6.4.0] 2026-01-12
+
 ### Notable changes
 
 * `attrs.disk_file_created_year`, `attrs.git_file_created_year`, and `attrs.git_file_modified_year` are now integers instead of strings. Most use cases should not be affected.
@@ -15,7 +17,7 @@ The semantic changes above are breaking, but they should not affect most users a
 
 * `additionalHeaders` and `headerPath` now search from the following paths in order:
   1. The directory of the configuration file, a.k.a., config_dir.
-  2. The baseDir configured.
+  2. The configured baseDir.
   3. The current working directory.
 
 ## Improvements
