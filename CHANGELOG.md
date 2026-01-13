@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## [6.4.1] 2026-01-13
+
+## Improvements
+
+* Use `TextLayout` for logging output to improve formatting and readability.
+
 ## [6.4.0] 2026-01-12
 
 ### Notable changes
