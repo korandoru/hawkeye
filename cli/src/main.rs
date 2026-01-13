@@ -14,7 +14,6 @@
 
 use clap::FromArgMatches;
 use clap::Subcommand;
-use logforth::append;
 use logforth::filter::env_filter::EnvFilterBuilder;
 
 use crate::subcommand::SubCommand;
@@ -23,11 +22,8 @@ pub mod subcommand;
 pub mod version;
 
 fn main() {
-    logforth::starter_log::builder()
-        .dispatch(|b| {
-            b.filter(EnvFilterBuilder::from_default_env_or("info").build())
-                .append(append::Stderr::default())
-        })
+    logforth::starter_log::stderr()
+        .filter(EnvFilterBuilder::from_default_env_or("info").build())
         .apply();
 
     let build_info = version::build_info();
