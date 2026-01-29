@@ -174,33 +174,30 @@ pub fn resolve_file_attrs(
     let make_error = || Error::new("cannot resolve git file attributes");
 
     let head = repo.head_commit().or_raise(make_error)?;
-    let mut next_commit = head.clone();
 
     for info in head.ancestors().all().or_raise(make_error)? {
         let info = info.or_raise(make_error)?;
-        let this_commit = info.object().or_raise(make_error)?;
-        let time = next_commit.time().or_raise(make_error)?;
-        let author = next_commit.author().or_raise(make_error)?.name.to_string();
+        let commit = info.object().or_raise(make_error)?;
+        let time = commit.time().or_raise(make_error)?;
+        let author = commit.author().or_raise(make_error)?.name.to_string();
 
-        let this_tree = this_commit.tree().or_raise(make_error)?;
-        let next_tree = next_commit.tree().or_raise(make_error)?;
+        let tree = commit.tree().or_raise(make_error)?;
+        let parents: Vec<_> = commit.parent_ids().collect();
 
+        if parents.len() > 1 {
+            // skip merge commit itself
+            continue;
+        }
+        let parent_tree = parents
+            .first()
+            .map(|p| p.object()?.into_commit().tree())
+            .transpose()
+            .or_raise(make_error)?;
         let changes = repo
-            .diff_tree_to_tree(Some(&this_tree), Some(&next_tree), Some(option))
+            .diff_tree_to_tree(parent_tree.as_ref(), Some(&tree), Some(option))
             .or_raise(make_error)?;
         process_changes(changes, time, &author);
-
-        next_commit = this_commit;
     }
-
-    // process the root commit
-    let time = next_commit.time().or_raise(make_error)?;
-    let author = next_commit.author().or_raise(make_error)?.name.to_string();
-    let next_tree = next_commit.tree().or_raise(make_error)?;
-    let changes = repo
-        .diff_tree_to_tree(None, Some(&next_tree), Some(option))
-        .or_raise(make_error)?;
-    process_changes(changes, time, &author);
 
     // process dirty working tree
     let status_platform = repo.status(gix::progress::Discard).or_raise(make_error)?;
