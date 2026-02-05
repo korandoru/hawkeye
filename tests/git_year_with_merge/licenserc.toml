@@ -1,0 +1,6 @@
+inlineHeader = "{{attrs.git_file_created_year}} - {{attrs.git_file_modified_year}}"
+includes = ["*.rs"]
+
+[git]
+ignore = "enable"
+attrs = "enable"
