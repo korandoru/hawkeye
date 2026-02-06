@@ -338,7 +338,7 @@ pub const EXCLUDES: [&str; 140] = [
     "**/.classpath",
     "**/.project",
     "**/.settings/**",
-    // IDEA projet files
+    // IDEA project files
     "**/*.iml",
     "**/*.ipr",
     "**/*.iws",

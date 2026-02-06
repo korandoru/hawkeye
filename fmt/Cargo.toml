@@ -25,10 +25,10 @@ repository.workspace = true
 [dependencies]
 anyhow = { workspace = true }
 gix = { version = "0.78.0", default-features = false, features = [
-    "blob-diff",
-    "excludes",
-    "status",
-    "parallel"
+  "blob-diff",
+  "excludes",
+  "status",
+  "parallel",
 ] }
 jiff = { version = "0.2.14" }
 ignore = { version = "0.4.23" }
