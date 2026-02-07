@@ -20,9 +20,10 @@ use std::path::PathBuf;
 
 use anyhow::bail;
 use anyhow::Context;
-use gix::bstr::BStr;
+use gix::diff::tree_with_rewrites::Change;
 use gix::status::Item;
 use gix::Repository;
+use walkdir::WalkDir;
 
 use crate::config;
 use crate::config::FeatureGate;
@@ -111,12 +112,19 @@ pub fn resolve_file_attrs(
         _ => "<unknown>".to_string(),
     };
 
+    let worktree = repo.worktree().expect("worktree cannot be absent");
     let workdir = repo.workdir().expect("workdir cannot be absent");
-    let workdir = workdir.canonicalize()?;
+    let workdir = workdir
+        .canonicalize()
+        .with_context(|| format!("cannot resolve absolute path: {}", workdir.display()))?;
 
-    let mut update_attrs = |rel_path: &BStr, time: gix::date::Time, author: &str| {
-        let filepath = gix::path::from_bstr(rel_path);
-        let filepath = workdir.join(filepath);
+    let mut excludes = worktree
+        .excludes(None)
+        .map_err(Box::new)
+        .context("cannot create gix exclude stack")?;
+
+    let mut update_attrs = |rela_path: &Path, time: gix::date::Time, author: &str| {
+        let filepath = workdir.join(rela_path);
         match attrs.entry(filepath) {
             Entry::Occupied(mut ent) => {
                 let attrs: &mut GitFileAttrs = ent.get_mut();
@@ -134,6 +142,18 @@ pub fn resolve_file_attrs(
                         authors
                     },
                 });
+            }
+        }
+    };
+
+    let mut process_changes = |changes: Vec<Change>, time: gix::date::Time, author: &str| {
+        for change in changes {
+            match change {
+                Change::Addition { location, .. } | Change::Modification { location, .. } => {
+                    update_attrs(&gix::path::from_bstring(location), time, author);
+                }
+                Change::Deletion { .. } => continue, // skip deletion
+                Change::Rewrite { .. } => unreachable!("rewrite has been disabled"),
             }
         }
     };
@@ -157,9 +177,8 @@ pub fn resolve_file_attrs(
         let next_tree = next_commit.tree()?;
 
         let changes = repo.diff_tree_to_tree(Some(&this_tree), Some(&next_tree), Some(option))?;
-        for change in changes {
-            update_attrs(change.location(), time, author.as_str());
-        }
+        process_changes(changes, time, &author);
+
         next_commit = this_commit;
     }
 
@@ -168,9 +187,7 @@ pub fn resolve_file_attrs(
     let author = next_commit.author()?.name.to_string();
     let next_tree = next_commit.tree()?;
     let changes = repo.diff_tree_to_tree(None, Some(&next_tree), Some(option))?;
-    for change in changes {
-        update_attrs(change.location(), time, author.as_str());
-    }
+    process_changes(changes, time, &author);
 
     // process dirty working tree
     let status_platform = repo.status(gix::progress::Discard)?;
@@ -178,11 +195,70 @@ pub fn resolve_file_attrs(
     let now = gix::date::Time::now_local_or_utc();
     for item in status_iter {
         let item = item.context("failed to check git status item")?;
-        let rel_path = match &item {
-            Item::IndexWorktree(item) => item.rela_path(),
-            Item::TreeIndex(item) => item.location(),
-        };
-        update_attrs(rel_path, now, current_username.as_str());
+        match item {
+            Item::IndexWorktree(item) => match item {
+                gix::status::index_worktree::Item::Modification { rela_path, .. } => {
+                    let rela_path = gix::path::from_bstring(rela_path);
+                    update_attrs(&rela_path, now, current_username.as_str());
+                }
+                gix::status::index_worktree::Item::DirectoryContents { entry, .. } => {
+                    if entry.disk_kind.is_some_and(|k| k.is_dir()) {
+                        let dirpath = gix::path::from_bstr(&entry.rela_path)
+                            .canonicalize()
+                            .with_context(|| {
+                                format!("cannot resolve absolute path: {}", &entry.rela_path)
+                            })?;
+
+                        let mut it = WalkDir::new(dirpath).follow_links(false).into_iter();
+                        while let Some(entry) = it.next() {
+                            let entry = entry.context("cannot traverse directory")?;
+                            let path = entry.path();
+                            let file_type = entry.file_type();
+                            if !file_type.is_file() && !file_type.is_dir() {
+                                log::debug!(file_type:?; "skip file: {path:?}");
+                                continue;
+                            }
+
+                            let rela_path = path
+                                .strip_prefix(&workdir)
+                                .expect("git repository encloses iteration");
+                            let mode = Some(if file_type.is_dir() {
+                                gix::index::entry::Mode::DIR
+                            } else {
+                                gix::index::entry::Mode::FILE
+                            });
+                            let platform = excludes
+                                .at_path(rela_path, mode)
+                                .context("cannot check gix exclude")?;
+
+                            if file_type.is_dir() {
+                                if platform.is_excluded() {
+                                    log::debug!(path:?, rela_path:?; "skip git ignored directory");
+                                    it.skip_current_dir();
+                                    continue;
+                                }
+                            } else if file_type.is_file() {
+                                if platform.is_excluded() {
+                                    log::debug!(path:?, rela_path:?; "skip git ignored file");
+                                    continue;
+                                }
+                                update_attrs(rela_path, now, current_username.as_str());
+                            }
+                        }
+                    } else {
+                        let rela_path = gix::path::from_bstring(entry.rela_path);
+                        update_attrs(&rela_path, now, current_username.as_str());
+                    }
+                }
+                gix::status::index_worktree::Item::Rewrite { .. } => {
+                    unreachable!("rewrite has been disabled")
+                }
+            },
+            Item::TreeIndex(item) => {
+                let rela_path = gix::path::from_bstr(item.location());
+                update_attrs(&rela_path, now, current_username.as_str());
+            }
+        }
     }
 
     Ok(attrs)

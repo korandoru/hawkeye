@@ -24,16 +24,16 @@ repository.workspace = true
 
 [dependencies]
 anyhow = { workspace = true }
-gix = { version = "0.77.0", default-features = false, features = [
-    "blob-diff",
-    "excludes",
-    "status",
-    "parallel"
+gix = { version = "0.78.0", default-features = false, features = [
+  "blob-diff",
+  "excludes",
+  "status",
+  "parallel",
 ] }
 jiff = { version = "0.2.14" }
 ignore = { version = "0.4.23" }
 log = { workspace = true }
-minijinja = { version = "2.5.0" }
+minijinja = { version = "2.15.1" }
 regex = { version = "1.11.1" }
 serde = { version = "1.0.216", features = ["derive"] }
 toml = { workspace = true }

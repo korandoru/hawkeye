@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## [6.4.2] 2026-02-07
+
+## Bug fixes
+
+* Set Git attributes for untracked folders as if it were committed now.
+
 ## [6.4.1] 2026-01-13
 
 ## Improvements

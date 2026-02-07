@@ -189,7 +189,7 @@ fn select_files_with_git(
     let workdir = repo.workdir().expect("workdir cannot be absent");
     let workdir = workdir
         .canonicalize()
-        .with_context(|| format!("cannot resolve absolute path: {}", basedir.display()))?;
+        .with_context(|| format!("cannot resolve absolute path: {}", workdir.display()))?;
     let worktree = repo.worktree().expect("worktree cannot be absent");
     let mut excludes = worktree
         .excludes(None)
@@ -338,7 +338,7 @@ pub const EXCLUDES: [&str; 140] = [
     "**/.classpath",
     "**/.project",
     "**/.settings/**",
-    // IDEA projet files
+    // IDEA project files
     "**/*.iml",
     "**/*.ipr",
     "**/*.iws",
