@@ -1259,7 +1259,7 @@ dependencies = [
 
 [[package]]
 name = "hawkeye"
-version = "6.4.1"
+version = "6.4.2"
 dependencies = [
  "anyhow",
  "build-data",
@@ -1276,7 +1276,7 @@ dependencies = [
 
 [[package]]
 name = "hawkeye-fmt"
-version = "6.4.1"
+version = "6.4.2"
 dependencies = [
  "anyhow",
  "gix",
