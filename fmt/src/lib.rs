@@ -14,6 +14,7 @@
 
 pub mod config;
 pub mod document;
+pub mod error;
 pub mod git;
 pub mod header;
 pub mod license;

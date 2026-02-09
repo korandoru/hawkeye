@@ -15,16 +15,17 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
-use std::io;
 use std::path::Path;
 use std::path::PathBuf;
 use std::time::SystemTime;
 
-use anyhow::Context;
+use exn::OptionExt;
+use exn::Result;
 
 use crate::config::Mapping;
 use crate::document::Attributes;
 use crate::document::Document;
+use crate::error::Error;
 use crate::git::GitFileAttrs;
 use crate::header::model::HeaderDef;
 
@@ -54,7 +55,7 @@ impl DocumentFactory {
         }
     }
 
-    pub fn create_document(&self, filepath: &Path) -> anyhow::Result<Option<Document>> {
+    pub fn create_document(&self, filepath: &Path) -> Result<Option<Document>, Error> {
         let lower_file_name = filepath
             .file_name()
             .map(|n| n.to_string_lossy().to_lowercase())
@@ -65,11 +66,13 @@ impl DocumentFactory {
             .find_map(|m| m.header_type(&lower_file_name))
             .unwrap_or_else(|| "unknown".to_string())
             .to_lowercase();
-        let header_def = self
-            .definitions
-            .get(&header_type)
-            .ok_or_else(|| io::Error::other(format!("header type {header_type} not found")))
-            .with_context(|| format!("cannot create document: {}", filepath.display()))?;
+        let header_def = self.definitions.get(&header_type).ok_or_raise(|| {
+            Error::new(format!(
+                "cannot create document: {}, header type {} not found",
+                filepath.display(),
+                header_type
+            ))
+        })?;
 
         let props = self.properties.clone();
 

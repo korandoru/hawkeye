@@ -14,12 +14,14 @@
 
 use std::collections::HashMap;
 
-use anyhow::Context;
+use exn::Result;
+use exn::ResultExt;
 use regex::Regex;
 use serde::Deserialize;
 use serde::Serialize;
 
 use crate::default_true;
+use crate::error::Error;
 
 #[derive(Debug, Clone)]
 pub struct HeaderDef {
@@ -34,8 +36,8 @@ pub struct HeaderDef {
     pub pad_lines: bool,
 
     pub skip_line_pattern: Option<Regex>,
-    pub first_line_detection_pattern: Regex,
-    pub last_line_detection_pattern: Regex,
+    pub first_line_detection_pattern: Option<Regex>,
+    pub last_line_detection_pattern: Option<Regex>,
 }
 
 impl HeaderDef {
@@ -51,13 +53,17 @@ impl HeaderDef {
     /// Tells if the given content line is the first line of a possible header of this definition
     /// kind.
     pub fn is_first_header_line(&self, line: &str) -> bool {
-        self.first_line_detection_pattern.is_match(line)
+        self.first_line_detection_pattern
+            .as_ref()
+            .is_some_and(|p| p.is_match(line))
     }
 
     /// Tells if the given content line is the last line of a possible header of this definition
     /// kind.
     pub fn is_last_header_line(&self, line: &str) -> bool {
-        self.last_line_detection_pattern.is_match(line)
+        self.last_line_detection_pattern
+            .as_ref()
+            .is_some_and(|p| p.is_match(line))
     }
 }
 
@@ -66,8 +72,9 @@ pub fn default_headers() -> HashMap<String, HeaderDef> {
     deserialize_header_definitions(defaults.to_string()).unwrap()
 }
 
-pub fn deserialize_header_definitions(value: String) -> anyhow::Result<HashMap<String, HeaderDef>> {
-    let header_styles: HashMap<String, HeaderStyle> = toml::from_str(&value).map_err(Box::new)?;
+pub fn deserialize_header_definitions(value: String) -> Result<HashMap<String, HeaderDef>, Error> {
+    let header_styles = toml::from_str::<HashMap<String, HeaderStyle>>(&value)
+        .or_raise(|| Error::new("failed to parse header definitions"))?;
 
     let headers = header_styles
         .into_iter()
@@ -76,7 +83,7 @@ pub fn deserialize_header_definitions(value: String) -> anyhow::Result<HashMap<S
 
             assert!(
                 !style.allow_blank_lines || style.multiple_lines,
-                "Header style {name} is configured to allow blank lines, so it should be set as a multi-line header style"
+                "Header style {name} allowing blank lines must be of multi-line header style"
             );
 
             let def = HeaderDef {
@@ -90,24 +97,33 @@ pub fn deserialize_header_definitions(value: String) -> anyhow::Result<HashMap<S
                 pad_lines: style.pad_lines,
                 skip_line_pattern: style
                     .skip_line_pattern
-                    .map(|pattern| Regex::new(&pattern).with_context(
-                        || format!("malformed regex: {pattern}")
-                    )).transpose()?,
+                    .map(|pattern| {
+                        Regex::new(&pattern).or_raise(|| {
+                            Error::new(format!("malformed skip_line_pattern: {pattern}"))
+                        })
+                    })
+                    .transpose()?,
                 first_line_detection_pattern: style
                     .first_line_detection_pattern
-                    .map(|pattern| Regex::new(&pattern).with_context(
-                        || format!("malformed regex: {pattern}")
-                    )).transpose()?.context("empty regex in header")?,
+                    .map(|pattern| {
+                        Regex::new(&pattern).or_raise(|| {
+                            Error::new(format!("malformed first_line_detection_pattern: {pattern}"))
+                        })
+                    })
+                    .transpose()?,
                 last_line_detection_pattern: style
                     .last_line_detection_pattern
-                    .map(|pattern| Regex::new(&pattern).with_context(
-                        || format!("malformed regex: {pattern}")
-                    )).transpose()?.context("empty regex in header")?,
+                    .map(|pattern| {
+                        Regex::new(&pattern).or_raise(|| {
+                            Error::new(format!("malformed last_line_detection_pattern: {pattern}"))
+                        })
+                    })
+                    .transpose()?,
             };
 
             Ok((name, def))
         })
-        .collect::<anyhow::Result<HashMap<String, HeaderDef>>>()?;
+        .collect::<Result<HashMap<String, HeaderDef>, Error>>()?;
     Ok(headers)
 }
 

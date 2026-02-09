@@ -19,12 +19,15 @@ use std::fs::File;
 use std::io::BufRead;
 use std::path::PathBuf;
 
-use anyhow::Context;
+use exn::ErrorExt;
+use exn::Result;
+use exn::ResultExt;
 use minijinja::context;
 use minijinja::Environment;
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::error::Error;
 use crate::header::matcher::HeaderMatcher;
 use crate::header::model::HeaderDef;
 use crate::header::parser::parse_header;
@@ -60,7 +63,7 @@ impl Document {
         keywords: &[String],
         props: HashMap<String, String>,
         attrs: Attributes,
-    ) -> anyhow::Result<Option<Self>> {
+    ) -> Result<Option<Self>, Error> {
         match FileContent::new(&filepath) {
             Ok(content) => Ok(Some(Self {
                 parser: parse_header(content, &header_def, keywords),
@@ -69,13 +72,15 @@ impl Document {
                 props,
                 attrs,
             })),
-            Err(e) => {
-                if matches!(e.kind(), std::io::ErrorKind::InvalidData) {
+            Err(err) => {
+                if matches!(err.kind(), std::io::ErrorKind::InvalidData) {
                     log::debug!("skip non-textual file: {}", filepath.display());
                     Ok(None)
                 } else {
-                    Err(e)
-                        .with_context(|| format!("cannot create document: {}", filepath.display()))
+                    Err(err.raise().raise(Error::new(format!(
+                        "cannot create document: {}",
+                        filepath.display()
+                    ))))
                 }
             }
         }
@@ -95,7 +100,7 @@ impl Document {
         &self,
         header: &HeaderMatcher,
         strict_check: bool,
-    ) -> anyhow::Result<bool> {
+    ) -> Result<bool, Error> {
         if strict_check {
             let file_header = {
                 let mut lines = self.read_file_first_lines(header)?.join("\n");
@@ -115,15 +120,19 @@ impl Document {
         }
     }
 
-    fn read_file_first_lines(&self, header: &HeaderMatcher) -> std::io::Result<Vec<String>> {
-        let file = File::open(&self.filepath)?;
+    #[track_caller]
+    fn read_file_first_lines(&self, header: &HeaderMatcher) -> Result<Vec<String>, Error> {
+        let make_error = || Error::new("cannot read file first line");
+        let file = File::open(&self.filepath).or_raise(make_error)?;
         std::io::BufReader::new(file)
             .lines()
             .take(header.header_content_lines_count() + 10)
             .collect::<std::io::Result<Vec<_>>>()
+            .or_raise(make_error)
     }
 
-    fn read_file_header_on_one_line(&self, header: &HeaderMatcher) -> std::io::Result<String> {
+    #[track_caller]
+    fn read_file_header_on_one_line(&self, header: &HeaderMatcher) -> Result<String, Error> {
         let first_lines = self.read_file_first_lines(header)?;
         let file_header = first_lines
             .join("")
@@ -137,7 +146,7 @@ impl Document {
         Ok(file_header)
     }
 
-    pub fn update_header(&mut self, header: &HeaderMatcher) -> anyhow::Result<()> {
+    pub fn update_header(&mut self, header: &HeaderMatcher) -> Result<(), Error> {
         let header_str = header.build_for_definition(&self.header_def);
         let header_str = self.merge_properties(&header_str)?;
         let begin_pos = self.parser.begin_pos;
@@ -155,22 +164,24 @@ impl Document {
         }
     }
 
-    pub fn save(&mut self, filepath: Option<&PathBuf>) -> anyhow::Result<()> {
+    pub fn save(&mut self, filepath: Option<&PathBuf>) -> Result<(), Error> {
         let filepath = filepath.unwrap_or(&self.filepath);
         fs::write(filepath, self.parser.file_content.content())
-            .context(format!("cannot save document {}", filepath.display()))
+            .or_raise(|| Error::new(format!("cannot save document {}", filepath.display())))
     }
 
-    pub(crate) fn merge_properties(&self, s: &str) -> anyhow::Result<String> {
+    pub(crate) fn merge_properties(&self, s: &str) -> Result<String, Error> {
         let mut env = Environment::new();
         env.add_template("template", s)
-            .context("malformed template")?;
+            .or_raise(|| Error::new("malformed template"))?;
 
         let tmpl = env.get_template("template").expect("template must exist");
-        let mut result = tmpl.render(context! {
-            props => &self.props,
-            attrs => &self.attrs,
-        })?;
+        let mut result = tmpl
+            .render(context! {
+                props => &self.props,
+                attrs => &self.attrs,
+            })
+            .or_raise(|| Error::new("cannot render template"))?;
         result.push('\n');
         Ok(result)
     }

@@ -23,7 +23,7 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-anyhow = { workspace = true }
+exn = { workspace = true }
 gix = { version = "0.78.0", default-features = false, features = [
   "blob-diff",
   "excludes",

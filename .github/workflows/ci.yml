@@ -48,7 +48,7 @@ jobs:
   test:
     strategy:
       matrix:
-        rust-version: ["1.85.0", "stable"]
+        rust-version: ["1.90.0", "stable"]
     name: Build and test
     runs-on: ubuntu-24.04
     steps:
