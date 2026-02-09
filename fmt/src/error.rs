@@ -12,15 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod config;
-pub mod document;
-pub mod error;
-pub mod git;
-pub mod header;
-pub mod license;
-pub mod processor;
-pub mod selection;
-
-const fn default_true() -> bool {
-    true
+#[derive(Debug)]
+pub struct Error {
+    message: String,
 }
+
+impl Error {
+    pub fn new(message: impl Into<String>) -> Self {
+        Self {
+            message: message.into(),
+        }
+    }
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.message)
+    }
+}
+
+impl std::error::Error for Error {}

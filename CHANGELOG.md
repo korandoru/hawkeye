@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## [6.5.0] 2026-02-09
+
+### Notable changes
+
+* Minimal Supported Rust Version (MSRV) is now 1.90.0.
+
+### Bug fixes
+
+* `hawkeye` CLI now uses hawkeye-fmt of exactly the same version to format headers, instead of using the latest version of `hawkeye-fmt` that may not be compatible with the current version of `hawkeye`.
+
+### Improvements
+
+* Replace `anyhow` with `exn` for more informative error messages.
+
 ## [6.4.2] 2026-02-07
 
 ## Bug fixes

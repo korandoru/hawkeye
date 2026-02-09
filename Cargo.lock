@@ -395,6 +395,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "exn"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5ca6badeb8a07b76663c7d7cb0903c1cc40c38d6fc06d3a2206780c63e8b9496"
+
+[[package]]
 name = "faster-hex"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1259,12 +1265,12 @@ dependencies = [
 
 [[package]]
 name = "hawkeye"
-version = "6.4.2"
+version = "6.5.0"
 dependencies = [
- "anyhow",
  "build-data",
  "clap",
  "const_format",
+ "exn",
  "gix-discover",
  "hawkeye-fmt",
  "log",
@@ -1276,9 +1282,9 @@ dependencies = [
 
 [[package]]
 name = "hawkeye-fmt"
-version = "6.4.2"
+version = "6.5.0"
 dependencies = [
- "anyhow",
+ "exn",
  "gix",
  "ignore",
  "jiff",

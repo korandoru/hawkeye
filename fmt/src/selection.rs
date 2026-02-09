@@ -15,10 +15,13 @@
 use std::path::Path;
 use std::path::PathBuf;
 
-use anyhow::Context;
+use exn::ensure;
+use exn::Result;
+use exn::ResultExt;
 use ignore::overrides::OverrideBuilder;
 use walkdir::WalkDir;
 
+use crate::error::Error;
 use crate::git::GitContext;
 
 pub struct Selection {
@@ -61,7 +64,7 @@ impl Selection {
         }
     }
 
-    pub fn select(self) -> anyhow::Result<Vec<PathBuf>> {
+    pub fn select(self) -> Result<Vec<PathBuf>, Error> {
         log::debug!(
             "selecting files with baseDir: {}, included: {:?}, excluded: {:?}",
             self.basedir.display(),
@@ -71,24 +74,25 @@ impl Selection {
 
         let (excludes, reverse_excludes) = {
             let mut excludes = self.excludes;
-            let mut reverse_excludes = vec![];
-            // TODO(tisonkun): can be simplified and no clone when extract_if stable
-            excludes.retain_mut(|pat| {
-                if pat.starts_with('!') {
-                    pat.remove(0);
-                    reverse_excludes.push(pat.clone());
-                    false
-                } else {
-                    true
-                }
-            });
+            let reverse_excludes = excludes
+                .extract_if(.., |pat| {
+                    if pat.starts_with('!') {
+                        pat.remove(0);
+                        true
+                    } else {
+                        false
+                    }
+                })
+                .collect::<Vec<_>>();
             (excludes, reverse_excludes)
         };
 
         let includes = self.includes;
-        anyhow::ensure!(
+        ensure!(
             includes.iter().all(|pat| !pat.starts_with('!')),
-            "select files failed; reverse pattern is not allowed for includes: {includes:?}"
+            Error::new(format!(
+                "select files failed; reverse pattern is not allowed for includes: {includes:?}"
+            ))
         );
 
         let ignore = self.git_context.config.ignore.is_auto();
@@ -116,7 +120,9 @@ fn select_files_with_ignore(
     excludes: &[String],
     reverse_excludes: &[String],
     turn_on_git_ignore: bool,
-) -> anyhow::Result<Vec<PathBuf>> {
+) -> Result<Vec<PathBuf>, Error> {
+    let make_error = || Error::new("failed to select files with ignore crate");
+
     log::debug!(turn_on_git_ignore; "Selecting files with ignore crate");
     let mut result = vec![];
 
@@ -131,21 +137,21 @@ fn select_files_with_ignore(
         .overrides({
             let mut builder = OverrideBuilder::new(basedir);
             for pat in includes.iter() {
-                builder.add(pat)?;
+                builder.add(pat).or_raise(make_error)?;
             }
             for pat in excludes.iter() {
                 let pat = format!("!{pat}");
-                builder.add(pat.as_str())?;
+                builder.add(pat.as_str()).or_raise(make_error)?;
             }
             for pat in reverse_excludes.iter() {
-                builder.add(pat)?;
+                builder.add(pat).or_raise(make_error)?;
             }
-            builder.build()?
+            builder.build().or_raise(make_error)?
         })
         .build();
 
     for mat in walker {
-        let mat = mat?;
+        let mat = mat.or_raise(make_error)?;
         if mat.file_type().map(|ft| ft.is_file()).unwrap_or(false) {
             result.push(mat.into_path())
         }
@@ -160,44 +166,51 @@ fn select_files_with_git(
     excludes: &[String],
     reverse_excludes: &[String],
     repo: gix::Repository,
-) -> anyhow::Result<Vec<PathBuf>> {
+) -> Result<Vec<PathBuf>, Error> {
     log::debug!("selecting files with git helper");
     let mut result = vec![];
 
     let matcher = {
+        let make_error = || Error::new("failed to select files with ignore crate");
+
         let mut builder = OverrideBuilder::new(basedir);
         for pat in includes.iter() {
-            builder.add(pat)?;
+            builder.add(pat).or_raise(make_error)?;
         }
         for pat in excludes.iter() {
             let pat = format!("!{pat}");
-            builder.add(pat.as_str())?;
+            builder.add(pat.as_str()).or_raise(make_error)?;
         }
         for pat in reverse_excludes.iter() {
-            builder.add(pat)?;
+            builder.add(pat).or_raise(make_error)?;
         }
-        builder.build()?
+        builder.build().or_raise(make_error)?
     };
 
-    let basedir = basedir
-        .canonicalize()
-        .with_context(|| format!("cannot resolve absolute path: {}", basedir.display()))?;
+    let basedir = basedir.canonicalize().or_raise(|| {
+        Error::new(format!(
+            "cannot resolve absolute path: {}",
+            basedir.display()
+        ))
+    })?;
     let mut it = WalkDir::new(basedir.clone())
         .follow_links(false)
         .into_iter();
 
     let workdir = repo.workdir().expect("workdir cannot be absent");
-    let workdir = workdir
-        .canonicalize()
-        .with_context(|| format!("cannot resolve absolute path: {}", workdir.display()))?;
+    let workdir = workdir.canonicalize().or_raise(|| {
+        Error::new(format!(
+            "cannot resolve absolute path: {}",
+            workdir.display()
+        ))
+    })?;
     let worktree = repo.worktree().expect("worktree cannot be absent");
     let mut excludes = worktree
         .excludes(None)
-        .map_err(Box::new)
-        .context("cannot create gix exclude stack")?;
+        .or_raise(|| Error::new("cannot create gix exclude stack"))?;
 
     while let Some(entry) = it.next() {
-        let entry = entry.context("cannot traverse directory")?;
+        let entry = entry.or_raise(|| Error::new("cannot traverse directory"))?;
         let path = entry.path();
         let file_type = entry.file_type();
         if !file_type.is_file() && !file_type.is_dir() {
@@ -215,7 +228,7 @@ fn select_files_with_git(
         });
         let platform = excludes
             .at_path(rela_path, mode)
-            .context("cannot check gix exclude")?;
+            .or_raise(|| Error::new("cannot check gix exclude"))?;
 
         if file_type.is_dir() {
             if platform.is_excluded() {

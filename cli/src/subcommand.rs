@@ -18,7 +18,9 @@ use std::path::PathBuf;
 
 use clap::Args;
 use clap::Parser;
+use exn::Result;
 use hawkeye_fmt::document::Document;
+use hawkeye_fmt::error::Error;
 use hawkeye_fmt::header::matcher::HeaderMatcher;
 use hawkeye_fmt::processor::check_license_header;
 use hawkeye_fmt::processor::Callback;
@@ -95,11 +97,11 @@ impl Callback for CheckContext {
         self.unknown.push(path.display().to_string());
     }
 
-    fn on_matched(&mut self, _: &HeaderMatcher, _: Document) -> anyhow::Result<()> {
+    fn on_matched(&mut self, _: &HeaderMatcher, _: Document) -> Result<(), Error> {
         Ok(())
     }
 
-    fn on_not_matched(&mut self, _: &HeaderMatcher, document: Document) -> anyhow::Result<()> {
+    fn on_not_matched(&mut self, _: &HeaderMatcher, document: Document) -> Result<(), Error> {
         self.missing.push(document.filepath.display().to_string());
         Ok(())
     }
@@ -149,11 +151,11 @@ impl Callback for FormatContext {
         self.unknown.push(path.display().to_string());
     }
 
-    fn on_matched(&mut self, _: &HeaderMatcher, _: Document) -> anyhow::Result<()> {
+    fn on_matched(&mut self, _: &HeaderMatcher, _: Document) -> Result<(), Error> {
         Ok(())
     }
 
-    fn on_not_matched(&mut self, header: &HeaderMatcher, mut doc: Document) -> anyhow::Result<()> {
+    fn on_not_matched(&mut self, header: &HeaderMatcher, mut doc: Document) -> Result<(), Error> {
         if doc.header_detected() {
             doc.remove_header();
             doc.update_header(header)?;
@@ -221,7 +223,7 @@ struct RemoveContext {
 }
 
 impl RemoveContext {
-    fn remove(&mut self, doc: &mut Document) -> anyhow::Result<()> {
+    fn remove(&mut self, doc: &mut Document) -> Result<(), Error> {
         if !doc.header_detected() {
             return Ok(());
         }
@@ -244,11 +246,11 @@ impl Callback for RemoveContext {
         self.unknown.push(path.display().to_string());
     }
 
-    fn on_matched(&mut self, _: &HeaderMatcher, mut doc: Document) -> anyhow::Result<()> {
+    fn on_matched(&mut self, _: &HeaderMatcher, mut doc: Document) -> Result<(), Error> {
         self.remove(&mut doc)
     }
 
-    fn on_not_matched(&mut self, _: &HeaderMatcher, mut doc: Document) -> anyhow::Result<()> {
+    fn on_not_matched(&mut self, _: &HeaderMatcher, mut doc: Document) -> Result<(), Error> {
         self.remove(&mut doc)
     }
 }

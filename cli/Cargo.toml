@@ -23,9 +23,9 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-anyhow = { workspace = true }
 clap = { workspace = true }
 const_format = { workspace = true }
+exn = { workspace = true }
 hawkeye-fmt = { workspace = true }
 log = { workspace = true }
 logforth = { version = "0.29.1", features = ["starter-log"] }

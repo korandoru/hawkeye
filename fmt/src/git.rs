@@ -18,8 +18,10 @@ use std::collections::HashMap;
 use std::path::Path;
 use std::path::PathBuf;
 
-use anyhow::bail;
-use anyhow::Context;
+use exn::bail;
+use exn::ErrorExt;
+use exn::Result;
+use exn::ResultExt;
 use gix::diff::tree_with_rewrites::Change;
 use gix::status::Item;
 use gix::Repository;
@@ -27,6 +29,7 @@ use walkdir::WalkDir;
 
 use crate::config;
 use crate::config::FeatureGate;
+use crate::error::Error;
 
 #[derive(Debug, Clone)]
 pub struct GitContext {
@@ -34,7 +37,7 @@ pub struct GitContext {
     pub config: config::Git,
 }
 
-pub fn discover(basedir: &Path, config: config::Git) -> anyhow::Result<GitContext> {
+pub fn discover(basedir: &Path, config: config::Git) -> Result<GitContext, Error> {
     let feature = resolve_features(&config);
 
     if feature.is_disable() {
@@ -49,7 +52,7 @@ pub fn discover(basedir: &Path, config: config::Git) -> anyhow::Result<GitContex
                     log::info!(config:?; "git config is resolved to disabled; {message}");
                     Ok(GitContext { repo: None, config })
                 } else {
-                    bail!("invalid config: {}", message);
+                    bail!(Error::new(format!("invalid config: {message}")))
                 }
             }
             Some(_) => {
@@ -65,7 +68,9 @@ pub fn discover(basedir: &Path, config: config::Git) -> anyhow::Result<GitContex
                 log::info!(err:?, config:?; "git config is resolved to disabled");
                 Ok(GitContext { repo: None, config })
             } else {
-                Err(err).context("cannot discover git repository with gix")
+                Err(err
+                    .raise()
+                    .raise(Error::new("cannot discover git repository with gix")))
             }
         }
     }
@@ -95,7 +100,7 @@ pub struct GitFileAttrs {
 
 pub fn resolve_file_attrs(
     git_context: GitContext,
-) -> anyhow::Result<HashMap<PathBuf, GitFileAttrs>> {
+) -> Result<HashMap<PathBuf, GitFileAttrs>, Error> {
     let mut attrs = HashMap::new();
 
     if git_context.config.attrs.is_disable() {
@@ -114,14 +119,16 @@ pub fn resolve_file_attrs(
 
     let worktree = repo.worktree().expect("worktree cannot be absent");
     let workdir = repo.workdir().expect("workdir cannot be absent");
-    let workdir = workdir
-        .canonicalize()
-        .with_context(|| format!("cannot resolve absolute path: {}", workdir.display()))?;
+    let workdir = workdir.canonicalize().or_raise(|| {
+        Error::new(format!(
+            "cannot resolve absolute path: {}",
+            workdir.display()
+        ))
+    })?;
 
     let mut excludes = worktree
         .excludes(None)
-        .map_err(Box::new)
-        .context("cannot create gix exclude stack")?;
+        .or_raise(|| Error::new("cannot create gix exclude stack"))?;
 
     let mut update_attrs = |rela_path: &Path, time: gix::date::Time, author: &str| {
         let filepath = workdir.join(rela_path);
@@ -164,38 +171,43 @@ pub fn resolve_file_attrs(
         option
     };
 
-    let head = repo.head_commit()?;
+    let make_error = || Error::new("cannot resolve git file attributes");
+
+    let head = repo.head_commit().or_raise(make_error)?;
     let mut next_commit = head.clone();
 
-    for info in head.ancestors().all()? {
-        let info = info?;
-        let this_commit = info.object()?;
-        let time = next_commit.time()?;
-        let author = next_commit.author()?.name.to_string();
+    for info in head.ancestors().all().or_raise(make_error)? {
+        let info = info.or_raise(make_error)?;
+        let this_commit = info.object().or_raise(make_error)?;
+        let time = next_commit.time().or_raise(make_error)?;
+        let author = next_commit.author().or_raise(make_error)?.name.to_string();
 
-        let this_tree = this_commit.tree()?;
-        let next_tree = next_commit.tree()?;
+        let this_tree = this_commit.tree().or_raise(make_error)?;
+        let next_tree = next_commit.tree().or_raise(make_error)?;
 
-        let changes = repo.diff_tree_to_tree(Some(&this_tree), Some(&next_tree), Some(option))?;
+        let changes = repo
+            .diff_tree_to_tree(Some(&this_tree), Some(&next_tree), Some(option))
+            .or_raise(make_error)?;
         process_changes(changes, time, &author);
 
         next_commit = this_commit;
     }
 
     // process the root commit
-    let time = next_commit.time()?;
-    let author = next_commit.author()?.name.to_string();
-    let next_tree = next_commit.tree()?;
-    let changes = repo.diff_tree_to_tree(None, Some(&next_tree), Some(option))?;
+    let time = next_commit.time().or_raise(make_error)?;
+    let author = next_commit.author().or_raise(make_error)?.name.to_string();
+    let next_tree = next_commit.tree().or_raise(make_error)?;
+    let changes = repo
+        .diff_tree_to_tree(None, Some(&next_tree), Some(option))
+        .or_raise(make_error)?;
     process_changes(changes, time, &author);
 
     // process dirty working tree
-    let status_platform = repo.status(gix::progress::Discard)?;
-    let status_iter = status_platform.into_iter(None)?;
+    let status_platform = repo.status(gix::progress::Discard).or_raise(make_error)?;
+    let status_iter = status_platform.into_iter(None).or_raise(make_error)?;
     let now = gix::date::Time::now_local_or_utc();
     for item in status_iter {
-        let item = item.context("failed to check git status item")?;
-        match item {
+        match item.or_raise(|| Error::new("failed to check git status item"))? {
             Item::IndexWorktree(item) => match item {
                 gix::status::index_worktree::Item::Modification { rela_path, .. } => {
                     let rela_path = gix::path::from_bstring(rela_path);
@@ -205,13 +217,17 @@ pub fn resolve_file_attrs(
                     if entry.disk_kind.is_some_and(|k| k.is_dir()) {
                         let dirpath = gix::path::from_bstr(&entry.rela_path)
                             .canonicalize()
-                            .with_context(|| {
-                                format!("cannot resolve absolute path: {}", &entry.rela_path)
+                            .or_raise(|| {
+                                Error::new(format!(
+                                    "cannot resolve absolute path: {}",
+                                    &entry.rela_path
+                                ))
                             })?;
 
                         let mut it = WalkDir::new(dirpath).follow_links(false).into_iter();
                         while let Some(entry) = it.next() {
-                            let entry = entry.context("cannot traverse directory")?;
+                            let entry =
+                                entry.or_raise(|| Error::new("cannot traverse directory"))?;
                             let path = entry.path();
                             let file_type = entry.file_type();
                             if !file_type.is_file() && !file_type.is_dir() {
@@ -229,7 +245,7 @@ pub fn resolve_file_attrs(
                             });
                             let platform = excludes
                                 .at_path(rela_path, mode)
-                                .context("cannot check gix exclude")?;
+                                .or_raise(|| Error::new("cannot check gix exclude"))?;
 
                             if file_type.is_dir() {
                                 if platform.is_excluded() {

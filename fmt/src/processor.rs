@@ -18,12 +18,17 @@ use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 
-use anyhow::Context;
+use exn::bail;
+use exn::ensure;
+use exn::OptionExt;
+use exn::Result;
+use exn::ResultExt;
 
 use crate::config::Config;
 use crate::document::factory::DocumentFactory;
 use crate::document::model::default_mapping;
 use crate::document::Document;
+use crate::error::Error;
 use crate::git;
 use crate::header::matcher::HeaderMatcher;
 use crate::header::model::default_headers;
@@ -39,36 +44,35 @@ pub trait Callback {
     fn on_unknown(&mut self, path: &Path);
 
     /// Called when the header is matched.
-    fn on_matched(&mut self, header: &HeaderMatcher, document: Document) -> anyhow::Result<()>;
+    fn on_matched(&mut self, header: &HeaderMatcher, document: Document) -> Result<(), Error>;
 
     /// Called when the header is not matched.
-    fn on_not_matched(&mut self, header: &HeaderMatcher, document: Document) -> anyhow::Result<()>;
+    fn on_not_matched(&mut self, header: &HeaderMatcher, document: Document) -> Result<(), Error>;
 }
 
 pub fn check_license_header<C: Callback>(
     run_config: PathBuf,
     callback: &mut C,
-) -> anyhow::Result<()> {
+) -> Result<(), Error> {
     let config = {
         let name = run_config.display().to_string();
         let config = fs::read_to_string(&run_config)
-            .with_context(|| format!("cannot load config: {name}"))?;
+            .or_raise(|| Error::new(format!("cannot load config: {name}")))?;
         toml::from_str::<Config>(&config)
-            .map_err(Box::new)
-            .with_context(|| format!("cannot parse config file: {name}"))?
+            .or_raise(|| Error::new(format!("cannot parse config file: {name}")))?
     };
 
     let config_dir = run_config
         .parent()
-        .context("cannot get parent directory of config file")?;
+        .ok_or_raise(|| Error::new("cannot get parent directory of config file"))?;
 
     let basedir = config.base_dir.clone();
-    anyhow::ensure!(
+    ensure!(
         basedir.is_dir(),
-        format!(
-            "{} does not exist or is not a directory.",
+        Error::new(format!(
+            "{} does not exist or is not a directory",
             basedir.display()
-        )
+        ))
     );
 
     let git_context = git::discover(&basedir, config.git)?;
@@ -158,10 +162,7 @@ pub fn check_license_header<C: Callback>(
 
         if document.is_unsupported() {
             callback.on_unknown(&file);
-        } else if document
-            .header_matched(&header_matcher, config.strict_check)
-            .context("failed to match header")?
-        {
+        } else if document.header_matched(&header_matcher, config.strict_check)? {
             callback.on_matched(&header_matcher, document)?;
         } else {
             callback.on_not_matched(&header_matcher, document)?;
@@ -175,7 +176,11 @@ fn load_additional_headers(
     additional_header: impl AsRef<Path>,
     config: &Config,
     config_dir: &Path,
-) -> anyhow::Result<HashMap<String, HeaderDef>> {
+) -> Result<HashMap<String, HeaderDef>, Error> {
+    fn make_error(path: &Path) -> String {
+        format!("cannot load additional header {}", path.display())
+    }
+
     let additional_header = additional_header.as_ref();
 
     // 1. Based on config directory.
@@ -185,8 +190,7 @@ fn load_additional_headers(
         path
     };
     if let Ok(content) = fs::read_to_string(&path) {
-        return deserialize_header_definitions(content)
-            .with_context(|| format!("cannot load header definitions: {}", path.display()));
+        return deserialize_header_definitions(content).or_raise(|| Error::new(make_error(&path)));
     }
 
     // 2. Based on the base_dir.
@@ -196,37 +200,31 @@ fn load_additional_headers(
         path
     };
     if let Ok(content) = fs::read_to_string(&path) {
-        return deserialize_header_definitions(content)
-            .with_context(|| format!("cannot load header definitions: {}", path.display()));
+        return deserialize_header_definitions(content).or_raise(|| Error::new(make_error(&path)));
     }
 
     // 3. Based on current working directory.
-    if let Ok(content) = fs::read_to_string(additional_header) {
-        return deserialize_header_definitions(content).with_context(|| {
-            format!(
-                "cannot load header definitions: {}",
-                additional_header.display()
-            )
-        });
+    let path = additional_header;
+    if let Ok(content) = fs::read_to_string(path) {
+        return deserialize_header_definitions(content).or_raise(|| Error::new(make_error(path)));
     }
 
-    Err(anyhow::anyhow!(
+    bail!(Error::new(format!(
         "cannot find header definitions: {}",
         additional_header.display()
-    ))
+    )))
 }
 
-fn load_header_sources(config: &Config, config_dir: &Path) -> anyhow::Result<HeaderSource> {
+fn load_header_sources(config: &Config, config_dir: &Path) -> Result<HeaderSource, Error> {
     // 1. inline_header takes priority.
     if let Some(content) = config.inline_header.as_ref().cloned() {
         return Ok(HeaderSource { content });
     }
 
     // 2. Then, try to load from header_path.
-    let header_path = config
-        .header_path
-        .as_ref()
-        .context("no header source found (both inline_header and header_path are None)")?;
+    let header_path = config.header_path.as_ref().ok_or_else(|| {
+        Error::new("no header source found (both inline_header and header_path are None)")
+    })?;
 
     // 2.1 Based on config directory.
     let path = {
@@ -254,6 +252,9 @@ fn load_header_sources(config: &Config, config_dir: &Path) -> anyhow::Result<Hea
     }
 
     // 3. Finally, fallback to try bundled headers.
-    bundled_headers(header_path)
-        .with_context(|| format!("no header source found (header_path is invalid: {header_path})"))
+    bundled_headers(header_path).ok_or_raise(|| {
+        Error::new(format!(
+            "no header source found (header_path is invalid: {header_path})"
+        ))
+    })
 }
