@@ -215,15 +215,7 @@ pub fn resolve_file_attrs(
                 }
                 gix::status::index_worktree::Item::DirectoryContents { entry, .. } => {
                     if entry.disk_kind.is_some_and(|k| k.is_dir()) {
-                        let dirpath = gix::path::from_bstr(&entry.rela_path)
-                            .canonicalize()
-                            .or_raise(|| {
-                                Error::new(format!(
-                                    "cannot resolve absolute path: {}",
-                                    &entry.rela_path
-                                ))
-                            })?;
-
+                        let dirpath = workdir.join(gix::path::from_bstr(&entry.rela_path));
                         let mut it = WalkDir::new(dirpath).follow_links(false).into_iter();
                         while let Some(entry) = it.next() {
                             let entry =
