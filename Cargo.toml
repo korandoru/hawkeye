@@ -34,7 +34,7 @@ const_format = { version = "0.2.34" }
 exn = { version = "0.3.0" }
 log = { version = "0.4.22", features = ["kv_serde", "serde"] }
 shadow-rs = { version = "1.7.0", default-features = false }
-toml = { version = "0.9.5" }
+toml = { version = "1.0.1" }
 
 [workspace.metadata.release]
 sign-tag = true
