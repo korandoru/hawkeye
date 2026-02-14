@@ -33,6 +33,8 @@ def setup():
     # Init git repo
     print("Initializing git repo...")
     run_cmd(["git", "init"], cwd=test_dir)
+    # Older git versions default to `master` so we explicitly name it `main`
+    run_cmd(["git", "branch", "-m", "main"], cwd=test_dir)
     # Configure user for reproducibility
     run_cmd(["git", "config", "user.email", "you@example.com"], cwd=test_dir)
     run_cmd(["git", "config", "user.name", "Your Name"], cwd=test_dir)
