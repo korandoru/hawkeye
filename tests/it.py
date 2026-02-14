@@ -37,11 +37,13 @@ rootdir = basedir.parent
 subprocess.run(["cargo", "build", "--bin", "hawkeye"], cwd=rootdir, check=True)
 hawkeye = rootdir / "target" / "debug" / "hawkeye"
 
-def drive(name, files, create_temp_copy=False):
+def drive(name, files, create_temp_copy=False, custom_setup=None):
     temp_paths = []
     expected_files = []
     case_dir = basedir / name
     try:
+        if custom_setup:
+            subprocess.run(["python3", custom_setup, "setup"], cwd=case_dir, check=True)
         if create_temp_copy:
             current_year = str(datetime.datetime.now().year)
             for filepath in files:
@@ -66,6 +68,8 @@ def drive(name, files, create_temp_copy=False):
             diff_files(case_dir / f"{file}.expected", case_dir / f"{file}.formatted")
     finally:
         # Remove all temp files at the end
+        if custom_setup:
+            subprocess.run(["python3", custom_setup, "clean"], cwd=case_dir, check=True)
         if create_temp_copy:
             for temp_path in temp_paths:
                 if os.path.exists(case_dir / temp_path):
@@ -80,3 +84,4 @@ drive("bom_issue", ["headless_bom.cs"])
 drive("regression_blank_line", ["main.rs"])
 drive("regression_no_blank_lines", ["repro.py"])
 drive("disk_file_created_year", ["main.rs"], True)
+drive("git_year_with_merge", ["a.rs", "b.rs"], custom_setup="setup.py")
