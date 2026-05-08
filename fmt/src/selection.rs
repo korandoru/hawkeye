@@ -208,6 +208,9 @@ fn select_files_with_git(
     let mut excludes = worktree
         .excludes(None)
         .or_raise(|| Error::new("cannot create gix exclude stack"))?;
+    let index = repo
+        .index_or_empty()
+        .or_raise(|| Error::new("cannot open gix index"))?;
 
     while let Some(entry) = it.next() {
         let entry = entry.or_raise(|| Error::new("cannot traverse directory"))?;
@@ -232,9 +235,14 @@ fn select_files_with_git(
 
         if file_type.is_dir() {
             if platform.is_excluded() {
-                log::debug!(path:?, rela_path:?; "skip git ignored directory");
-                it.skip_current_dir();
-                continue;
+                let rela = gix::path::try_into_bstr(rela_path)
+                    .or_raise(|| Error::new("cannot convert path to git path"))?;
+
+                if !index.path_is_directory(rela.as_ref()) {
+                    log::debug!(path:?, rela_path:?; "skip git ignored directory");
+                    it.skip_current_dir();
+                    continue;
+                }
             }
             if matcher.matched(rela_path, file_type.is_dir()).is_ignore() {
                 log::debug!(path:?, rela_path:?; "skip glob ignored directory");
@@ -243,8 +251,13 @@ fn select_files_with_git(
             }
         } else if file_type.is_file() {
             if platform.is_excluded() {
-                log::debug!(path:?, rela_path:?; "skip git ignored file");
-                continue;
+                let rela = gix::path::try_into_bstr(rela_path)
+                    .or_raise(|| Error::new("cannot convert path to git path"))?;
+
+                if index.entry_by_path(rela.as_ref()).is_none() {
+                    log::debug!(path:?, rela_path:?; "skip git ignored file");
+                    continue;
+                }
             }
             if !matcher
                 .matched(rela_path, file_type.is_dir())

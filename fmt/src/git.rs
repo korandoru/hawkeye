@@ -203,6 +203,7 @@ pub fn resolve_file_attrs(
     process_changes(changes, time, &author);
 
     // process dirty working tree
+    let index = repo.index_or_empty().or_raise(make_error)?;
     let status_platform = repo.status(gix::progress::Discard).or_raise(make_error)?;
     let status_iter = status_platform.into_iter(None).or_raise(make_error)?;
     let now = gix::date::Time::now_local_or_utc();
@@ -241,14 +242,28 @@ pub fn resolve_file_attrs(
 
                             if file_type.is_dir() {
                                 if platform.is_excluded() {
-                                    log::debug!(path:?, rela_path:?; "skip git ignored directory");
-                                    it.skip_current_dir();
-                                    continue;
+                                    let rela =
+                                        gix::path::try_into_bstr(rela_path).or_raise(|| {
+                                            Error::new("cannot convert path to git path")
+                                        })?;
+
+                                    if !index.path_is_directory(rela.as_ref()) {
+                                        log::debug!(path:?, rela_path:?; "skip git ignored directory");
+                                        it.skip_current_dir();
+                                        continue;
+                                    }
                                 }
                             } else if file_type.is_file() {
                                 if platform.is_excluded() {
-                                    log::debug!(path:?, rela_path:?; "skip git ignored file");
-                                    continue;
+                                    let rela =
+                                        gix::path::try_into_bstr(rela_path).or_raise(|| {
+                                            Error::new("cannot convert path to git path")
+                                        })?;
+
+                                    if index.entry_by_path(rela.as_ref()).is_none() {
+                                        log::debug!(path:?, rela_path:?; "skip git ignored file");
+                                        continue;
+                                    }
                                 }
                                 update_attrs(rela_path, now, current_username.as_str());
                             }
