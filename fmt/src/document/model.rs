@@ -34,8 +34,8 @@ pub fn default_mapping() -> Vec<Mapping> {
         toml::from_str(defaults).expect("default mapping must be valid");
 
     mapping
-        .into_iter()
-        .flat_map(|(_, doctype)| {
+        .into_values()
+        .flat_map(|doctype| {
             let mut ms = vec![];
             if doctype.extension {
                 ms.push(Mapping::Extension {
