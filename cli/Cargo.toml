@@ -36,4 +36,4 @@ shadow-rs = { workspace = true }
 [build-dependencies]
 build-data = { workspace = true }
 shadow-rs = { workspace = true, features = ["build"] }
-gix-discover = { version = "0.46.0" }
+gix-discover = { version = "0.47.0" }

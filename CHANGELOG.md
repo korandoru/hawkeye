@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## [6.5.1] 2026-02-14
+
+### Bug fixes
+
+* Properly resolve relative paths when populating Git attributes for untracked folders.
+
 ## [6.5.0] 2026-02-09
 
 ### Notable changes

@@ -24,7 +24,7 @@ repository.workspace = true
 
 [dependencies]
 exn = { workspace = true }
-gix = { version = "0.78.0", default-features = false, features = [
+gix = { version = "0.79.0", default-features = false, features = [
   "blob-diff",
   "excludes",
   "status",
