@@ -128,8 +128,10 @@ impl Config {
 pub struct HeaderConfig {
     /// The built-in template key, when using a bundled header.
     pub builtin: Option<String>,
-    /// The template file. [`Config::load`] renders path templates and resolves relative paths
-    /// from the config directory.
+    /// The template file.
+    ///
+    /// [`Config::load`] renders path templates and resolves relative paths from the config
+    /// directory.
     pub path: Option<PathBuf>,
     /// The inline template, when the header is stored in the config file.
     pub text: Option<String>,
@@ -146,8 +148,10 @@ fn default_keywords() -> Vec<String> {
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct FilesConfig {
-    /// The directory to scan; defaults to `.`. [`Config::load`] renders path templates and
-    /// resolves relative paths from the config directory.
+    /// The directory to scan; defaults to `.`.
+    ///
+    /// [`Config::load`] renders path templates and resolves relative paths from the config
+    /// directory.
     pub root: PathBuf,
     /// Git-ignore-style inclusion patterns; an empty list selects all files.
     pub includes: Vec<String>,
