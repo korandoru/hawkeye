@@ -1,6 +1,6 @@
 # Migrating from HawkEye v6 to v7
 
-HawkEye v7 is a rewrite. It does not accept v6 configuration aliases, and several behaviors changed in addition to the move from camel case to snake case. This guide targets v6.5.x and v7.0.0 and is written as an executable migration checklist for either a person or a code agent.
+HawkEye v7 is a rewrite. It does not accept v6 configuration aliases, and several behaviors changed in addition to the move from camel case to snake case. This guide targets v6.5.x and v7 and is written as an executable migration checklist for either a person or a code agent.
 
 ## Migration rules
 
@@ -60,7 +60,7 @@ builtin = "Apache-2.0"
 keywords = ["copyright"]
 
 [files]
-root = "."
+root = "{{ cwd }}"
 includes = ["**/*.rs", "**/*.toml"]
 excludes = ["generated/**"]
 
@@ -77,7 +77,7 @@ Use this field mapping for the rest of the config:
 
 | v6                   | v7                                | Migration action                                               |
 |----------------------|-----------------------------------|----------------------------------------------------------------|
-| `baseDir`            | `files.root`                      | Move the value under `[files]`.                                |
+| `baseDir`            | `files.root`                      | Move under `[files]`; use `cwd` for invocation-relative paths.  |
 | `inlineHeader`       | `header.text`                     | Move the template under `[header]`.                            |
 | `headerPath`         | `header.builtin` or `header.path` | Use a built-in key for a bundled header; otherwise use a path. |
 | `keywords`           | `header.keywords`                 | Move the list under `[header]`.                                |
@@ -99,12 +99,12 @@ v6 evaluated a relative `baseDir` from the process working directory. v7 resolve
 root = "{{ cwd }}"
 
 [header]
-path = "HEADER.txt"
+path = "{{ config_dir }}/HEADER.txt"
 ```
 
-This scans the invocation directory regardless of where the shared config is stored. For v6's `baseDir = "src"`, use `root = "{{ [cwd, 'src'] | join_path }}"`. Leaving `root` unset or setting it to `"."` keeps v7's config-directory default.
+This scans the invocation directory regardless of where the shared config is stored. For v6's `baseDir = "src"`, use `root = "{{ cwd }}/src"`. To scan beside the config, write `root = "{{ config_dir }}"`. Leaving `root` unset or setting it to `"."` keeps v7's config-directory default.
 
-Relative `header.path` values are also resolved only from the config directory; v6 additionally tried `baseDir` and the process working directory for resources. Keep `path = "HEADER.txt"` for a header beside the config, or use `path = "{{ [cwd, 'HEADER.txt'] | join_path }}"` for a header in the invocation directory. See [Path templates](README.md#path-templates) for the complete context and resolution rules.
+Relative `header.path` values are also resolved only from the config directory; v6 additionally tried `baseDir` and the process working directory for resources. Use `path = "{{ config_dir }}/HEADER.txt"` for a header beside the config, or `path = "{{ cwd }}/HEADER.txt"` for a header in the invocation directory. See [Path templates](README.md#path-templates) for the complete context and resolution rules.
 
 ### Header source
 

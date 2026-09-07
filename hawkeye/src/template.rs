@@ -44,14 +44,9 @@ impl<'a> PathTemplates<'a> {
         })?;
         let mut environment = template_environment();
         environment.set_keep_trailing_newline(true);
-        environment.add_filter("join_path", join_path);
         environment.add_global(
             "config_dir",
             native_string("config_dir", directory.as_os_str()),
-        );
-        environment.add_global(
-            "config_path",
-            native_string("config_path", config_path.as_os_str()),
         );
         environment.add_global(
             "cwd",
@@ -65,16 +60,6 @@ impl<'a> PathTemplates<'a> {
                     .with_source(err),
                 ),
             },
-        );
-        environment.add_global(
-            "env",
-            env::vars_os()
-                .filter_map(|(name, value)| {
-                    let name = name.into_string().ok()?;
-                    let value = native_string(&format!("env.{name}"), &value);
-                    Some((name, value))
-                })
-                .collect::<Value>(),
         );
         Ok(Self {
             environment,
@@ -111,6 +96,12 @@ impl<'a> PathTemplates<'a> {
                 format!("{field} template rendered a NUL byte"),
             ));
         }
+        // Canonical Windows paths use verbatim prefixes. Normalize template separators,
+        // then rebuild components so `.` and `..` follow native path-joining rules.
+        #[cfg(windows)]
+        let rendered: PathBuf = Path::new(&rendered.replace('/', "\\"))
+            .components()
+            .collect();
         Ok(self.directory.join(rendered))
     }
 }
@@ -124,23 +115,6 @@ fn native_string(name: &str, value: &OsStr) -> Value {
             format!("path template variable {name:?} is not valid UTF-8"),
         )),
     }
-}
-
-fn join_path(parts: Vec<Value>) -> Result<String, minijinja::Error> {
-    let mut path = PathBuf::new();
-    for part in parts {
-        let part = part.as_str().ok_or_else(|| {
-            minijinja::Error::new(
-                TemplateErrorKind::InvalidOperation,
-                "join_path expects a list of strings",
-            )
-        })?;
-        path.push(part);
-    }
-    Ok(path
-        .into_os_string()
-        .into_string()
-        .expect("joining UTF-8 paths preserves UTF-8"))
 }
 
 pub struct HeaderTemplate {

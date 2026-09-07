@@ -32,7 +32,7 @@ fn shared_configs_use_cwd_independently_of_their_location() {
         project.write(
             &config_path,
             r#"[header]
-path = "HEADER.txt"
+path = "{{ config_dir }}/HEADER.txt"
 
 [files]
 root = "{{ cwd }}"
@@ -73,7 +73,12 @@ ignore = "disable"
 #[test]
 fn defaults_and_relative_results_use_the_config_directory() {
     let project = Project::empty();
-    for root in ["", "root = '.'", "root = \"{{ '.' }}\""] {
+    for root in [
+        "",
+        "root = '.'",
+        "root = \"{{ '.' }}\"",
+        "root = \"{{ config_dir }}\"",
+    ] {
         project.write(
             "config/licenserc.toml",
             format!("[header]\npath = 'HEADER.txt'\n[files]\n{root}\n"),
@@ -92,96 +97,81 @@ fn defaults_and_relative_results_use_the_config_directory() {
 }
 
 #[test]
-fn config_path_and_config_directory_are_absolute_template_values() {
+fn config_directory_supports_relative_components_and_standard_template_joins() {
     let project = Project::empty();
-    project.write(
-        "config/licenserc.toml",
-        r#"[header]
-path = "{{ config_path }}.header"
-
-[files]
-root = "{{ [config_dir, 'source'] | join_path }}"
-includes = ["**/*.rs"]
-
-[git]
-ignore = "disable"
-"#,
-    );
-    project.write("config/licenserc.toml.header", "Copyright Acme");
-    project.write("config/source/main.rs", "fn main() {}\n");
-    project.write("source/outside.rs", "fn outside() {}\n");
-
-    let checked = project.run([
-        "--config",
-        "config/licenserc.toml",
-        "check",
-        "--output-format=json",
-    ]);
-    assert_exit(&checked, 1);
-    assert_report(&checked, &[("main.rs", "add")]);
-}
-
-#[test]
-fn environment_paths_are_rendered_once_before_relative_resolution() {
-    let project = Project::empty();
-    let headers = Project::empty();
-    project.write(
-        "config/licenserc.toml",
-        r#"[header]
-path = "{{ env.HAWKEYE_TEST_HEADER }}"
-
-[files]
-root = "{{ env.HAWKEYE_TEST_ROOT | default(cwd) }}"
-includes = ["**/*.rs"]
-
-[git]
-ignore = "disable"
-"#,
-    );
-    headers.write("HEADER.txt", "Copyright {{ attrs.filename }}");
-    let directory = "source & 'quoted' {{ literal }}";
-    project.write(format!("config/{directory}/main.rs"), "fn main() {}\n");
-
+    project.write("config/HEADER.txt", "Copyright Acme");
+    project.write("source/main.rs", "fn main() {}\n");
+    project.write("config/source/outside.rs", "fn outside() {}\n");
     for root in [
-        directory.into(),
-        project
-            .path()
-            .join("config")
-            .join(directory)
-            .into_os_string(),
+        "{{ config_dir }}/../source",
+        "{{ [config_dir, '..', 'source'] | join('/') }}",
     ] {
-        let formatted = project
-            .command([
-                "--config",
-                "config/licenserc.toml",
-                "format",
-                "--dry-run",
-                "--output-format=json",
-            ])
-            .env("HAWKEYE_TEST_ROOT", root)
-            .env("HAWKEYE_TEST_HEADER", headers.path().join("HEADER.txt"))
-            .output()
-            .expect("render relative or absolute environment paths");
-        assert_exit(&formatted, 0);
-        assert_report(&formatted, &[("main.rs", "add")]);
-    }
+        project.write(
+            "config/licenserc.toml",
+            format!(
+                r#"[header]
+path = "{{{{ config_dir }}}}/./HEADER.txt"
 
-    let fallback = project
-        .command([
+[files]
+root = "{root}"
+includes = ["**/*.rs"]
+
+[git]
+ignore = "disable"
+"#,
+            ),
+        );
+
+        let checked = project.run([
             "--config",
             "config/licenserc.toml",
             "check",
             "--output-format=json",
-        ])
-        .env_remove("HAWKEYE_TEST_ROOT")
-        .env("HAWKEYE_TEST_HEADER", headers.path().join("HEADER.txt"))
-        .output()
-        .expect("use cwd when an optional environment variable is absent");
-    assert_exit(&fallback, 1);
-    assert_report(
-        &fallback,
-        &[(&format!("config/{directory}/main.rs"), "add")],
+        ]);
+        assert_exit(&checked, 1);
+        assert_report(&checked, &[("main.rs", "add")]);
+    }
+}
+
+#[test]
+fn context_paths_are_rendered_once_without_escaping() {
+    let project = Project::empty();
+    let directory = "source & 'quoted' {{ literal }}";
+    project.write(
+        format!("{directory}/HEADER.txt"),
+        "Copyright {{ attrs.filename }}",
     );
+    project.write(format!("{directory}/main.rs"), "fn main() {}\n");
+    for root in ["{{ cwd }}", "{{ config_dir }}"] {
+        project.write(
+            format!("{directory}/licenserc.toml"),
+            format!(
+                r#"[header]
+path = "{{{{ config_dir }}}}/HEADER.txt"
+
+[files]
+root = "{root}"
+includes = ["**/*.rs"]
+
+[git]
+ignore = "disable"
+"#,
+            ),
+        );
+        let formatted = project
+            .command([
+                "--config",
+                "licenserc.toml",
+                "format",
+                "--dry-run",
+                "--output-format=json",
+            ])
+            .current_dir(project.path().join(directory))
+            .output()
+            .expect("preserve template delimiters and special characters in context paths");
+        assert_exit(&formatted, 0);
+        assert_report(&formatted, &[("main.rs", "add")]);
+    }
 }
 
 #[test]
@@ -191,10 +181,10 @@ fn templated_roots_control_git_discovery_and_requested_paths() {
     policy.write(
         "licenserc.toml",
         r#"[header]
-path = "{{ [config_dir, 'HEADER.txt'] | join_path }}"
+path = "{{ config_dir }}/HEADER.txt"
 
 [files]
-root = "{{ [cwd, 'source'] | join_path }}"
+root = "{{ cwd }}/source"
 includes = ["**/*.rs"]
 excludes = ["generated/**"]
 
@@ -291,10 +281,6 @@ fn path_template_errors_identify_the_field_and_failing_expression() {
         ("", "empty path"),
         ("{{ '' }}", "empty path"),
         ("{{ '\0' }}", "NUL byte"),
-        (
-            "{{ ['source', 42] | join_path }}",
-            "join_path expects a list of strings",
-        ),
     ] {
         for field in ["files.root", "header.path"] {
             let quoted = toml::Value::String(expression.to_owned());
@@ -311,23 +297,26 @@ fn path_template_errors_identify_the_field_and_failing_expression() {
             assert!(err.to_string().contains(diagnostic), "{err}");
         }
     }
+}
 
+#[test]
+fn path_templates_do_not_expose_environment_variables() {
+    let project = Project::empty();
     project.write(
         "licenserc.toml",
-        "[header]\npath = '{{ env.HAWKEYE_TEST_HEADER }}'\n",
+        "[header]\npath = '{{ env.HAWKEYE_TEST_SECRET }}'\n",
     );
+    let secret = "test-value-must-stay-private";
     let checked = project
         .command(["check"])
-        .env_remove("HAWKEYE_TEST_HEADER")
+        .env("HAWKEYE_TEST_SECRET", secret)
         .output()
-        .expect("report a missing environment variable");
+        .expect("reject environment access in a path template");
     assert_exit(&checked, 2);
     let diagnostic = stderr(&checked);
     assert!(diagnostic.contains("header.path"), "{diagnostic}");
-    assert!(
-        diagnostic.contains("env.HAWKEYE_TEST_HEADER"),
-        "{diagnostic}"
-    );
+    assert!(diagnostic.contains("undefined value"), "{diagnostic}");
+    assert!(!diagnostic.contains(secret), "{diagnostic}");
 }
 
 #[cfg(target_os = "linux")]
@@ -338,24 +327,15 @@ fn non_utf8_context_values_fail_only_when_referenced() {
 
     let project = Project::named(OsString::from_vec(b"project-\xff".to_vec()));
     project.write("source/main.rs", "fn main() {}\n");
-    let invalid = OsString::from_vec(b"source-\xff".to_vec());
-    for root in [
-        "source",
-        "{{ 'source' }}",
-        "{{ cwd }}",
-        "{{ config_dir }}",
-        "{{ config_path }}",
-        "{{ env.HAWKEYE_TEST_ROOT }}",
-    ] {
+    for root in ["source", "{{ 'source' }}", "{{ cwd }}", "{{ config_dir }}"] {
         project.write(
             "licenserc.toml",
             format!("[header]\ntext = 'Copyright'\n[files]\nroot = {}\nincludes = ['**/*.rs']\n[git]\nignore = 'disable'\n", toml::Value::String(root.to_owned())),
         );
         let checked = project
             .command(["check", "--output-format=json"])
-            .env("HAWKEYE_TEST_ROOT", &invalid)
             .output()
-            .expect("load config with non-UTF-8 native paths and environment values");
+            .expect("load config with non-UTF-8 native paths");
         if root == "source" || root == "{{ 'source' }}" {
             assert_exit(&checked, 1);
             assert_report(&checked, &[("main.rs", "add")]);
