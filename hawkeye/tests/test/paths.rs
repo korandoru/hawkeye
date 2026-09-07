@@ -32,7 +32,7 @@ fn shared_configs_use_cwd_independently_of_their_location() {
         project.write(
             &config_path,
             r#"[header]
-path = "{{ config_dir }}/HEADER.txt"
+path = "{{ [config_dir, 'HEADER.txt'] | join_path }}"
 
 [files]
 root = "{{ cwd }}"
@@ -97,40 +97,33 @@ fn defaults_and_relative_results_use_the_config_directory() {
 }
 
 #[test]
-fn config_directory_supports_relative_components_and_standard_template_joins() {
+fn join_path_resolves_relative_components_from_the_config_directory() {
     let project = Project::empty();
     project.write("config/HEADER.txt", "Copyright Acme");
     project.write("source/main.rs", "fn main() {}\n");
     project.write("config/source/outside.rs", "fn outside() {}\n");
-    for root in [
-        "{{ config_dir }}/../source",
-        "{{ [config_dir, '..', 'source'] | join('/') }}",
-    ] {
-        project.write(
-            "config/licenserc.toml",
-            format!(
-                r#"[header]
-path = "{{{{ config_dir }}}}/./HEADER.txt"
+    project.write(
+        "config/licenserc.toml",
+        r#"[header]
+path = "{{ [config_dir, '.', 'HEADER.txt'] | join_path }}"
 
 [files]
-root = "{root}"
+root = "{{ [config_dir, '..', 'source'] | join_path }}"
 includes = ["**/*.rs"]
 
 [git]
 ignore = "disable"
 "#,
-            ),
-        );
+    );
 
-        let checked = project.run([
-            "--config",
-            "config/licenserc.toml",
-            "check",
-            "--output-format=json",
-        ]);
-        assert_exit(&checked, 1);
-        assert_report(&checked, &[("main.rs", "add")]);
-    }
+    let checked = project.run([
+        "--config",
+        "config/licenserc.toml",
+        "check",
+        "--output-format=json",
+    ]);
+    assert_exit(&checked, 1);
+    assert_report(&checked, &[("main.rs", "add")]);
 }
 
 #[test]
@@ -147,7 +140,7 @@ fn context_paths_are_rendered_once_without_escaping() {
             format!("{directory}/licenserc.toml"),
             format!(
                 r#"[header]
-path = "{{{{ config_dir }}}}/HEADER.txt"
+path = "{{{{ [config_dir, 'HEADER.txt'] | join_path }}}}"
 
 [files]
 root = "{root}"
@@ -181,10 +174,10 @@ fn templated_roots_control_git_discovery_and_requested_paths() {
     policy.write(
         "licenserc.toml",
         r#"[header]
-path = "{{ config_dir }}/HEADER.txt"
+path = "{{ [config_dir, 'HEADER.txt'] | join_path }}"
 
 [files]
-root = "{{ cwd }}/source"
+root = "{{ [cwd, 'source'] | join_path }}"
 includes = ["**/*.rs"]
 excludes = ["generated/**"]
 
@@ -281,6 +274,10 @@ fn path_template_errors_identify_the_field_and_failing_expression() {
         ("", "empty path"),
         ("{{ '' }}", "empty path"),
         ("{{ '\0' }}", "NUL byte"),
+        (
+            "{{ ['source', 42] | join_path }}",
+            "join_path expects a list of strings",
+        ),
     ] {
         for field in ["files.root", "header.path"] {
             let quoted = toml::Value::String(expression.to_owned());
@@ -317,6 +314,105 @@ fn path_templates_do_not_expose_environment_variables() {
     assert!(diagnostic.contains("header.path"), "{diagnostic}");
     assert!(diagnostic.contains("undefined value"), "{diagnostic}");
     assert!(!diagnostic.contains(secret), "{diagnostic}");
+}
+
+#[cfg(windows)]
+#[test]
+fn join_path_supports_windows_unc_paths() {
+    let project = Project::empty();
+    for (base, expected) in [
+        (r"\\server\share\policy", r"\\server\share\policy\..\source"),
+        (
+            r"\\?\UNC\server\share\policy",
+            r"\\?\UNC\server\share\source",
+        ),
+    ] {
+        let expression = format!(
+            "{{{{ [{}, '..', 'source'] | join_path }}}}",
+            serde_json::to_string(base).unwrap(),
+        );
+        project.write(
+            "licenserc.toml",
+            format!(
+                "[header]\ntext = 'Copyright'\n[files]\nroot = {}\n",
+                toml::Value::String(expression),
+            ),
+        );
+        let config = Config::load(project.path().join("licenserc.toml"))
+            .expect("resolve a UNC path without accessing the network share");
+        assert_eq!(config.files.root, std::path::Path::new(expected));
+    }
+}
+
+#[cfg(windows)]
+#[test]
+fn path_templates_preserve_windows_stream_paths() {
+    let project = Project::empty();
+    for expression in [
+        r"\\?\C:\policy\headers\H:license",
+        r#"{{ ["\\\\?\\C:\\policy", "headers/H:license"] | join_path }}"#,
+    ] {
+        project.write(
+            "licenserc.toml",
+            format!(
+                "[header]\npath = {}\n",
+                toml::Value::String(expression.into())
+            ),
+        );
+        let config = Config::load(project.path().join("licenserc.toml"))
+            .expect("preserve a named stream without reinterpreting its name as a drive prefix");
+        assert_eq!(
+            config.header.path.unwrap(),
+            std::path::Path::new(r"\\?\C:\policy\headers\H:license"),
+        );
+    }
+}
+
+#[cfg(windows)]
+#[test]
+fn join_path_loads_headers_and_formats_sources_beyond_max_path() {
+    use std::os::windows::ffi::OsStrExt;
+    use std::path::PathBuf;
+
+    let project = Project::empty();
+    let directory: PathBuf = std::iter::repeat_n("nested-policy-directory", 16).collect();
+    let config_path = directory.join("licenserc.toml");
+    assert!(
+        project
+            .path()
+            .join(&config_path)
+            .as_os_str()
+            .encode_wide()
+            .count()
+            > 260
+    );
+    project.write(
+        &config_path,
+        r#"[header]
+path = "{{ [config_dir, 'headers', 'HEADER.txt'] | join_path }}"
+
+[files]
+root = "{{ [config_dir, 'source'] | join_path }}"
+includes = ["**/*.rs"]
+
+[git]
+ignore = "disable"
+"#,
+    );
+    project.write(directory.join("headers/HEADER.txt"), "Copyright Acme");
+    project.write(directory.join("source/main.rs"), "fn main() {}\n");
+
+    let formatted = project
+        .command(["format", "--output-format=json", "--config"])
+        .arg(config_path)
+        .output()
+        .expect("format sources using long template paths");
+    assert_exit(&formatted, 0);
+    assert_report(&formatted, &[("main.rs", "add")]);
+    assert_eq!(
+        project.read(directory.join("source/main.rs")),
+        "// Copyright Acme\n\nfn main() {}\n"
+    );
 }
 
 #[cfg(target_os = "linux")]

@@ -128,7 +128,7 @@ The following example shows every configuration section. Field names are snake c
 [header]
 # Choose exactly one source. Built-in keys are case-sensitive.
 builtin = "Apache-2.0"
-# path = "{{ config_dir }}/HEADER.txt"
+# path = "{{ [config_dir, 'HEADER.txt'] | join_path }}"
 # text = "Copyright {{ props.inception_year }} {{ props.copyright_owner }}"
 
 # Every keyword must occur, case-insensitively, before an existing comment can
@@ -177,30 +177,28 @@ styles_in = ["doubleslash", "slashstar"]
 
 ### Path templates
 
-`files.root` and `header.path` accept MiniJinja templates. Choose their base explicitly with one of two variables, captured when the config is loaded:
-
-| Variable     | Meaning |
-|--------------|---------|
-| `cwd`        | The absolute process working directory, independent of the `PWD` environment variable. |
-| `config_dir` | The absolute directory containing the canonical config file, after resolving symlinks. |
-
-To share a config across projects, scan the directory where HawkEye was invoked while keeping the header beside the config:
+`files.root` and `header.path` accept MiniJinja templates. A shared config can scan the directory where HawkEye was invoked while keeping its header beside the config:
 
 ```toml
 [files]
 root = "{{ cwd }}"
 
 [header]
-path = "{{ config_dir }}/HEADER.txt"
+path = "{{ [config_dir, 'HEADER.txt'] | join_path }}"
 ```
 
-For subdirectories, write `root = "{{ cwd }}/src"` or use MiniJinja's built-in string operations, such as `root = "{{ [cwd, 'src'] | join('/') }}"`. Forward slashes are accepted as path separators on Windows too.
+The two variables are captured when the config is loaded:
 
-To scan beside the config instead, write `root = "{{ config_dir }}"`. Plain relative paths and relative template results remain based on `config_dir`; leaving `root` unset or setting it to `"."` preserves this existing default. Absolute results are used directly. Neither variable infers a project or Git root.
+| Variable     | Meaning |
+|--------------|---------|
+| `cwd`        | The absolute process working directory. |
+| `config_dir` | The absolute directory containing the config file, after resolving symlinks. |
 
-HawkEye does not expose environment variables to path templates. Templates use strict undefined values and no auto-escaping. Syntax errors, missing values, empty results, and NUL bytes fail config loading and identify the affected field. Whitespace is preserved. Referenced context values must be valid UTF-8; unused non-UTF-8 directories do not prevent loading a config.
+Use HawkEye's `join_path` filter to join a list of strings with native platform path rules. For example, `root = "{{ [cwd, 'src'] | join_path }}"` selects the invocation directory's `src` subdirectory across platforms.
 
-HawkEye parses TOML first and renders each path once. Text returned by a variable is not evaluated as another template. To use literal template delimiters in a path, wrap them in a raw block, for example `root = "{% raw %}{{ sources }}{% endraw %}"`. Header contents and other configuration fields are not rendered at this stage; `props` and `attrs` are available only when rendering a header for a file.
+Relative paths and relative template results still resolve from `config_dir`, which is also the default scan directory when `root` is omitted. Use `root = "{{ config_dir }}"` to make that choice explicit.
+
+Path templates do not expose environment variables; `props` and `attrs` are available only in header contents. Undefined variables or invalid paths fail config loading.
 
 ### Headers and templates
 

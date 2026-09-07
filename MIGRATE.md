@@ -92,19 +92,9 @@ Use this field mapping for the rest of the config:
 | `useDefaultExcludes` | none                              | Remove it and make required exclusions explicit.               |
 | `useDefaultMapping`  | none                              | Remove it; built-in rules are always low-priority fallbacks.   |
 
-v6 evaluated a relative `baseDir` from the process working directory. v7 resolves a relative `files.root` from the directory containing the selected config file. To preserve v6's `baseDir = "."` behavior, use a path template:
+v6 evaluated a relative `baseDir` from the process working directory. v7 resolves a relative `files.root` from the config directory. To preserve invocation-relative scanning, use `root = "{{ cwd }}"` for v6's `baseDir = "."`, or `root = "{{ [cwd, 'src'] | join_path }}"` for `baseDir = "src"`.
 
-```toml
-[files]
-root = "{{ cwd }}"
-
-[header]
-path = "{{ config_dir }}/HEADER.txt"
-```
-
-This scans the invocation directory regardless of where the shared config is stored. For v6's `baseDir = "src"`, use `root = "{{ cwd }}/src"`. To scan beside the config, write `root = "{{ config_dir }}"`. Leaving `root` unset or setting it to `"."` keeps v7's config-directory default.
-
-Relative `header.path` values are also resolved only from the config directory; v6 additionally tried `baseDir` and the process working directory for resources. Use `path = "{{ config_dir }}/HEADER.txt"` for a header beside the config, or `path = "{{ cwd }}/HEADER.txt"` for a header in the invocation directory. See [Path templates](README.md#path-templates) for the complete context and resolution rules.
+Relative `header.path` values also use only the config directory; v6 additionally tried `baseDir` and the process working directory. If a header relied on that fallback, choose its location explicitly, such as `path = "{{ [cwd, 'HEADER.txt'] | join_path }}"`. See [Path templates](README.md#path-templates) for the shared-config example and available path bases.
 
 ### Header source
 
