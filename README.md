@@ -175,6 +175,45 @@ style_out = "doubleslash"
 styles_in = ["doubleslash", "slashstar"]
 ```
 
+### Path templates
+
+`files.root` and `header.path` accept MiniJinja templates. Plain paths and relative template results are resolved from the directory containing the selected config file. The default `files.root = "."` uses that directory.
+
+To share a config across projects, scan the directory where HawkEye was invoked while keeping the header beside the config:
+
+```toml
+[files]
+root = "{{ cwd }}"
+
+[header]
+path = "HEADER.txt"
+```
+
+Path templates have their own context, captured when the config is loaded:
+
+| Value         | Meaning                                                                 |
+|---------------|-------------------------------------------------------------------------|
+| `cwd`         | The absolute process working directory, independent of the `PWD` environment variable. |
+| `config_dir`  | The directory containing the canonical config file, after resolving symlinks. |
+| `config_path` | The absolute, canonical config file path.                                |
+| `env`         | Environment variables, accessed as `env.NAME` or `env["NAME"]`.           |
+
+Use `join_path` to join a list of strings with the platform's path rules. For example, scan `src` below the invocation directory and load a header from an environment-selected directory:
+
+```toml
+[files]
+root = "{{ [cwd, 'src'] | join_path }}"
+
+[header]
+path = "{{ [env.POLICY_DIR, 'HEADER.txt'] | join_path }}"
+```
+
+Absolute results are used directly. Relative results, including values read from `env`, remain relative to `config_dir`. `join_path` follows native path-joining rules; a later absolute component replaces the preceding path. It does not infer a project or Git root.
+
+Templates use strict undefined values and no auto-escaping. To make an environment variable optional, write `root = "{{ env.SOURCE_ROOT | default(cwd) }}"`. Syntax errors, missing values, empty results, and NUL bytes fail config loading and identify the affected field. Whitespace is preserved. Referenced context values must be valid UTF-8; unused non-UTF-8 paths or environment values do not prevent loading a config.
+
+HawkEye parses TOML first and renders each path once. Text returned by a variable is not evaluated as another template. To use literal template delimiters in a path, wrap them in a raw block, for example `root = "{% raw %}{{ sources }}{% endraw %}"`. Header contents and other configuration fields are not rendered at this stage; `props` and `attrs` are available only when rendering a header for a file.
+
 ### Headers and templates
 
 `header.builtin` accepts `Apache-2.0`, `Apache-2.0-ASF`, or `Elastic-2.0`. `header.path` loads a UTF-8 template, while `header.text` stores the same template inline. A template file is never selected as a source file.
@@ -227,6 +266,8 @@ let report = engine.check(Scope::All)?;
 ```
 
 Each operation accepts a `Scope`. `Scope::All` processes the configured file set, while `Scope::Paths(&paths)` processes only the requested files and directories; an empty path slice processes nothing. `Engine::check` never writes files. `Engine::format` and `Engine::remove` return pending `Edits`; call `Edits::apply` to write them or `Edits::into_report` to inspect the result without writing.
+
+`Config::load` resolves path templates once. `Engine::new` uses the resulting paths without rendering them again; paths in a programmatically constructed `Config` are used as supplied.
 
 The default `application` feature builds the command-line tool. Library-only users can omit its command-specific dependencies:
 

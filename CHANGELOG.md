@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+### New features
+
+* Support MiniJinja path templates in `files.root` and `header.path`, with `cwd`, `config_dir`, `config_path`, `env`, and a `join_path` filter. Shared configs can use `root = "{{ cwd }}"` to scan the invocation directory while relative paths remain based on the config directory.
+
 ## v7.0.1 (2026-09-01)
 
 ### Bug fixes
