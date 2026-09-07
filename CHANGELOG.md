@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### New features
 
-* Support MiniJinja path templates in `files.root` and `header.path`, with `cwd`, `config_dir`, and a native `join_path` filter, so shared configs can scan the invocation directory and load headers beside the config.
+* Support MiniJinja path templates in `files.root` and `header.path`, with `cwd` and `config_dir` variables, so shared configs can scan the invocation directory and load headers beside the config.
 
 ## v7.0.1 (2026-09-01)
 

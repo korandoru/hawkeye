@@ -92,9 +92,9 @@ Use this field mapping for the rest of the config:
 | `useDefaultExcludes` | none                              | Remove it and make required exclusions explicit.               |
 | `useDefaultMapping`  | none                              | Remove it; built-in rules are always low-priority fallbacks.   |
 
-v6 evaluated a relative `baseDir` from the process working directory. v7 resolves a relative `files.root` from the config directory. To preserve invocation-relative scanning, use `root = "{{ cwd }}"` for v6's `baseDir = "."`, or `root = "{{ [cwd, 'src'] | join_path }}"` for `baseDir = "src"`.
+v6 evaluated a relative `baseDir` from the process working directory. v7 resolves a relative `files.root` from the config directory. To preserve invocation-relative scanning, use `root = "{{ cwd }}"` for v6's `baseDir = "."`. On Unix, use `root = "{{ cwd }}/src"` for `baseDir = "src"`.
 
-Relative `header.path` values also use only the config directory; v6 additionally tried `baseDir` and the process working directory. If a header relied on that fallback, choose its location explicitly, such as `path = "{{ [cwd, 'HEADER.txt'] | join_path }}"`. See [Path templates](README.md#path-templates) for the shared-config example and available path bases.
+Relative `header.path` values also use only the config directory; v6 additionally tried `baseDir` and the process working directory. If a header relied on that fallback, choose its location explicitly, such as `path = "{{ cwd }}/HEADER.txt"` on Unix. See [Path templates](README.md#path-templates) for shared configs and Windows-compatible path composition.
 
 ### Header source
 
