@@ -53,22 +53,15 @@ pub struct Config {
 }
 
 impl Config {
-    /// Loads a config file, renders path templates, and resolves relative paths from its directory.
+    /// Loads a TOML config file, rendering path templates and resolving relative paths
+    /// from the config directory.
     ///
-    /// `files.root` and `header.path` are rendered once with MiniJinja. Their context contains
-    /// `cwd` (the absolute process working directory at load time) and `config_dir` (the
-    /// directory containing the canonical config file). Paths can be composed with standard
-    /// MiniJinja syntax, for example `{{ cwd }}/src`. Forward slashes are accepted on Windows.
-    /// Relative results are resolved from `config_dir`. Undefined values, invalid UTF-8 in
-    /// referenced context values, empty paths, and NUL bytes are errors. Header contents are
-    /// rendered later by the engine with a separate context.
-    ///
-    /// This method parses the file without performing semantic validation. Call [`Self::validate`]
-    /// to validate it directly, or pass it to [`Engine::new`](crate::Engine::new).
+    /// For semantic validation, call [`Self::validate`] or pass the result to
+    /// [`Engine::new`](crate::Engine::new).
     ///
     /// # Errors
     ///
-    /// Returns an error if the file cannot be read, parsed, or resolved, or a path template fails.
+    /// Returns an error if reading, parsing, or resolving the configuration fails.
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
         let path = path.as_ref();
         let source = fs::read_to_string(path).map_err(|err| {
