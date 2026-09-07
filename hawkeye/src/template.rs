@@ -14,15 +14,117 @@
 
 use std::borrow::Cow;
 use std::collections::BTreeMap;
+use std::env;
+use std::ffi::OsStr;
+use std::path::Path;
+use std::path::PathBuf;
 
 use minijinja::AutoEscape;
 use minijinja::Environment;
 use minijinja::ErrorKind as TemplateErrorKind;
 use minijinja::UndefinedBehavior;
+use minijinja::Value;
 
 use crate::Error;
 use crate::ErrorKind;
 use crate::engine::FileAttrs;
+
+pub struct PathTemplates<'a> {
+    environment: Environment<'static>,
+    directory: &'a Path,
+}
+
+impl<'a> PathTemplates<'a> {
+    pub fn new(config_path: &'a Path) -> Result<Self, Error> {
+        let directory = config_path.parent().ok_or_else(|| {
+            Error::new(
+                ErrorKind::ConfigInvalid,
+                "config file has no parent directory",
+            )
+        })?;
+        let mut environment = template_environment();
+        environment.set_keep_trailing_newline(true);
+        environment.add_filter("join_path", join_path);
+        environment.add_global(
+            "config_dir",
+            native_string("config_dir", directory.as_os_str()),
+        );
+        environment.add_global(
+            "cwd",
+            match env::current_dir() {
+                Ok(path) => native_string("cwd", path.as_os_str()),
+                Err(err) => Value::from(
+                    minijinja::Error::new(
+                        TemplateErrorKind::InvalidOperation,
+                        "cannot determine cwd",
+                    )
+                    .with_source(err),
+                ),
+            },
+        );
+        Ok(Self {
+            environment,
+            directory,
+        })
+    }
+
+    pub fn resolve(&self, field: &str, path: &Path) -> Result<PathBuf, Error> {
+        let source = path.to_str().ok_or_else(|| {
+            Error::new(
+                ErrorKind::ConfigInvalid,
+                format!("{field} template is not valid UTF-8"),
+            )
+        })?;
+        let rendered = self
+            .environment
+            .render_named_str(field, source, ())
+            .map_err(|err| {
+                let detail = render_error_message(&err, source);
+                Error::new(
+                    ErrorKind::ConfigInvalid,
+                    format!("cannot render {field} template: {detail}"),
+                )
+            })?;
+        if rendered.is_empty() {
+            return Err(Error::new(
+                ErrorKind::ConfigInvalid,
+                format!("{field} template rendered an empty path"),
+            ));
+        }
+        if rendered.contains('\0') {
+            return Err(Error::new(
+                ErrorKind::ConfigInvalid,
+                format!("{field} template rendered a NUL byte"),
+            ));
+        }
+        Ok(self.directory.join(rendered))
+    }
+}
+
+fn join_path(parts: Vec<Value>) -> Result<String, minijinja::Error> {
+    parts
+        .iter()
+        .map(Value::as_str)
+        .collect::<Option<PathBuf>>()
+        .ok_or_else(|| {
+            minijinja::Error::new(
+                TemplateErrorKind::InvalidOperation,
+                "join_path expects a list of strings",
+            )
+        })
+        .map(|path| path.to_string_lossy().into_owned())
+}
+
+fn native_string(name: &str, value: &OsStr) -> Value {
+    match value.to_str() {
+        Some(value) => Value::from(value),
+        // Defer the error until lookup so unused non-UTF-8 values do not prevent loading a config.
+        None => Value::from(minijinja::Error::new(
+            TemplateErrorKind::InvalidOperation,
+            format!("path template variable {name:?} is not valid UTF-8"),
+        )),
+    }
+}
 
 pub struct HeaderTemplate {
     environment: Environment<'static>,
@@ -30,9 +132,7 @@ pub struct HeaderTemplate {
 
 impl HeaderTemplate {
     pub fn new<S: Into<Cow<'static, str>>>(source: S) -> Result<Self, Error> {
-        let mut environment = Environment::new();
-        environment.set_undefined_behavior(UndefinedBehavior::Strict);
-        environment.set_auto_escape_callback(|_| AutoEscape::None);
+        let mut environment = template_environment();
         environment
             .add_template_owned("header", source)
             .map_err(|err| {
@@ -73,6 +173,13 @@ impl HeaderTemplate {
         }
         Ok(normalized)
     }
+}
+
+fn template_environment() -> Environment<'static> {
+    let mut environment = Environment::new();
+    environment.set_undefined_behavior(UndefinedBehavior::Strict);
+    environment.set_auto_escape_callback(|_| AutoEscape::None);
+    environment
 }
 
 fn render_error_message(error: &minijinja::Error, template_source: &str) -> String {

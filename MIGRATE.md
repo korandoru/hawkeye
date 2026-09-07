@@ -1,6 +1,6 @@
 # Migrating from HawkEye v6 to v7
 
-HawkEye v7 is a rewrite. It does not accept v6 configuration aliases, and several behaviors changed in addition to the move from camel case to snake case. This guide targets v6.5.x and v7.0.0 and is written as an executable migration checklist for either a person or a code agent.
+HawkEye v7 is a rewrite. It does not accept v6 configuration aliases, and several behaviors changed in addition to the move from camel case to snake case. This guide targets v6.5.x and v7 and is written as an executable migration checklist for either a person or a code agent.
 
 ## Migration rules
 
@@ -60,7 +60,7 @@ builtin = "Apache-2.0"
 keywords = ["copyright"]
 
 [files]
-root = "."
+root = "{{ cwd }}"
 includes = ["**/*.rs", "**/*.toml"]
 excludes = ["generated/**"]
 
@@ -77,7 +77,7 @@ Use this field mapping for the rest of the config:
 
 | v6                   | v7                                | Migration action                                               |
 |----------------------|-----------------------------------|----------------------------------------------------------------|
-| `baseDir`            | `files.root`                      | Move the value under `[files]`.                                |
+| `baseDir`            | `files.root`                      | Move under `[files]`; use `cwd` for invocation-relative paths.  |
 | `inlineHeader`       | `header.text`                     | Move the template under `[header]`.                            |
 | `headerPath`         | `header.builtin` or `header.path` | Use a built-in key for a bundled header; otherwise use a path. |
 | `keywords`           | `header.keywords`                 | Move the list under `[header]`.                                |
@@ -92,7 +92,9 @@ Use this field mapping for the rest of the config:
 | `useDefaultExcludes` | none                              | Remove it and make required exclusions explicit.               |
 | `useDefaultMapping`  | none                              | Remove it; built-in rules are always low-priority fallbacks.   |
 
-v6 evaluated a relative `baseDir` from the process working directory. v7 resolves a relative `files.root` from the directory containing the selected config file, so rewrite the path when those directories differ. Relative `header.path` values are also resolved only from the config directory; v6 additionally tried `baseDir` and the process working directory for resources.
+v6 evaluated a relative `baseDir` from the process working directory. v7 resolves a relative `files.root` from the config directory. To preserve invocation-relative scanning, use `root = "{{ cwd }}"` for v6's `baseDir = "."`. On Unix, use `root = "{{ cwd }}/src"` for `baseDir = "src"`.
+
+Relative `header.path` values also use only the config directory; v6 additionally tried `baseDir` and the process working directory. If a header relied on that fallback, choose its location explicitly, such as `path = "{{ cwd }}/HEADER.txt"` on Unix. See [Path templates](README.md#path-templates) for shared configs and Windows-compatible path composition.
 
 ### Header source
 

@@ -7,6 +7,11 @@ Use `cargo x` as the source of truth for repository workflows.
 - Run `cargo x --help` before choosing build, test, lint, or formatting commands.
 - Run `cargo x <command> --help` for command-specific behavior.
 
+## Markdown Style
+
+- Keep each prose paragraph and list item on one source line.
+- Pad table cells with spaces to align columns in the Markdown source.
+
 ## Commits and Pull Requests
 
 Follow the semantic definition at `.github/semantic.yml`.

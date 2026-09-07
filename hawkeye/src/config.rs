@@ -14,8 +14,8 @@
 
 //! HawkEye configuration types.
 //!
-//! [`Config::load`] parses TOML and resolves relative paths. [`Config::validate`] checks
-//! relationships between the parsed fields.
+//! [`Config::load`] parses TOML, renders path templates, and resolves relative paths.
+//! [`Config::validate`] checks relationships between the parsed fields.
 
 use std::collections::BTreeMap;
 use std::collections::HashMap;
@@ -27,6 +27,7 @@ use serde::Deserialize;
 
 use crate::Error;
 use crate::ErrorKind;
+use crate::template::PathTemplates;
 
 /// Configuration for a HawkEye engine.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
@@ -52,14 +53,15 @@ pub struct Config {
 }
 
 impl Config {
-    /// Loads a config file and resolves relative paths from its directory.
+    /// Loads a TOML config file, rendering path templates and resolving relative paths
+    /// from the config directory.
     ///
-    /// This method parses the file without performing semantic validation. Call [`Self::validate`]
-    /// to validate it directly, or pass it to [`Engine::new`](crate::Engine::new).
+    /// For semantic validation, call [`Self::validate`] or pass the result to
+    /// [`Engine::new`](crate::Engine::new).
     ///
     /// # Errors
     ///
-    /// Returns an error if the file cannot be read, parsed, or resolved.
+    /// Returns an error if reading, parsing, or resolving the configuration fails.
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
         let path = path.as_ref();
         let source = fs::read_to_string(path).map_err(|err| {
@@ -83,20 +85,10 @@ impl Config {
             )
             .with_source(err)
         })?;
-        let directory = path.parent().ok_or_else(|| {
-            Error::new(
-                ErrorKind::ConfigInvalid,
-                "config file has no parent directory",
-            )
-        })?;
-
-        if config.files.root.is_relative() {
-            config.files.root = directory.join(&config.files.root);
-        }
-        if let Some(header_path) = &mut config.header.path
-            && header_path.is_relative()
-        {
-            *header_path = directory.join(&*header_path);
+        let templates = PathTemplates::new(&path)?;
+        config.files.root = templates.resolve("files.root", &config.files.root)?;
+        if let Some(header_path) = &mut config.header.path {
+            *header_path = templates.resolve("header.path", header_path)?;
         }
         Ok(config)
     }
@@ -136,7 +128,10 @@ impl Config {
 pub struct HeaderConfig {
     /// The built-in template key, when using a bundled header.
     pub builtin: Option<String>,
-    /// The template file, resolved from the config file by [`Config::load`] when relative.
+    /// The template file.
+    ///
+    /// [`Config::load`] renders path templates and resolves relative paths from the config
+    /// directory.
     pub path: Option<PathBuf>,
     /// The inline template, when the header is stored in the config file.
     pub text: Option<String>,
@@ -153,8 +148,10 @@ fn default_keywords() -> Vec<String> {
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct FilesConfig {
-    /// The directory to scan, resolved from the config file by [`Config::load`] when relative;
-    /// defaults to `.`.
+    /// The directory to scan; defaults to `.`.
+    ///
+    /// [`Config::load`] renders path templates and resolves relative paths from the config
+    /// directory.
     pub root: PathBuf,
     /// Git-ignore-style inclusion patterns; an empty list selects all files.
     pub includes: Vec<String>,

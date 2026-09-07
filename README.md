@@ -128,7 +128,7 @@ The following example shows every configuration section. Field names are snake c
 [header]
 # Choose exactly one source. Built-in keys are case-sensitive.
 builtin = "Apache-2.0"
-# path = "HEADER.txt"
+# path = "{{ config_dir }}/HEADER.txt"
 # text = "Copyright {{ props.inception_year }} {{ props.copyright_owner }}"
 
 # Every keyword must occur, case-insensitively, before an existing comment can
@@ -136,8 +136,8 @@ builtin = "Apache-2.0"
 keywords = ["copyright"]
 
 [files]
-# Relative paths are resolved from the directory containing this config file.
-root = "."
+# Scan the directory containing this config file.
+root = "{{ config_dir }}"
 # An empty includes list selects every discovered file.
 includes = ["**/*.rs", "**/*.toml"]
 excludes = ["generated/**"]
@@ -174,6 +174,33 @@ style_out = "doubleslash"
 # An empty list accepts only style_out; otherwise list every accepted style.
 styles_in = ["doubleslash", "slashstar"]
 ```
+
+### Path templates
+
+`files.root` and `header.path` accept MiniJinja templates. A shared config can scan the directory where HawkEye was invoked while keeping its header beside the config. For example, on Unix:
+
+```toml
+[files]
+root = "{{ cwd }}"
+
+[header]
+path = "{{ config_dir }}/HEADER.txt"
+```
+
+The two variables are captured when the config is loaded:
+
+| Variable     | Meaning                                                                      |
+|--------------|------------------------------------------------------------------------------|
+| `cwd`        | The absolute process working directory.                                      |
+| `config_dir` | The absolute directory containing the config file, after resolving symlinks. |
+
+Subdirectories can be appended in the same way: `root = "{{ cwd }}/src"`.
+
+Relative paths and relative template results still resolve from `config_dir`, which is also the default scan directory when `root` is omitted. Use `root = "{{ config_dir }}"` to make that choice explicit.
+
+Path templates do not expose environment variables; `props` and `attrs` are available only in header contents. Undefined variables or invalid paths fail config loading.
+
+For configs that also run on Windows, use `join_path` when composing paths, for example `path = "{{ [config_dir, 'HEADER.txt'] | join_path }}"`. This filter joins a list of strings using the platform's native path rules.
 
 ### Headers and templates
 
@@ -227,6 +254,8 @@ let report = engine.check(Scope::All)?;
 ```
 
 Each operation accepts a `Scope`. `Scope::All` processes the configured file set, while `Scope::Paths(&paths)` processes only the requested files and directories; an empty path slice processes nothing. `Engine::check` never writes files. `Engine::format` and `Engine::remove` return pending `Edits`; call `Edits::apply` to write them or `Edits::into_report` to inspect the result without writing.
+
+`Config::load` resolves path templates once. `Engine::new` uses the resulting paths without rendering them again; paths in a programmatically constructed `Config` are used as supplied.
 
 The default `application` feature builds the command-line tool. Library-only users can omit its command-specific dependencies:
 
