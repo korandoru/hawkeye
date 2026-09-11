@@ -18,6 +18,8 @@ mod command;
 mod config;
 #[path = "test/format.rs"]
 mod format;
+#[path = "test/frontmatter.rs"]
+mod frontmatter;
 #[path = "test/git.rs"]
 mod git;
 #[path = "test/paths.rs"]

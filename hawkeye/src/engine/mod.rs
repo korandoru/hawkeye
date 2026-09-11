@@ -389,7 +389,7 @@ impl Engine {
                     .and_then(|history| history.get(&relative_path)),
             )?;
             let header = self.render_header(&file_attrs)?;
-            let outcome = match self.analyze(rule, input, &header, target) {
+            let outcome = match self.analyze(&relative_path, rule, input, &header, target) {
                 FileAnalysis::Clean => FileOutcome::Clean,
                 FileAnalysis::Add(replacement) => {
                     file_edits.push(FileEdit { path, replacement });

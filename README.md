@@ -228,6 +228,24 @@ Rules match complete filenames or case-insensitive filename suffixes. Extensions
 
 `style_out` is the canonical format written by HawkEye. `styles_in` lists formats that may be recognized and safely replaced or removed. When `styles_in` is empty, it defaults to `[style_out]`; a non-empty list must include `style_out`. Style names are case-sensitive. A custom style may override a built-in style and produces a warning. The bundled mappings are defined in [rules.toml](hawkeye/src/builtin/rules.toml) and [styles.toml](hawkeye/src/builtin/styles.toml).
 
+### Markdown frontmatter
+
+To manage Markdown license headers as HTML comments, add a rule using the built-in `xml` style:
+
+```toml
+[[rules]]
+extensions = ["md", "markdown"]
+style_out = "xml"
+```
+
+For files with a case-insensitive `md`, `markdown`, `mdown`, `mkdn`, `mkd`, `mdwn`, or `mdx` extension, HawkEye checks, inserts, updates, and removes headers after recognized YAML frontmatter. Recognition is independent of the configured comment style and does not depend on a particular filename or metadata field.
+
+A frontmatter candidate must start on the first line, optionally after a UTF-8 BOM, with an unindented `---` delimiter. The first subsequent unindented `---` line closes it; delimiter lines may have trailing spaces or tabs. The enclosed content must parse as a single YAML document whose root is a mapping. Nested mappings, sequences, multiline strings, and metadata comments are supported. HawkEye only parses YAML syntax; it does not validate application-specific metadata, resolve tags, or expand aliases.
+
+Empty or comment-only blocks, root scalars or sequences, malformed YAML, and unclosed candidates remain ordinary body text. The `...` closing convention is not recognized. These conservative rules avoid treating arbitrary text between Markdown horizontal rules as metadata, but cannot distinguish valid mapping-shaped prose from intentional frontmatter. Such prose is treated as frontmatter; an initial blank line can keep it outside this recognition rule.
+
+Recognized frontmatter and the blank lines immediately following it are preserved byte for byte. Header text follows the file's first line ending, including LF or CRLF, and the body is not normalized. If the closing delimiter is at EOF without a newline, inserting a header adds one to put the comment on its own line; that newline remains after header removal.
+
 ### Git integration
 
 `git.ignore` defaults to `auto`: it uses the Git index and ignore rules inside a worktree and falls back to filesystem discovery using `.gitignore` files at or below `files.root` outside one. Tracked files remain selected even when they match an ignore rule. Set the mode to `enable` to require a worktree or `disable` to use filesystem discovery without Git ignore rules.
