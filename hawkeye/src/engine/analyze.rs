@@ -15,8 +15,9 @@
 use std::ops::Range;
 use std::path::Path;
 
-use saphyr_parser::Event;
-use saphyr_parser::Parser;
+use markdown::Constructs;
+use markdown::ParseOptions;
+use markdown::mdast::Node;
 
 use crate::Engine;
 use crate::config::StyleConfig;
@@ -235,32 +236,29 @@ fn preamble_offset(path: &Path, input: &str) -> usize {
 }
 
 fn markdown_frontmatter_offset(input: &str, start: usize) -> Option<usize> {
-    let mut lines = lines(input, start);
-    let (opening, opening_range) = lines.next()?;
-    if opening.trim_end_matches([' ', '\t']) != "---" {
+    let source = &input[start..];
+    if !source.starts_with("---") {
         return None;
     }
-    let (_, closing_range) = lines.find(|(line, _)| line.trim_end_matches([' ', '\t']) == "---")?;
 
-    // Delimiters also occur around ordinary Markdown. Require one syntactically valid YAML
-    // mapping, excluding empty/comment-only blocks, scalars, and sequences. Parse events without
-    // building values or expanding aliases; the metadata is never reserialized.
-    let metadata = &input[opening_range.end..closing_range.start];
-    let mut parser = Parser::new_from_str(metadata);
-    if !matches!(parser.next()?.ok()?.0, Event::StreamStart)
-        || !matches!(parser.next()?.ok()?.0, Event::DocumentStart(_))
-        || !matches!(parser.next()?.ok()?.0, Event::MappingStart(..))
-    {
+    let options = ParseOptions {
+        constructs: Constructs {
+            frontmatter: true,
+            ..Constructs::default()
+        },
+        ..ParseOptions::default()
+    };
+    let Node::Root(root) = markdown::to_mdast(source, &options).ok()? else {
         return None;
-    }
-    for event in parser {
-        if matches!(event.ok()?.0, Event::DocumentStart(_)) {
-            return None;
-        }
-    }
+    };
+    let Node::Yaml(frontmatter) = root.children.first()? else {
+        return None;
+    };
 
-    // Preserve the separator after the frontmatter as part of the preamble, including its EOLs.
-    Some(skip_blank_lines(input, closing_range.end))
+    // Use the Markdown boundary even if the enclosed YAML is invalid. Source offsets preserve
+    // metadata and its following blank lines verbatim, without reserializing the syntax tree.
+    let end = start + frontmatter.position.as_ref()?.end.offset;
+    Some(skip_blank_lines(input, end))
 }
 
 fn skip_blank_lines(input: &str, mut position: usize) -> usize {

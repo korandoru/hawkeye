@@ -50,9 +50,9 @@ gix = { workspace = true }
 ignore = { workspace = true }
 jiff = { workspace = true }
 log = { workspace = true }
+markdown = { workspace = true }
 minijinja = { workspace = true }
 same-file = { workspace = true }
-saphyr-parser = { workspace = true }
 serde = { workspace = true }
 toml = { workspace = true }
 

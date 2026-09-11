@@ -121,22 +121,46 @@ options:
 }
 
 #[test]
-fn ordinary_or_invalid_frontmatter_candidates_remain_body_text() {
+fn frontmatter_recognition_does_not_validate_yaml() {
+    let project = Project::empty();
+    project.write("licenserc.toml", CONFIG);
+    let header = "<!--\nCopyright 2026 Acme\n-->\n\n";
+    for metadata in [
+        "An ordinary paragraph.\n",
+        "- A Markdown list\n- Another item\n",
+        "",
+        "# A metadata comment\n",
+        "title: [an unclosed sequence\n",
+    ] {
+        let preamble = format!("---\n{metadata}---\n\n");
+        let body = "# Guide\n\n---\n\nBody\n";
+        let original = format!("{preamble}{header}{body}");
+        project.write("guide.md", &original);
+
+        let checked = project.run(["check", "--output-format=json"]);
+        assert_exit(&checked, 0);
+        assert_report(&checked, &[("guide.md", "clean")]);
+        assert_eq!(project.read("guide.md"), original);
+
+        assert_exit(&project.run(["remove"]), 0);
+        assert_eq!(project.read("guide.md"), format!("{preamble}{body}"));
+        assert_exit(&project.run(["format"]), 0);
+        assert_eq!(project.read("guide.md"), original);
+    }
+}
+
+#[test]
+fn non_frontmatter_prefixes_remain_body_text() {
     let project = Project::empty();
     project.write("licenserc.toml", CONFIG);
     let header = "<!--\nCopyright 2026 Acme\n-->\n\n";
     for candidate in [
-        "---\nAn ordinary paragraph.\n---\n",
-        "---\n- A Markdown list\n- Another item\n---\n",
-        "---\n---\n",
-        "---\n# A Markdown heading\n---\n",
-        "---\ntitle: [an unclosed sequence\n---\n",
         "---\ntitle: A guide\n",
         "---\ntitle: A guide\n...\n",
-        "---\ntitle: A guide\n...\n--- another document\ntitle: Another guide\n---\n",
         " ---\ntitle: A guide\n---\n",
         "----\ntitle: A guide\n----\n",
         "\n---\ntitle: A guide\n---\n",
+        "# Guide\n\n---\nA paragraph.\n---\n",
     ] {
         // A later license-like comment is part of the body, not a removable leading header.
         let body = format!("{candidate}{header}# Body\n");
