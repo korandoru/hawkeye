@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Bug fixes
 
-* Preserve leading Markdown YAML frontmatter when checking, inserting, updating, or removing license headers, including blocks with empty or invalid YAML content.
+* Preserve leading Markdown YAML frontmatter when checking, inserting, updating, or removing license headers.
 
 ## v7.1.0 (2026-09-07)
 
