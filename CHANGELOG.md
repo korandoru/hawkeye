@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
-### Bug fixes
+### Improvements
 
 * Preserve leading Markdown YAML frontmatter when checking, inserting, updating, or removing license headers.
 
