@@ -13,6 +13,11 @@
 // limitations under the License.
 
 use std::ops::Range;
+use std::path::Path;
+
+use markdown::Constructs;
+use markdown::ParseOptions;
+use markdown::mdast::Node;
 
 use crate::Engine;
 use crate::config::StyleConfig;
@@ -24,16 +29,23 @@ use crate::engine::Rule;
 impl Engine {
     pub(super) fn analyze(
         &self,
+        path: &Path,
         rule: &Rule,
         input: &str,
         header: &str,
         target: HeaderTarget,
     ) -> FileAnalysis {
-        let offset = preamble_offset(input);
+        let offset = preamble_offset(path, input);
         let header_start = skip_blank_lines(input, offset);
         let render = || {
             let eol = line_ending(input);
-            let mut rendered = self.styles[&rule.style_out].render(header, eol);
+            let mut rendered = String::new();
+            // A preamble may end at EOF without a newline; the header still needs its own line.
+            let preamble = input[..offset].trim_start_matches('\u{feff}');
+            if !preamble.is_empty() && !preamble.ends_with('\n') {
+                rendered.push_str(eol);
+            }
+            rendered.push_str(&self.styles[&rule.style_out].render(header, eol));
             rendered.push_str(eol);
             rendered.push_str(eol);
             rendered
@@ -158,13 +170,25 @@ fn line_ending(input: &str) -> &'static str {
     }
 }
 
-fn preamble_offset(input: &str) -> usize {
+fn preamble_offset(path: &Path, input: &str) -> usize {
     // A UTF-8 BOM describes the file itself and must remain before any inserted header.
     let mut position = if input.starts_with('\u{feff}') {
         '\u{feff}'.len_utf8()
     } else {
         0
     };
+    if path
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .is_some_and(|ext| {
+            ["md", "markdown", "mdown", "mkdn", "mkd", "mdwn", "mdx"]
+                .iter()
+                .any(|markdown| ext.eq_ignore_ascii_case(markdown))
+        })
+        && let Some(end) = markdown_frontmatter_offset(input, position)
+    {
+        return end;
+    }
     let Some((first, line_range)) = lines(input, position).next() else {
         return position;
     };
@@ -209,6 +233,32 @@ fn preamble_offset(input: &str) -> usize {
         position = line_range.end;
     }
     position
+}
+
+fn markdown_frontmatter_offset(input: &str, start: usize) -> Option<usize> {
+    let source = &input[start..];
+    if !source.starts_with("---") {
+        return None;
+    }
+
+    let options = ParseOptions {
+        constructs: Constructs {
+            frontmatter: true,
+            ..Constructs::default()
+        },
+        ..ParseOptions::default()
+    };
+    let Node::Root(root) = markdown::to_mdast(source, &options).ok()? else {
+        return None;
+    };
+    let Node::Yaml(frontmatter) = root.children.first()? else {
+        return None;
+    };
+
+    // Use the Markdown boundary even if the enclosed YAML is invalid. Source offsets preserve
+    // metadata and its following blank lines verbatim, without reserializing the syntax tree.
+    let end = start + frontmatter.position.as_ref()?.end.offset;
+    Some(skip_blank_lines(input, end))
 }
 
 fn skip_blank_lines(input: &str, mut position: usize) -> usize {
